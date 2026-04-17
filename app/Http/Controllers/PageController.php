@@ -15,6 +15,12 @@ class PageController extends Controller
     {
         $page = CmsPage::query()->where('slug', 'home')->firstOrFail();
         $siteName = config('app.name');
+        $recentVehicles = Vehicle::query()
+            ->with('images')
+            ->where('status', 'approved')
+            ->latest()
+            ->take(6)
+            ->get();
 
         $filterOptions = $this->approvedVehicleFilterOptions();
         $filters = $this->defaultInventoryFilters();
@@ -32,6 +38,9 @@ class PageController extends Controller
             'homeInventorySearchHtml' => view('pages.partials.home-inventory-search', [
                 'filterOptions' => $filterOptions,
                 'filters' => $filters,
+            ])->render(),
+            'homeRecentCarsHtml' => view('pages.partials.home-recent-cars', [
+                'vehicles' => $recentVehicles,
             ])->render(),
         ]);
     }

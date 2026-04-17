@@ -17,18 +17,19 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RolesSeeder::class);
 
-        // Seed a default admin and a regular user (password: "password")
-        $admin = User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@example.com',
-        ]);
-        $admin->assignRole('admin');
+        foreach (DemoData::users() as $demoUser) {
+            $user = User::query()->firstOrCreate(
+                ['email' => $demoUser['email']],
+                User::factory()->make([
+                    'name' => $demoUser['name'],
+                    'email' => $demoUser['email'],
+                ])->toArray()
+            );
 
-        $user = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-        $user->assignRole('user');
+            if (! $user->hasRole($demoUser['role'])) {
+                $user->assignRole($demoUser['role']);
+            }
+        }
 
         $this->call(VehiclesSeeder::class);
         $this->call(SiteSettingsSeeder::class);

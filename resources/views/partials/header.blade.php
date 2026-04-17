@@ -14,77 +14,6 @@
   <div id="top-bar">
     <div class="container">
       <div class="clearfix top-bar-wrapper">
-        <div class="stm-boats-top-bar-right clearfix">
-          <div class="stm-boats-top-bar-centered clearfix">
-            <ul class="top-bar-info clearfix">
-              <li><i class="far fa-fa fa-calendar-check"></i> {{ $dealerHoursLabel }}</li>
-              <li><i class="fas fa-phone"></i> {{ $dealerPhone }}</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="header">
-    <div class="header-listing header-listing-fixed listing-nontransparent-header">
-      <div class="container header-inner-content">
-        <div class="listing-logo-main" style="margin-top: 6px;">
-          <a class="bloglogo" href="{{ route('home') }}">
-            <img
-              src="{{ asset('assets/images/wp-uploads/sites/24/2018/04/logo-1.png') }}"
-              style="width: 140px;"
-              title="Home"
-              alt="Logo"
-            />
-          </a>
-        </div>
-
-        <div class="listing-service-right clearfix">
-          <div class="listing-right-actions">
-            <div class="pull-right hdn-767">
-              <a class="lOffer-compare compare-cta" href="{{ route('compare') }}" title="View compared items">
-                <span class="heading-font">Compare</span>
-                <i class="stm-boats-icon-compare-boats list-icon"></i>
-                <span class="list-badge">
-                  <span class="stm-current-cars-in-compare">{{ $compareCount }}</span>
-                </span>
-              </a>
-            </div>
-          </div>
-
-          <ul class="listing-menu clearfix">
-            <li class="menu-item menu-item-type-custom menu-item-object-custom">
-              <a href="{{ route('home') }}">Home</a>
-            </li>
-            <li class="menu-item menu-item-type-custom menu-item-object-custom">
-              <a href="{{ route('about') }}">About Us</a>
-            </li>
-            <li class="menu-item menu-item-type-custom menu-item-object-custom">
-              <a href="{{ route('contact') }}">Contact Us</a>
-            </li>
-            <li class="menu-item menu-item-type-custom menu-item-object-custom">
-              <a href="{{ route('faq') }}">FAQ</a>
-            </li>
-            <li class="menu-item menu-item-type-custom menu-item-object-custom">
-              <a href="{{ route('inventory.index') }}">Inventory</a>
-            </li>
-            @auth
-              <li class="menu-item menu-item-type-custom menu-item-object-custom">
-                <a href="{{ route('dashboard.favorites.index') }}">Saved</a>
-              </li>
-            @endauth
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="stm-boats-header" class="listing-nontransparent-header">
-  <div id="top-bar">
-    <div class="container">
-      <div class="clearfix top-bar-wrapper">
         <div class="pull-left">
           <div class="pull-left currency-switcher">
             <div class="stm-multiple-currency-wrap">
@@ -99,7 +28,7 @@
         <div class="stm-boats-top-bar-right clearfix">
           <div class="stm-boats-top-bar-centered clearfix">
             <ul class="top-bar-info clearfix">
-              <li><i class="far fa-fa fa-calendar-check"></i> {{ $dealerHoursLabel }}</li>
+              <li><i class="far fa-calendar-check"></i> {{ $dealerHoursLabel }}</li>
               <li>
                 <span id="top-bar-address" class="">
                   <i class="stm-service-icon-pin_big"></i>
@@ -164,7 +93,7 @@
                 <span class="heading-font">Compare</span>
                 <i class="stm-boats-icon-compare-boats list-icon"></i>
                 <span class="list-badge">
-                  <span class="stm-current-cars-in-compare">0</span>
+                  <span class="stm-current-cars-in-compare">{{ $compareCount }}</span>
                 </span>
               </a>
             </div>
@@ -247,7 +176,7 @@
       <div id="top-bar-mobile">
         <div class="stm-boats-top-bar-centered clearfix">
           <ul class="top-bar-info clearfix">
-            <li><i class="far fa-fa fa-calendar-check"></i> {{ $dealerHoursLabel }}</li>
+            <li><i class="far fa-calendar-check"></i> {{ $dealerHoursLabel }}</li>
             <li>
               <span id="top-bar-address-mobile" class="">
                 <i class="stm-service-icon-pin_big"></i>
