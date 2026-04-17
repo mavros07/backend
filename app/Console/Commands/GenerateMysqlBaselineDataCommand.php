@@ -6,14 +6,16 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 
 /**
- * Regenerates the DATA section appended to database/myauto_torque_db_data.sql
- * and documents merging into myauto_torque_db.sql — run after changing seed HTML.
+ * Regenerates the baseline DATA section in database/myauto_torque_db.sql
+ * (everything after -- MYAUTO_TORQUE_BASELINE_DATA_START) from seed-data/*.html.
  */
 class GenerateMysqlBaselineDataCommand extends Command
 {
+    private const BASELINE_MARKER = '-- MYAUTO_TORQUE_BASELINE_DATA_START';
+
     protected $signature = 'db:generate-mysql-baseline-data';
 
-    protected $description = 'Write MySQL INSERTs for cms_pages + site_settings from seed-data/ (for manual SQL import)';
+    protected $description = 'Rewrite baseline INSERTs in myauto_torque_db.sql from database/seed-data/';
 
     public function handle(): int
     {
@@ -56,10 +58,10 @@ class GenerateMysqlBaselineDataCommand extends Command
 
         $now = Carbon::now()->format('Y-m-d H:i:s');
         $lines = [];
+        $lines[] = self::BASELINE_MARKER;
         $lines[] = '-- =============================================================================';
         $lines[] = '-- Auto-generated: php artisan db:generate-mysql-baseline-data';
-        $lines[] = '-- Public CMS pages (home, about, faq, contact) + site_settings defaults';
-        $lines[] = '-- Import AFTER structure section of myauto_torque_db.sql (same database).';
+        $lines[] = '-- Public CMS pages (home, about, faq, contact) + site_settings defaults + Spatie roles.';
         $lines[] = '-- =============================================================================';
         $lines[] = '';
         $lines[] = 'SET NAMES utf8mb4;';
@@ -94,20 +96,27 @@ class GenerateMysqlBaselineDataCommand extends Command
 
         $lines[] = 'SET FOREIGN_KEY_CHECKS = 1;';
 
-        $dataPath = database_path('myauto_torque_db_data.sql');
-        file_put_contents($dataPath, implode("\n", $lines));
+        $dataBlock = implode("\n", $lines);
+        $sqlPath = database_path('myauto_torque_db.sql');
+        if (! is_file($sqlPath)) {
+            $this->error('Missing: '.$sqlPath);
 
-        $this->info('Wrote: '.$dataPath);
-
-        $structurePath = database_path('myauto_torque_db.sql');
-        if (is_file($structurePath)) {
-            $fullPath = database_path('myauto_torque_db_full.sql');
-            file_put_contents(
-                $fullPath,
-                rtrim((string) file_get_contents($structurePath))."\n\n".trim(implode("\n", $lines))."\n"
-            );
-            $this->info('Wrote combined import: '.$fullPath);
+            return self::FAILURE;
         }
+
+        $content = (string) file_get_contents($sqlPath);
+        $pos = strpos($content, self::BASELINE_MARKER);
+        if ($pos === false) {
+            $this->error('Marker "'.self::BASELINE_MARKER.'" not found in myauto_torque_db.sql. Add it on its own line before the baseline INSERT section.');
+
+            return self::FAILURE;
+        }
+
+        $prefix = rtrim(substr($content, 0, $pos));
+        $newContent = $prefix."\n\n".$dataBlock."\n";
+        file_put_contents($sqlPath, $newContent);
+
+        $this->info('Updated baseline section in: '.$sqlPath);
 
         return self::SUCCESS;
     }
