@@ -1,7 +1,20 @@
+# When document root is the Laravel root (not `public/`), forward requests into
+# `public/`. Same pattern as Stay Eazi: avoids double `/public/` and avoids
+# serving the project root as a directory (403) instead of the front controller.
+
 <IfModule mod_rewrite.c>
     Options -Indexes +FollowSymLinks
     RewriteEngine On
-    # Prefer setting the vhost/cPanel document root to `public/`. If the host
-    # points here instead, forward everything into `public/` (Apache only).
+
+    # Already targeting /public/ — do not rewrite again
+    RewriteCond %{REQUEST_URI} ^/public/
+    RewriteRule ^ - [L]
+
+    # Real files at repo root only (not directories — those would skip rewrite and 403)
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
+
+Options -Indexes

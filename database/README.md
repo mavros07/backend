@@ -10,6 +10,16 @@ Same idea as **Stay Eazi** (`stayeazi_eaziapp_db.sql` + `manual_mysql_patches.sq
 
 Prefer adding schema **only** via **`migrations/`**. Edit the structure portion of `myauto_torque_db.sql` when you need a portable dump that matches migrations.
 
+### `migrations` table must not stay empty
+
+If you **only** create tables by hand or import an old dump **without** migration rows, Laravel’s `migrations` table can be **empty** (`0` rows). Then Laravel assumes nothing has been migrated; `php artisan migrate` may try to create tables again and fail with **“table already exists”**, and tooling can misbehave.
+
+**Preferred:** empty database → `php artisan migrate --force` (no SQL structure import).
+
+**If you import `myauto_torque_db.sql`:** it now includes **`INSERT` into `migrations`** for every file under `database/migrations/`, so the batch history matches the schema.
+
+**Repair an existing DB with tables but `migrations` empty:** see the commented block in `manual_mysql_patches.sql` (typically `TRUNCATE migrations` then `INSERT`, or run only the `INSERT` block if the table is empty). Create the database as **utf8mb4** / **InnoDB** in the host panel; avoid **latin1** / **MyISAM** for Laravel.
+
 ---
 
 ## Production / staging workflow

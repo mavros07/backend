@@ -15,6 +15,26 @@ SET time_zone = "+00:00";
 SET NAMES utf8mb4;
 
 -- -----------------------------------------------------------------------------
+-- Repair: `migrations` table empty after manual SQL import (Laravel needs rows here)
+-- Run only if your schema already matches `database/migrations/*.php` (same as myauto_torque_db.sql).
+-- Backup first. If duplicates exist, run: TRUNCATE TABLE `migrations`;
+-- -----------------------------------------------------------------------------
+/*
+INSERT INTO `migrations` (`migration`, `batch`) VALUES
+  ('0001_01_01_000000_create_users_table', 1),
+  ('0001_01_01_000001_create_cache_table', 1),
+  ('0001_01_01_000002_create_jobs_table', 1),
+  ('2026_04_16_163235_create_permission_tables', 1),
+  ('2026_04_16_163946_create_vehicles_table', 1),
+  ('2026_04_16_163948_create_vehicle_images_table', 1),
+  ('2026_04_17_120000_add_marketplace_fields_to_vehicles_table', 1),
+  ('2026_04_17_140000_create_vehicle_favorites_table', 1),
+  ('2026_04_17_140001_create_vehicle_inquiries_table', 1),
+  ('2026_04_17_200000_create_site_settings_table', 1),
+  ('2026_04_18_100000_create_cms_pages_table', 1);
+*/
+
+-- -----------------------------------------------------------------------------
 -- Example: ensure sessions table exists (SESSION_DRIVER=database)
 -- (Included in myauto_torque_db.sql — duplicate safe with IF NOT EXISTS if you patch an old DB.)
 -- -----------------------------------------------------------------------------
