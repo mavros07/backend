@@ -7,11 +7,14 @@ use Illuminate\Support\Carbon;
 
 /**
  * Regenerates the baseline DATA section in database/myauto_torque_db.sql
- * (everything after -- MYAUTO_TORQUE_BASELINE_DATA_START) from seed-data/*.html.
+ * (everything after BASELINE_MARKER) from seed-data/*.html.
+ *
+ * Important: the marker must not appear anywhere else in the file (e.g. header
+ * comments), or regeneration will truncate the schema.
  */
 class GenerateMysqlBaselineDataCommand extends Command
 {
-    private const BASELINE_MARKER = '-- MYAUTO_TORQUE_BASELINE_DATA_START';
+    private const BASELINE_MARKER = '-- __MYAUTO_TORQUE_SQL_BASELINE_V1__';
 
     protected $signature = 'db:generate-mysql-baseline-data';
 
@@ -107,7 +110,7 @@ class GenerateMysqlBaselineDataCommand extends Command
         $content = (string) file_get_contents($sqlPath);
         $pos = strpos($content, self::BASELINE_MARKER);
         if ($pos === false) {
-            $this->error('Marker "'.self::BASELINE_MARKER.'" not found in myauto_torque_db.sql. Add it on its own line before the baseline INSERT section.');
+            $this->error('Baseline marker not found in myauto_torque_db.sql. Append a single line containing exactly: '.self::BASELINE_MARKER);
 
             return self::FAILURE;
         }

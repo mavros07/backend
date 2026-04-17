@@ -1,0 +1,7 @@
+<IfModule mod_rewrite.c>
+    Options -Indexes +FollowSymLinks
+    RewriteEngine On
+    # Prefer setting the vhost/cPanel document root to `public/`. If the host
+    # points here instead, forward everything into `public/` (Apache only).
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

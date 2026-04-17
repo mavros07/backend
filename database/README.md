@@ -5,7 +5,7 @@ Same idea as **Stay Eazi** (`stayeazi_eaziapp_db.sql` + `manual_mysql_patches.sq
 | Item | Purpose |
 |------|--------|
 | **`migrations/`** | **Canonical** schema — run `php artisan migrate` on each environment (after backup). Only `*.php` files belong here. |
-| **`myauto_torque_db.sql`** | **Single MySQL import** — `CREATE TABLE` for the full app schema **plus** baseline `INSERT`s (Spatie `roles`, `site_settings`, `cms_pages` for home/about/faq/contact). Regenerate the baseline block from `database/seed-data/*.html` with `php artisan db:generate-mysql-baseline-data` (rewrites only the section after `-- MYAUTO_TORQUE_BASELINE_DATA_START`). Does **not** include user accounts or vehicle listings (those come from the running app / Laravel). |
+| **`myauto_torque_db.sql`** | **Single MySQL import** — `CREATE TABLE` for the full app schema **plus** baseline `INSERT`s (Spatie `roles`, `site_settings`, `cms_pages` for home/about/faq/contact). Regenerate the baseline block from `database/seed-data/*.html` with `php artisan db:generate-mysql-baseline-data` (rewrites only the section after the baseline marker line `__MYAUTO_TORQUE_SQL_BASELINE_V1__`). Does **not** include user accounts or vehicle listings (those come from the running app / Laravel). |
 | **`manual_mysql_patches.sql`** | **Fallback only** — hosts that **cannot** run Artisan (one-off `ALTER TABLE`, indexes, charset fixes). Prefer `php artisan migrate` everywhere you can. |
 
 Prefer adding schema **only** via **`migrations/`**. Edit the structure portion of `myauto_torque_db.sql` when you need a portable dump that matches migrations.
