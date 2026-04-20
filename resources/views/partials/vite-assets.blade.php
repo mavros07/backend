@@ -4,6 +4,7 @@
 @if ($viteReady)
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 @else
-    {{-- Staging/deploy without Node build: avoid ViteManifestNotFoundException --}}
+    {{-- CDN fallback: Tailwind + Alpine so admin sidebar / toggles work without npm build --}}
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
 @endif
