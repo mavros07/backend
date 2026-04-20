@@ -14,20 +14,20 @@
       @endif
     </a>
     <div class="hidden md:flex items-center gap-6 text-[11px] font-bold uppercase tracking-wider">
-      <a class="text-white hover:text-motors_blue transition-colors" href="{{ route('home') }}">Home</a>
-      <a class="text-white hover:text-motors_blue transition-colors" href="{{ route('inventory.index') }}">Inventory</a>
-      <a class="text-white hover:text-motors_blue transition-colors" href="{{ route('inventory.show') }}">Listing</a>
-      <a class="text-white hover:text-motors_blue transition-colors" href="{{ route('faq') }}">Blog</a>
-      <a class="text-white hover:text-motors_blue transition-colors" href="{{ route('about') }}">Pages</a>
-      <a class="text-white hover:text-motors_blue transition-colors" href="{{ route('contact') }}">Contact</a>
+      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('home') }}">Home</a>
+      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('inventory.index') }}">Inventory</a>
+      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('inventory.show') }}">Listing</a>
+      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('faq') }}">Blog</a>
+      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('about') }}">Pages</a>
+      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('contact') }}">Contact</a>
     </div>
   </div>
 
   <div class="hidden md:flex items-center gap-6 text-[11px] font-bold uppercase tracking-wider">
-    <a class="text-white hover:text-motors_blue transition-colors" href="{{ route('about') }}">Pages</a>
-    <a class="text-white hover:text-motors_blue transition-colors" href="{{ route('faq') }}">Calculators</a>
-    <a class="text-white hover:text-motors_blue transition-colors" href="{{ route('compare') }}">Compare</a>
-    <a class="text-white hover:text-motors_blue transition-colors" href="{{ route('inventory.index') }}">Shop</a>
+    <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('about') }}">Pages</a>
+    <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('faq') }}">Calculators</a>
+    <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('compare') }}">Compare</a>
+    <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('inventory.index') }}">Shop</a>
   </div>
 
   <button class="md:hidden text-white" type="button" data-mobile-menu-toggle>

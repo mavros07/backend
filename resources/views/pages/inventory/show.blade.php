@@ -70,7 +70,7 @@
           </div>
           <a href="{{ route('inventory.index') }}" class="mt-6 inline-flex w-full items-center justify-center border border-white/30 rounded px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-white/10">Back to Inventory</a>
           @auth
-            <form class="mt-3" method="post" action="{{ route('favorites.toggle', ['vehicle' => $vehicle->id]) }}">@csrf<button type="submit" class="w-full bg-motors_blue py-2 rounded text-xs font-bold uppercase tracking-wider">{{ $isFavorited ? 'Remove from Saved' : 'Save Listing' }}</button></form>
+            <form class="mt-3" method="post" action="{{ route('favorites.toggle', ['vehicle' => $vehicle->id]) }}">@csrf<button type="submit" class="w-full bg-brand_blue py-2 rounded text-xs font-bold uppercase tracking-wider">{{ $isFavorited ? 'Remove from Saved' : 'Save Listing' }}</button></form>
           @endauth
         </div>
 
@@ -82,7 +82,7 @@
               <input type="text" name="sender_name" value="{{ old('sender_name', auth()->user()?->name) }}" class="w-full bg-slate-100 border-none rounded px-4 py-3 text-sm" placeholder="Your name" required />
               <input type="email" name="sender_email" value="{{ old('sender_email', auth()->user()?->email) }}" class="w-full bg-slate-100 border-none rounded px-4 py-3 text-sm" placeholder="Email" required />
               <textarea name="message" rows="4" class="w-full bg-slate-100 border-none rounded px-4 py-3 text-sm" placeholder="Message" required>{{ old('message') }}</textarea>
-              <button type="submit" class="w-full bg-motors_blue text-white py-3 rounded text-xs font-bold uppercase tracking-wider">Send Message</button>
+              <button type="submit" class="w-full bg-brand_blue text-white py-3 rounded text-xs font-bold uppercase tracking-wider">Send Message</button>
             </form>
           </div>
         @endif

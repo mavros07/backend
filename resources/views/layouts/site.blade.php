@@ -33,8 +33,8 @@
           extend: {
             colors: {
               primary: '#ffb129',
-              motors_blue: '#4e77ed',
-              motors_orange: '#f9a825',
+              brand_blue: '#4e77ed',
+              brand_orange: '#f9a825',
               card_bg: 'rgba(34,39,45,0.95)',
               sold_red: '#e94343',
               on_surface: '#191c1e',
@@ -53,7 +53,7 @@
     @stack('head')
   </head>
 
-  <body class="bg-page_bg font-body text-on_surface selection:bg-motors_blue/20 {{ $bodyClass ?? '' }}">
+  <body class="bg-page_bg font-body text-on_surface selection:bg-brand_blue/20 {{ $bodyClass ?? '' }}">
     @include('partials.header')
     <main id="main" class="pt-16">
       @yield('content')

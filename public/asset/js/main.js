@@ -34,7 +34,7 @@
         tab.classList.toggle('bg-white', active);
         tab.classList.toggle('text-slate-900', active);
         tab.classList.toggle('border-t-2', active);
-        tab.classList.toggle('border-motors_orange', active);
+        tab.classList.toggle('border-brand_orange', active);
       });
 
       document.querySelectorAll('[data-contact-panel]').forEach(function (panel) {
