@@ -374,27 +374,27 @@ DELETE vi FROM `vehicle_images` vi
 JOIN `vehicles` v ON v.id = vi.vehicle_id
 WHERE v.slug = '2021-bmw-m4-competition';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5Swu_VfY8IYgBgtCLqdAKgXJhY0t8G3NFrL8qTkiU44-P7b0xd4dQziHP1ghsmtbfRVNSzKYN4RDBi9zLkHkSLlWh_MQLgPP5IWdw61BJqGpgJCUuLvD5fX9_6dUqcFkJAmJfmZcoyaA9zU5pGH58epqw7pyi0uub5aZwr3jLEE7KwIw_wOF1m2MiFcMriGWniMn-Mocixe-uP_EocYcG43OJR5FS36YbZiwJ724cuVrhr6wy1Ne2B3Ic9Gt21MmQSzmfFm5FTMM', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-6-1-1.jpg', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2021-bmw-m4-competition';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuAx6Rclw6OJt765M0v-ShtMYuYxM_y7xXCmC2FWOUYhHoaBpcuHQ_KJ7U432s3IDy08d-jNUjzyUtjrTv1jbH1E59-vhzQO3QfBsBvZvd9ttRFKguhpJ7RHUegUn5CEsdKCh_JD7eNmc84LcZWvxUU7bbC2kglPs-P-iKm4P3YJiKw3lJbaxbZcXLsKnImzDI5NHX7HvvasSrEKgEzOC1WpY1_pgdnnZQldPOpnIuogs4UWhkjab70BFh_Yxwkpb66zzujg_lqW4f8', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-7-1-1.jpg', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2021-bmw-m4-competition';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCX2OnbrN_OlmcbFkbfG57QSrXZWDCFn0gdz7Ooq2J_eTeTNVshs0Ehow1j1v8Etk5TwG2d3aL3B-3PSL54wXSHv9sM8ch_GPPV6tz4LTfv0VB8pmGM6qR98icOkm6KUAvMy73QbwUUc-wOsPLTU-bKq8Dd-dWtTH2RlOU4Te226j03i-jCjg2D0VRm_-4gY3Zj4uTakTcSYZKgY19sHTzTbQ96sOdDfIlq_xm1I2PhBPnQEKtLeMT1Fr99fHWszJHsvtK2-2rsB5E', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-10-1.jpg', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2021-bmw-m4-competition';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuB86za3jd2sQu83szzqHSezMl_I7t0cmFztbHt18TYAyJ1UTwT_-Sv49DKASvnObsTBNRUP2XxEm48L74HXFpt6qbjDyUZ-bowk-9vp_O6Mh9NQOQZFrCbDKa-YmKvMWQPibBJUYX_sXhBe9MidGIcbEIiwDdFo7Ff44VYcpVtO0aqdour27tUxwWoaSs9TYgV9JnGYCbE2mKe9LLJbQQi1AsKoWaWslpY9QgOtd3b71fQblFw0ymLrpBB81AgzAF_g1fbdj-U0oG8', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-24-1.jpg', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2021-bmw-m4-competition';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuAtzOrMxv34w0a1iVMYHwMqfYMmJ6ZC5xS7IYi2vfEDIckK5RSiJoqyRLdBevA3Dvv0SVPuqouh4DaN2LWNJOgFzrt6KxJbVAF6a_UpzBaEJRVO0X3_7m7wi_-aOLf5oPqsc2Rd5LFbow0ghNr6mxCXEeO5VQ9rkdvfM-7sAM4ulNJjEUf_IAfTXhHU9sj6HK_SxBjA8tHF9zT1jOx59a36YjVrp6lAxcylS8PsDXWV5naerX7MTJHXV5cmlEdbW8uIMQwKS1Y2R2w', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-6-1-1.jpg', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2021-bmw-m4-competition';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuDT52f15zUg_xA-xANN-dCaXv7HtCXjGvOrSZ3EEJfobbbIMXWZnm9mEktxeS-E2KwY3OW7xUAyDHJVZ4QnUm_Wcz3ynHdjeX8bjmSPbfsm0WgV8AScG_YwAVRR5_0R1Sqq6c7IiDfFvUXRK2gTpyNjYGBOBM3M5b0w18emsv6lamP5bIrTzY2Kp6U-glyBiFpFDAkW1yYtRMP9rA7R-XZVYQQmQiigVTdDw_rrO7GyjuVB_L4_9pqhuq9AgL7Li5CL7dVkdq9F7XE', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-7-1-1.jpg', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2021-bmw-m4-competition';
 
@@ -408,27 +408,27 @@ DELETE vi FROM `vehicle_images` vi
 JOIN `vehicles` v ON v.id = vi.vehicle_id
 WHERE v.slug = '2022-audi-rs6-avant';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuAx6Rclw6OJt765M0v-ShtMYuYxM_y7xXCmC2FWOUYhHoaBpcuHQ_KJ7U432s3IDy08d-jNUjzyUtjrTv1jbH1E59-vhzQO3QfBsBvZvd9ttRFKguhpJ7RHUegUn5CEsdKCh_JD7eNmc84LcZWvxUU7bbC2kglPs-P-iKm4P3YJiKw3lJbaxbZcXLsKnImzDI5NHX7HvvasSrEKgEzOC1WpY1_pgdnnZQldPOpnIuogs4UWhkjab70BFh_Yxwkpb66zzujg_lqW4f8', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-7-1-1.jpg', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-audi-rs6-avant';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCX2OnbrN_OlmcbFkbfG57QSrXZWDCFn0gdz7Ooq2J_eTeTNVshs0Ehow1j1v8Etk5TwG2d3aL3B-3PSL54wXSHv9sM8ch_GPPV6tz4LTfv0VB8pmGM6qR98icOkm6KUAvMy73QbwUUc-wOsPLTU-bKq8Dd-dWtTH2RlOU4Te226j03i-jCjg2D0VRm_-4gY3Zj4uTakTcSYZKgY19sHTzTbQ96sOdDfIlq_xm1I2PhBPnQEKtLeMT1Fr99fHWszJHsvtK2-2rsB5E', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-10-1.jpg', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-audi-rs6-avant';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuB86za3jd2sQu83szzqHSezMl_I7t0cmFztbHt18TYAyJ1UTwT_-Sv49DKASvnObsTBNRUP2XxEm48L74HXFpt6qbjDyUZ-bowk-9vp_O6Mh9NQOQZFrCbDKa-YmKvMWQPibBJUYX_sXhBe9MidGIcbEIiwDdFo7Ff44VYcpVtO0aqdour27tUxwWoaSs9TYgV9JnGYCbE2mKe9LLJbQQi1AsKoWaWslpY9QgOtd3b71fQblFw0ymLrpBB81AgzAF_g1fbdj-U0oG8', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-24-1.jpg', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-audi-rs6-avant';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuAtzOrMxv34w0a1iVMYHwMqfYMmJ6ZC5xS7IYi2vfEDIckK5RSiJoqyRLdBevA3Dvv0SVPuqouh4DaN2LWNJOgFzrt6KxJbVAF6a_UpzBaEJRVO0X3_7m7wi_-aOLf5oPqsc2Rd5LFbow0ghNr6mxCXEeO5VQ9rkdvfM-7sAM4ulNJjEUf_IAfTXhHU9sj6HK_SxBjA8tHF9zT1jOx59a36YjVrp6lAxcylS8PsDXWV5naerX7MTJHXV5cmlEdbW8uIMQwKS1Y2R2w', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-6-1-1.jpg', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-audi-rs6-avant';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuDT52f15zUg_xA-xANN-dCaXv7HtCXjGvOrSZ3EEJfobbbIMXWZnm9mEktxeS-E2KwY3OW7xUAyDHJVZ4QnUm_Wcz3ynHdjeX8bjmSPbfsm0WgV8AScG_YwAVRR5_0R1Sqq6c7IiDfFvUXRK2gTpyNjYGBOBM3M5b0w18emsv6lamP5bIrTzY2Kp6U-glyBiFpFDAkW1yYtRMP9rA7R-XZVYQQmQiigVTdDw_rrO7GyjuVB_L4_9pqhuq9AgL7Li5CL7dVkdq9F7XE', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-7-1-1.jpg', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-audi-rs6-avant';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCI7GI67cd6jzTLSlhJmEPOJZZhrp1FjnHPa4Rlgs7i4cwb-9xchzGNUNwq8mM7M4QAR5uxfLKaO8NMhcsuSFlqks6D45EpzAWc02A80wuw4mFZLgNargnw7HF0FYvagQpNn1OvDuQwUa7WRLJ-TS5nH8vcIkhVBuer9OuPoUUGpxugQcGH5HKNrB1XDrtQhwbv_MsQZeq7xEtB-U573tnSPuIXIOzhs4AWLBtZ2l5iTeX-Dg5ddWxP5bRWGVW7N2PjBy88E9Z1pac', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-10-1.jpg', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-audi-rs6-avant';
 
@@ -442,27 +442,27 @@ DELETE vi FROM `vehicle_images` vi
 JOIN `vehicles` v ON v.id = vi.vehicle_id
 WHERE v.slug = '2023-porsche-911-gt3';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCX2OnbrN_OlmcbFkbfG57QSrXZWDCFn0gdz7Ooq2J_eTeTNVshs0Ehow1j1v8Etk5TwG2d3aL3B-3PSL54wXSHv9sM8ch_GPPV6tz4LTfv0VB8pmGM6qR98icOkm6KUAvMy73QbwUUc-wOsPLTU-bKq8Dd-dWtTH2RlOU4Te226j03i-jCjg2D0VRm_-4gY3Zj4uTakTcSYZKgY19sHTzTbQ96sOdDfIlq_xm1I2PhBPnQEKtLeMT1Fr99fHWszJHsvtK2-2rsB5E', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-10-1.jpg', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-porsche-911-gt3';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuB86za3jd2sQu83szzqHSezMl_I7t0cmFztbHt18TYAyJ1UTwT_-Sv49DKASvnObsTBNRUP2XxEm48L74HXFpt6qbjDyUZ-bowk-9vp_O6Mh9NQOQZFrCbDKa-YmKvMWQPibBJUYX_sXhBe9MidGIcbEIiwDdFo7Ff44VYcpVtO0aqdour27tUxwWoaSs9TYgV9JnGYCbE2mKe9LLJbQQi1AsKoWaWslpY9QgOtd3b71fQblFw0ymLrpBB81AgzAF_g1fbdj-U0oG8', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-24-1.jpg', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-porsche-911-gt3';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuAtzOrMxv34w0a1iVMYHwMqfYMmJ6ZC5xS7IYi2vfEDIckK5RSiJoqyRLdBevA3Dvv0SVPuqouh4DaN2LWNJOgFzrt6KxJbVAF6a_UpzBaEJRVO0X3_7m7wi_-aOLf5oPqsc2Rd5LFbow0ghNr6mxCXEeO5VQ9rkdvfM-7sAM4ulNJjEUf_IAfTXhHU9sj6HK_SxBjA8tHF9zT1jOx59a36YjVrp6lAxcylS8PsDXWV5naerX7MTJHXV5cmlEdbW8uIMQwKS1Y2R2w', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-6-1-1.jpg', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-porsche-911-gt3';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuDT52f15zUg_xA-xANN-dCaXv7HtCXjGvOrSZ3EEJfobbbIMXWZnm9mEktxeS-E2KwY3OW7xUAyDHJVZ4QnUm_Wcz3ynHdjeX8bjmSPbfsm0WgV8AScG_YwAVRR5_0R1Sqq6c7IiDfFvUXRK2gTpyNjYGBOBM3M5b0w18emsv6lamP5bIrTzY2Kp6U-glyBiFpFDAkW1yYtRMP9rA7R-XZVYQQmQiigVTdDw_rrO7GyjuVB_L4_9pqhuq9AgL7Li5CL7dVkdq9F7XE', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-7-1-1.jpg', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-porsche-911-gt3';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCI7GI67cd6jzTLSlhJmEPOJZZhrp1FjnHPa4Rlgs7i4cwb-9xchzGNUNwq8mM7M4QAR5uxfLKaO8NMhcsuSFlqks6D45EpzAWc02A80wuw4mFZLgNargnw7HF0FYvagQpNn1OvDuQwUa7WRLJ-TS5nH8vcIkhVBuer9OuPoUUGpxugQcGH5HKNrB1XDrtQhwbv_MsQZeq7xEtB-U573tnSPuIXIOzhs4AWLBtZ2l5iTeX-Dg5ddWxP5bRWGVW7N2PjBy88E9Z1pac', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-10-1.jpg', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-porsche-911-gt3';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5Swu_VfY8IYgBgtCLqdAKgXJhY0t8G3NFrL8qTkiU44-P7b0xd4dQziHP1ghsmtbfRVNSzKYN4RDBi9zLkHkSLlWh_MQLgPP5IWdw61BJqGpgJCUuLvD5fX9_6dUqcFkJAmJfmZcoyaA9zU5pGH58epqw7pyi0uub5aZwr3jLEE7KwIw_wOF1m2MiFcMriGWniMn-Mocixe-uP_EocYcG43OJR5FS36YbZiwJ724cuVrhr6wy1Ne2B3Ic9Gt21MmQSzmfFm5FTMM', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-24-1.jpg', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-porsche-911-gt3';
 
@@ -476,27 +476,27 @@ DELETE vi FROM `vehicle_images` vi
 JOIN `vehicles` v ON v.id = vi.vehicle_id
 WHERE v.slug = '2023-lexus-rx-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuB86za3jd2sQu83szzqHSezMl_I7t0cmFztbHt18TYAyJ1UTwT_-Sv49DKASvnObsTBNRUP2XxEm48L74HXFpt6qbjDyUZ-bowk-9vp_O6Mh9NQOQZFrCbDKa-YmKvMWQPibBJUYX_sXhBe9MidGIcbEIiwDdFo7Ff44VYcpVtO0aqdour27tUxwWoaSs9TYgV9JnGYCbE2mKe9LLJbQQi1AsKoWaWslpY9QgOtd3b71fQblFw0ymLrpBB81AgzAF_g1fbdj-U0oG8', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-24-1.jpg', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lexus-rx-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuAtzOrMxv34w0a1iVMYHwMqfYMmJ6ZC5xS7IYi2vfEDIckK5RSiJoqyRLdBevA3Dvv0SVPuqouh4DaN2LWNJOgFzrt6KxJbVAF6a_UpzBaEJRVO0X3_7m7wi_-aOLf5oPqsc2Rd5LFbow0ghNr6mxCXEeO5VQ9rkdvfM-7sAM4ulNJjEUf_IAfTXhHU9sj6HK_SxBjA8tHF9zT1jOx59a36YjVrp6lAxcylS8PsDXWV5naerX7MTJHXV5cmlEdbW8uIMQwKS1Y2R2w', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-6-1-1.jpg', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lexus-rx-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuDT52f15zUg_xA-xANN-dCaXv7HtCXjGvOrSZ3EEJfobbbIMXWZnm9mEktxeS-E2KwY3OW7xUAyDHJVZ4QnUm_Wcz3ynHdjeX8bjmSPbfsm0WgV8AScG_YwAVRR5_0R1Sqq6c7IiDfFvUXRK2gTpyNjYGBOBM3M5b0w18emsv6lamP5bIrTzY2Kp6U-glyBiFpFDAkW1yYtRMP9rA7R-XZVYQQmQiigVTdDw_rrO7GyjuVB_L4_9pqhuq9AgL7Li5CL7dVkdq9F7XE', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-7-1-1.jpg', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lexus-rx-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCI7GI67cd6jzTLSlhJmEPOJZZhrp1FjnHPa4Rlgs7i4cwb-9xchzGNUNwq8mM7M4QAR5uxfLKaO8NMhcsuSFlqks6D45EpzAWc02A80wuw4mFZLgNargnw7HF0FYvagQpNn1OvDuQwUa7WRLJ-TS5nH8vcIkhVBuer9OuPoUUGpxugQcGH5HKNrB1XDrtQhwbv_MsQZeq7xEtB-U573tnSPuIXIOzhs4AWLBtZ2l5iTeX-Dg5ddWxP5bRWGVW7N2PjBy88E9Z1pac', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-10-1.jpg', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lexus-rx-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5Swu_VfY8IYgBgtCLqdAKgXJhY0t8G3NFrL8qTkiU44-P7b0xd4dQziHP1ghsmtbfRVNSzKYN4RDBi9zLkHkSLlWh_MQLgPP5IWdw61BJqGpgJCUuLvD5fX9_6dUqcFkJAmJfmZcoyaA9zU5pGH58epqw7pyi0uub5aZwr3jLEE7KwIw_wOF1m2MiFcMriGWniMn-Mocixe-uP_EocYcG43OJR5FS36YbZiwJ724cuVrhr6wy1Ne2B3Ic9Gt21MmQSzmfFm5FTMM', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-24-1.jpg', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lexus-rx-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuAx6Rclw6OJt765M0v-ShtMYuYxM_y7xXCmC2FWOUYhHoaBpcuHQ_KJ7U432s3IDy08d-jNUjzyUtjrTv1jbH1E59-vhzQO3QfBsBvZvd9ttRFKguhpJ7RHUegUn5CEsdKCh_JD7eNmc84LcZWvxUU7bbC2kglPs-P-iKm4P3YJiKw3lJbaxbZcXLsKnImzDI5NHX7HvvasSrEKgEzOC1WpY1_pgdnnZQldPOpnIuogs4UWhkjab70BFh_Yxwkpb66zzujg_lqW4f8', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-6-1-1.jpg', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lexus-rx-350';
 
@@ -510,27 +510,27 @@ DELETE vi FROM `vehicle_images` vi
 JOIN `vehicles` v ON v.id = vi.vehicle_id
 WHERE v.slug = '2022-lexus-es-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuAtzOrMxv34w0a1iVMYHwMqfYMmJ6ZC5xS7IYi2vfEDIckK5RSiJoqyRLdBevA3Dvv0SVPuqouh4DaN2LWNJOgFzrt6KxJbVAF6a_UpzBaEJRVO0X3_7m7wi_-aOLf5oPqsc2Rd5LFbow0ghNr6mxCXEeO5VQ9rkdvfM-7sAM4ulNJjEUf_IAfTXhHU9sj6HK_SxBjA8tHF9zT1jOx59a36YjVrp6lAxcylS8PsDXWV5naerX7MTJHXV5cmlEdbW8uIMQwKS1Y2R2w', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-6-1-1.jpg', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-lexus-es-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuDT52f15zUg_xA-xANN-dCaXv7HtCXjGvOrSZ3EEJfobbbIMXWZnm9mEktxeS-E2KwY3OW7xUAyDHJVZ4QnUm_Wcz3ynHdjeX8bjmSPbfsm0WgV8AScG_YwAVRR5_0R1Sqq6c7IiDfFvUXRK2gTpyNjYGBOBM3M5b0w18emsv6lamP5bIrTzY2Kp6U-glyBiFpFDAkW1yYtRMP9rA7R-XZVYQQmQiigVTdDw_rrO7GyjuVB_L4_9pqhuq9AgL7Li5CL7dVkdq9F7XE', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-7-1-1.jpg', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-lexus-es-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCI7GI67cd6jzTLSlhJmEPOJZZhrp1FjnHPa4Rlgs7i4cwb-9xchzGNUNwq8mM7M4QAR5uxfLKaO8NMhcsuSFlqks6D45EpzAWc02A80wuw4mFZLgNargnw7HF0FYvagQpNn1OvDuQwUa7WRLJ-TS5nH8vcIkhVBuer9OuPoUUGpxugQcGH5HKNrB1XDrtQhwbv_MsQZeq7xEtB-U573tnSPuIXIOzhs4AWLBtZ2l5iTeX-Dg5ddWxP5bRWGVW7N2PjBy88E9Z1pac', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-10-1.jpg', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-lexus-es-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5Swu_VfY8IYgBgtCLqdAKgXJhY0t8G3NFrL8qTkiU44-P7b0xd4dQziHP1ghsmtbfRVNSzKYN4RDBi9zLkHkSLlWh_MQLgPP5IWdw61BJqGpgJCUuLvD5fX9_6dUqcFkJAmJfmZcoyaA9zU5pGH58epqw7pyi0uub5aZwr3jLEE7KwIw_wOF1m2MiFcMriGWniMn-Mocixe-uP_EocYcG43OJR5FS36YbZiwJ724cuVrhr6wy1Ne2B3Ic9Gt21MmQSzmfFm5FTMM', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-24-1.jpg', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-lexus-es-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuAx6Rclw6OJt765M0v-ShtMYuYxM_y7xXCmC2FWOUYhHoaBpcuHQ_KJ7U432s3IDy08d-jNUjzyUtjrTv1jbH1E59-vhzQO3QfBsBvZvd9ttRFKguhpJ7RHUegUn5CEsdKCh_JD7eNmc84LcZWvxUU7bbC2kglPs-P-iKm4P3YJiKw3lJbaxbZcXLsKnImzDI5NHX7HvvasSrEKgEzOC1WpY1_pgdnnZQldPOpnIuogs4UWhkjab70BFh_Yxwkpb66zzujg_lqW4f8', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-6-1-1.jpg', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-lexus-es-350';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCX2OnbrN_OlmcbFkbfG57QSrXZWDCFn0gdz7Ooq2J_eTeTNVshs0Ehow1j1v8Etk5TwG2d3aL3B-3PSL54wXSHv9sM8ch_GPPV6tz4LTfv0VB8pmGM6qR98icOkm6KUAvMy73QbwUUc-wOsPLTU-bKq8Dd-dWtTH2RlOU4Te226j03i-jCjg2D0VRm_-4gY3Zj4uTakTcSYZKgY19sHTzTbQ96sOdDfIlq_xm1I2PhBPnQEKtLeMT1Fr99fHWszJHsvtK2-2rsB5E', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-7-1-1.jpg', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2022-lexus-es-350';
 
@@ -544,27 +544,27 @@ DELETE vi FROM `vehicle_images` vi
 JOIN `vehicles` v ON v.id = vi.vehicle_id
 WHERE v.slug = '2023-lamborghini-urus';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuDT52f15zUg_xA-xANN-dCaXv7HtCXjGvOrSZ3EEJfobbbIMXWZnm9mEktxeS-E2KwY3OW7xUAyDHJVZ4QnUm_Wcz3ynHdjeX8bjmSPbfsm0WgV8AScG_YwAVRR5_0R1Sqq6c7IiDfFvUXRK2gTpyNjYGBOBM3M5b0w18emsv6lamP5bIrTzY2Kp6U-glyBiFpFDAkW1yYtRMP9rA7R-XZVYQQmQiigVTdDw_rrO7GyjuVB_L4_9pqhuq9AgL7Li5CL7dVkdq9F7XE', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-7-1-1.jpg', 0, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lamborghini-urus';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCI7GI67cd6jzTLSlhJmEPOJZZhrp1FjnHPa4Rlgs7i4cwb-9xchzGNUNwq8mM7M4QAR5uxfLKaO8NMhcsuSFlqks6D45EpzAWc02A80wuw4mFZLgNargnw7HF0FYvagQpNn1OvDuQwUa7WRLJ-TS5nH8vcIkhVBuer9OuPoUUGpxugQcGH5HKNrB1XDrtQhwbv_MsQZeq7xEtB-U573tnSPuIXIOzhs4AWLBtZ2l5iTeX-Dg5ddWxP5bRWGVW7N2PjBy88E9Z1pac', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-10-1.jpg', 1, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lamborghini-urus';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5Swu_VfY8IYgBgtCLqdAKgXJhY0t8G3NFrL8qTkiU44-P7b0xd4dQziHP1ghsmtbfRVNSzKYN4RDBi9zLkHkSLlWh_MQLgPP5IWdw61BJqGpgJCUuLvD5fX9_6dUqcFkJAmJfmZcoyaA9zU5pGH58epqw7pyi0uub5aZwr3jLEE7KwIw_wOF1m2MiFcMriGWniMn-Mocixe-uP_EocYcG43OJR5FS36YbZiwJ724cuVrhr6wy1Ne2B3Ic9Gt21MmQSzmfFm5FTMM', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-24-1.jpg', 2, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lamborghini-urus';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuAx6Rclw6OJt765M0v-ShtMYuYxM_y7xXCmC2FWOUYhHoaBpcuHQ_KJ7U432s3IDy08d-jNUjzyUtjrTv1jbH1E59-vhzQO3QfBsBvZvd9ttRFKguhpJ7RHUegUn5CEsdKCh_JD7eNmc84LcZWvxUU7bbC2kglPs-P-iKm4P3YJiKw3lJbaxbZcXLsKnImzDI5NHX7HvvasSrEKgEzOC1WpY1_pgdnnZQldPOpnIuogs4UWhkjab70BFh_Yxwkpb66zzujg_lqW4f8', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-6-1-1.jpg', 3, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lamborghini-urus';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCX2OnbrN_OlmcbFkbfG57QSrXZWDCFn0gdz7Ooq2J_eTeTNVshs0Ehow1j1v8Etk5TwG2d3aL3B-3PSL54wXSHv9sM8ch_GPPV6tz4LTfv0VB8pmGM6qR98icOkm6KUAvMy73QbwUUc-wOsPLTU-bKq8Dd-dWtTH2RlOU4Te226j03i-jCjg2D0VRm_-4gY3Zj4uTakTcSYZKgY19sHTzTbQ96sOdDfIlq_xm1I2PhBPnQEKtLeMT1Fr99fHWszJHsvtK2-2rsB5E', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-7-1-1.jpg', 4, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lamborghini-urus';
 INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)
-SELECT v.id, 'https://lh3.googleusercontent.com/aida-public/AB6AXuB86za3jd2sQu83szzqHSezMl_I7t0cmFztbHt18TYAyJ1UTwT_-Sv49DKASvnObsTBNRUP2XxEm48L74HXFpt6qbjDyUZ-bowk-9vp_O6Mh9NQOQZFrCbDKa-YmKvMWQPibBJUYX_sXhBe9MidGIcbEIiwDdFo7Ff44VYcpVtO0aqdour27tUxwWoaSs9TYgV9JnGYCbE2mKe9LLJbQQi1AsKoWaWslpY9QgOtd3b71fQblFw0ymLrpBB81AgzAF_g1fbdj-U0oG8', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
+SELECT v.id, 'asset/images/media/demo/01-10-1.jpg', 5, '2026-04-20 02:43:54', '2026-04-20 02:43:54'
 FROM `vehicles` v
 WHERE v.slug = '2023-lamborghini-urus';
 

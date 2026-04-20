@@ -1,3 +1,4 @@
+{{-- Standalone LUXEMOTIVE shell (Tailwind-only). Public pages should use layouts.site + shared partials.header/footer; see pages/home-luxemotive + partials/luxemotive-home-assets. --}}
 <!DOCTYPE html>
 <html class="light" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
   <head>
@@ -120,7 +121,7 @@
         background-color: #ffb129;
       }
       .stats-bg {
-        background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAtzOrMxv34w0a1iVMYHwMqfYMmJ6ZC5xS7IYi2vfEDIckK5RSiJoqyRLdBevA3Dvv0SVPuqouh4DaN2LWNJOgFzrt6KxJbVAF6a_UpzBaEJRVO0X3_7m7wi_-aOLf5oPqsc2Rd5LFbow0ghNr6mxCXEeO5VQ9rkdvfM-7sAM4ulNJjEUf_IAfTXhHU9sj6HK_SxBjA8tHF9zT1jOx59a36YjVrp6lAxcylS8PsDXWV5naerX7MTJHXV5cmlEdbW8uIMQwKS1Y2R2w');
+        background-image: url('{{ asset('asset/images/media/demo/01-10-1.jpg') }}');
         background-size: cover;
         background-position: center;
       }

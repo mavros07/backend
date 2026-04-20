@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Rewrites vehicle_images paths in SQL dumps to match DemoData (HTTPS URLs).
+ * Rewrites vehicle_images paths in SQL dumps to match DemoData (local asset paths or HTTPS).
  * Run from backend: php database/scripts/patch_manual_mysql_demo_images.php
  */
 
@@ -23,20 +23,28 @@ $replaceBlock = function (string $slug, int $sort, string $url, string $tsPair) 
     return "SELECT v.id, '".$url."', ".$sort.", ".$tsPair."\nFROM `vehicles` v\nWHERE v.slug = '".$slug."';";
 };
 
-$patchFile = function (string $path, string $tsPair) use ($bySlug, $replaceBlock) {
-    $sql = file_get_contents($path);
-    $pattern = "/SELECT v\\.id, 'assets\\/images\\/wp-uploads\\/[^']+', (\\d+), (?:@demo_ts, @demo_ts|'[^']+', '[^']+')\\s+FROM `vehicles` v\\s+WHERE v\\.slug = '([^']+)';/s";
-    $sql = preg_replace_callback($pattern, function ($m) use ($bySlug, $replaceBlock, $tsPair) {
-        $sort = (int) $m[1];
-        $slug = $m[2];
-        if (! isset($bySlug[$slug])) {
-            return $m[0];
-        }
-        $images = $bySlug[$slug];
-        $url = $images[$sort] ?? $images[0];
+$patchPatterns = [
+    // Legacy wp-uploads paths in SQL
+    "/SELECT v\\.id, 'assets\\/images\\/wp-uploads\\/[^']+', (\\d+), (?:@demo_ts, @demo_ts|'[^']+', '[^']+')\\s+FROM `vehicles` v\\s+WHERE v\\.slug = '([^']+)';/s",
+    // Google CDN URLs (may be truncated if column was VARCHAR)
+    "/SELECT v\\.id, 'https:\\/\\/lh3\\.googleusercontent\\.com[^']+', (\\d+), (?:@demo_ts, @demo_ts|'[^']+', '[^']+')\\s+FROM `vehicles` v\\s+WHERE v\\.slug = '([^']+)';/s",
+];
 
-        return $replaceBlock($slug, $sort, $url, $tsPair);
-    }, $sql);
+$patchFile = function (string $path, string $tsPair) use ($bySlug, $replaceBlock, $patchPatterns) {
+    $sql = file_get_contents($path);
+    foreach ($patchPatterns as $pattern) {
+        $sql = preg_replace_callback($pattern, function ($m) use ($bySlug, $replaceBlock, $tsPair) {
+            $sort = (int) $m[1];
+            $slug = $m[2];
+            if (! isset($bySlug[$slug])) {
+                return $m[0];
+            }
+            $images = $bySlug[$slug];
+            $url = $images[$sort] ?? $images[0];
+
+            return $replaceBlock($slug, $sort, $url, $tsPair);
+        }, $sql);
+    }
     file_put_contents($path, $sql);
     fwrite(STDOUT, "Patched: {$path}\n");
 };
