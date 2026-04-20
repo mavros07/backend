@@ -328,3 +328,117 @@ WHERE v.`slug` IN (
 -- Example (commented):
 -- -- 2026-04-20: example index — see migrations/2026_xx_xx_xxxx_example.php
 -- ALTER TABLE `vehicles` ADD INDEX `vehicles_example_index` (`some_column`);
+
+-- 2026-04-20: align staging schema with latest Laravel migrations
+-- Migration refs:
+-- - 2026_04_20_220000_add_is_active_to_cms_pages_table.php
+-- - 2026_04_20_220100_create_page_sections_table.php
+-- - 2026_04_20_220200_create_media_table.php
+
+-- cms_pages.is_active (used by PageController WHERE clause)
+SET @has_is_active := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'cms_pages'
+    AND COLUMN_NAME = 'is_active'
+);
+SET @sql := IF(
+  @has_is_active = 0,
+  'ALTER TABLE `cms_pages` ADD COLUMN `is_active` TINYINT(1) NOT NULL DEFAULT 1 AFTER `content_html`;',
+  'SELECT ''cms_pages.is_active already exists'';'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- page_sections table for page-editor section fields
+CREATE TABLE IF NOT EXISTS `page_sections` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `page` VARCHAR(255) NOT NULL,
+  `section_key` VARCHAR(255) NOT NULL,
+  `content_type` VARCHAR(50) NOT NULL DEFAULT 'text',
+  `content` TEXT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `page_sections_page_section_key_unique` (`page`, `section_key`),
+  KEY `page_sections_page_index` (`page`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- media table for admin media library + modal picker
+CREATE TABLE IF NOT EXISTS `media` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `filename` VARCHAR(255) NOT NULL,
+  `original_name` VARCHAR(255) NULL,
+  `file_path` VARCHAR(255) NOT NULL,
+  `file_type` VARCHAR(100) NULL,
+  `file_size` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  `uploaded_by` BIGINT UNSIGNED NULL,
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `media_created_at_index` (`created_at`),
+  KEY `media_uploaded_by_foreign` (`uploaded_by`),
+  CONSTRAINT `media_uploaded_by_foreign`
+    FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2026-04-21: remove legacy WordPress/Elementor HTML from home `content_html` (homepage layout is Blade + `page_sections`).
+UPDATE `cms_pages`
+SET `content_html` = ''
+WHERE `slug` = 'home'
+  AND (
+    `content_html` LIKE '%elementor%'
+    OR `content_html` LIKE '%__HOME_INVENTORY_SEARCH__%'
+    OR `content_html` LIKE '%stm-%'
+    OR `content_html` LIKE '%wp-%'
+  );
+
+-- Optional: drop old per-section keys in `site_settings` so `page_sections` + defaults win (uncomment if hero still shows old copy).
+-- DELETE FROM `site_settings` WHERE `key` LIKE 'page_home_%';
+
+-- -----------------------------------------------------------------------------
+-- 2026-04-21: Seed `page_sections` (same data as `Database\Seeders\PageSectionsSeeder`).
+-- Run after `CREATE TABLE IF NOT EXISTS page_sections` above. No Artisan required.
+-- Idempotent: upserts on unique (`page`, `section_key`).
+-- -----------------------------------------------------------------------------
+INSERT INTO `page_sections` (`page`, `section_key`, `content_type`, `content`, `created_at`, `updated_at`) VALUES
+('home', 'hero_title', 'text', 'Lorem ipsum dolor sit amet', NOW(), NOW()),
+('home', 'hero_subtitle', 'text', 'Consectetur adipiscing elit, sed do eiusmod tempor incididunt', NOW(), NOW()),
+('home', 'hero_cta_text', 'text', 'Lorem CTA', NOW(), NOW()),
+('home', 'hero_cta_href', 'text', '/inventory', NOW(), NOW()),
+('home', 'home_search_label', 'text', 'Lorem ipsum — search inventory', NOW(), NOW()),
+('home', 'recent_title', 'text', 'Lorem dolor sit amet', NOW(), NOW()),
+('home', 'recent_subtitle', 'textarea', 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Cards below are live listings.', NOW(), NOW()),
+('home', 'hero_image', 'image', 'asset/images/media/home-hero-main.jpg', NOW(), NOW()),
+('home', 'cta_left_image', 'image', 'asset/images/media/home-cta-left.jpg', NOW(), NOW()),
+('home', 'cta_right_image', 'image', 'asset/images/media/home-cta-right.jpg', NOW(), NOW()),
+('home', 'cta_left_title', 'text', 'Lorem ipsum dolor', NOW(), NOW()),
+('home', 'cta_left_body', 'textarea', 'Sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', NOW(), NOW()),
+('home', 'cta_right_title', 'text', 'Consectetur adipiscing', NOW(), NOW()),
+('home', 'cta_right_body', 'textarea', 'Elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.', NOW(), NOW()),
+('home', 'feat1_title', 'text', 'Lorem ipsum', NOW(), NOW()),
+('home', 'feat1_body', 'textarea', 'Dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.', NOW(), NOW()),
+('home', 'feat2_title', 'text', 'Dolor sit amet', NOW(), NOW()),
+('home', 'feat2_body', 'textarea', 'Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet.', NOW(), NOW()),
+('home', 'feat3_title', 'text', 'Consectetur elit', NOW(), NOW()),
+('home', 'feat3_body', 'textarea', 'Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.', NOW(), NOW()),
+('home', 'welcome_title', 'text', 'Lorem ipsum welcome block', NOW(), NOW()),
+('home', 'welcome_body', 'textarea', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.', NOW(), NOW()),
+('home', 'testimonial_name', 'text', 'Lorem Ipsum', NOW(), NOW()),
+('home', 'testimonial_role', 'text', 'Lorem role', NOW(), NOW()),
+('home', 'testimonial_quote', 'textarea', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla, velit id laoreet hendrerit, sapien nisl varius dolor, eu consequat erat augue in eros.', NOW(), NOW()),
+('inventory', 'heading', 'text', 'Vehicles For Sale', NOW(), NOW()),
+('inventory', 'intro', 'textarea', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Inventory cards are dynamic and loaded from vehicle records.', NOW(), NOW()),
+('inventory', 'fallback_image', 'image', 'asset/images/media/inventory-listing-fallback.jpg', NOW(), NOW()),
+('contact', 'heading', 'text', 'Contact Us', NOW(), NOW()),
+('contact', 'intro', 'textarea', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', NOW(), NOW()),
+('contact', 'hero_image', 'image', 'asset/images/media/contact-hero-bg.jpg', NOW(), NOW()),
+('contact', 'map_image', 'image', 'asset/images/media/contact-map.jpg', NOW(), NOW()),
+('compare', 'heading', 'text', 'Compare Vehicles', NOW(), NOW()),
+('compare', 'intro', 'textarea', 'Lorem ipsum dolor sit amet. Compare list remains dynamic from selected inventory records.', NOW(), NOW()),
+('listing-detail', 'heading', 'text', 'Vehicle Detail', NOW(), NOW()),
+('listing-detail', 'intro', 'textarea', 'Lorem ipsum dolor sit amet. Gallery and specifications are loaded from listing data.', NOW(), NOW())
+ON DUPLICATE KEY UPDATE
+  `content_type` = VALUES(`content_type`),
+  `content` = VALUES(`content`),
+  `updated_at` = VALUES(`updated_at`);

@@ -1,6 +1,6 @@
 @php
   $site = $site ?? [];
-  $brandName = config('app.name', 'MOTORS');
+  $brandName = config('app.name', 'Site');
   $logoPath = $site['logo_path'] ?? $site['logo_url'] ?? null;
 @endphp
 
@@ -16,18 +16,11 @@
     <div class="hidden md:flex items-center gap-6 text-[11px] font-bold uppercase tracking-wider">
       <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('home') }}">Home</a>
       <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('inventory.index') }}">Inventory</a>
-      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('inventory.show') }}">Listing</a>
-      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('faq') }}">Blog</a>
-      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('about') }}">Pages</a>
+      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('about') }}">About</a>
+      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('faq') }}">FAQ</a>
+      <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('compare') }}">Compare</a>
       <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('contact') }}">Contact</a>
     </div>
-  </div>
-
-  <div class="hidden md:flex items-center gap-6 text-[11px] font-bold uppercase tracking-wider">
-    <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('about') }}">Pages</a>
-    <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('faq') }}">Calculators</a>
-    <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('compare') }}">Compare</a>
-    <a class="text-white hover:text-brand_blue transition-colors" href="{{ route('inventory.index') }}">Shop</a>
   </div>
 
   <button class="md:hidden text-white" type="button" data-mobile-menu-toggle>
@@ -44,9 +37,9 @@
   <div class="flex flex-col gap-4 text-sm font-bold uppercase tracking-wide">
     <a href="{{ route('home') }}">Home</a>
     <a href="{{ route('inventory.index') }}">Inventory</a>
-    <a href="{{ route('contact') }}">Contact</a>
     <a href="{{ route('about') }}">About</a>
     <a href="{{ route('faq') }}">FAQ</a>
     <a href="{{ route('compare') }}">Compare</a>
+    <a href="{{ route('contact') }}">Contact</a>
   </div>
 </div>

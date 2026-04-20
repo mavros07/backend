@@ -48,6 +48,34 @@ class PageController extends Controller
         $heroCover = $recentVehicles->first()?->images->first();
         $ogImage = $heroCover ? url(VehicleImageUrl::url($heroCover->path)) : null;
 
+        $homeSections = $this->pageSections('home', [
+            'hero_title' => 'Lorem ipsum dolor sit amet',
+            'hero_subtitle' => 'Consectetur adipiscing elit, sed do eiusmod tempor incididunt',
+            'hero_cta_text' => 'Lorem CTA',
+            'hero_cta_href' => '/inventory',
+            'home_search_label' => 'Lorem ipsum — search inventory',
+            'recent_title' => 'Lorem dolor sit amet',
+            'recent_subtitle' => 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Cards below are live listings.',
+            'hero_image' => 'asset/images/media/home-hero-main.jpg',
+            'cta_left_image' => 'asset/images/media/home-cta-left.jpg',
+            'cta_right_image' => 'asset/images/media/home-cta-right.jpg',
+            'cta_left_title' => 'Lorem ipsum dolor',
+            'cta_left_body' => 'Sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+            'cta_right_title' => 'Consectetur adipiscing',
+            'cta_right_body' => 'Elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.',
+            'feat1_title' => 'Lorem ipsum',
+            'feat1_body' => 'Dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.',
+            'feat2_title' => 'Dolor sit amet',
+            'feat2_body' => 'Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet.',
+            'feat3_title' => 'Consectetur elit',
+            'feat3_body' => 'Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.',
+            'welcome_title' => 'Lorem ipsum welcome block',
+            'welcome_body' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.',
+            'testimonial_name' => 'Lorem Ipsum',
+            'testimonial_role' => 'Lorem role',
+            'testimonial_quote' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla, velit id laoreet hendrerit, sapien nisl varius dolor, eu consequat erat augue in eros.',
+        ]);
+
         return view('pages.home-luxemotive', [
             'title' => $page->title . ' | ' . $siteName,
             'metaDescription' => $page->meta_description,
@@ -62,15 +90,8 @@ class PageController extends Controller
             'filterOptions' => $filterOptions,
             'filters' => $filters,
             'dealerPhone' => SiteSetting::getValue('dealer_phone', '+1 878-9674-4455'),
-            'sections' => $this->pageSections('home', [
-                'hero_title' => 'Mercedes-Benz AMG GT 2017',
-                'hero_subtitle' => '$320 /mo for 36 months',
-                'recent_title' => 'Recent Cars',
-                'recent_subtitle' => 'Curabitur tellus leo, euismod sit amet gravida at, egestas sed commodo.',
-                'hero_image' => 'asset/images/media/home-hero-main.jpg',
-                'cta_left_image' => 'asset/images/media/home-cta-left.jpg',
-                'cta_right_image' => 'asset/images/media/home-cta-right.jpg',
-            ]),
+            'approvedListingCount' => Vehicle::query()->where('status', 'approved')->count(),
+            'sections' => $homeSections,
         ]);
     }
 
