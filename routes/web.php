@@ -32,6 +32,9 @@ if (config('app.admin_bootstrap_enabled')) {
     });
 }
 
+// There is no separate admin login URL; admins use the same session as other users.
+Route::redirect('/admin/login', '/login', 302);
+
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
