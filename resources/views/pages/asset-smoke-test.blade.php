@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Asset smoke test</title>
 
-    <link rel="stylesheet" href="{{ asset('assets/css/vendor-autoptimize.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}" />
+    <link rel="stylesheet" href="{{ asset('asset/css/vendor-autoptimize.css') }}" />
+    <link rel="stylesheet" href="{{ asset('asset/css/main.css') }}" />
   </head>
   <body>
     <div style="padding: 24px; font-family: Arial, sans-serif;">
@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <script src="{{ asset('assets/js/main.js') }}"></script>
+    <script src="{{ asset('asset/js/main.js') }}"></script>
   </body>
 </html>
 

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\InteractsWithVehicleForms;
 use App\Models\Vehicle;
+use App\Models\VehicleImage;
 use App\Services\Mail\OutboundMailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,6 +13,8 @@ use Illuminate\View\View;
 
 class AdminVehicleController extends Controller
 {
+    use InteractsWithVehicleForms;
+
     public function index(): View
     {
         $vehicles = Vehicle::query()
@@ -28,6 +32,45 @@ class AdminVehicleController extends Controller
         ]);
     }
 
+    public function edit(Vehicle $vehicle): View
+    {
+        $vehicle->load('images');
+
+        return view('dashboard.vehicles.edit', [
+            'vehicle' => $vehicle,
+            'isAdminEdit' => true,
+        ]);
+    }
+
+    public function update(Request $request, Vehicle $vehicle): RedirectResponse
+    {
+        $data = $this->validateVehicleData($request);
+
+        $vehicle->fill($data);
+        if ($vehicle->isDirty('title')) {
+            $vehicle->slug = $this->uniqueSlug($data['title'], $vehicle->id);
+        }
+        $vehicle->save();
+
+        $this->storeUploadedImages($request, $vehicle);
+
+        return back()->with('status', 'Listing updated.');
+    }
+
+    public function destroyImage(Request $request, Vehicle $vehicle, VehicleImage $image): RedirectResponse
+    {
+        abort_unless($image->vehicle_id === $vehicle->id, 404);
+
+        $rel = $this->relativeStoragePathForDelete($image->path);
+        if ($rel !== null) {
+            Storage::disk('public')->delete($rel);
+        }
+        $image->delete();
+        $this->resequenceImages($vehicle);
+
+        return back()->with('status', 'Image removed.');
+    }
+
     public function approve(Request $request, Vehicle $vehicle): RedirectResponse
     {
         $vehicle->status = 'approved';
@@ -36,7 +79,7 @@ class AdminVehicleController extends Controller
         $vehicle->rejection_reason = null;
         $vehicle->save();
 
-        if (!empty($vehicle->user?->email)) {
+        if (! empty($vehicle->user?->email)) {
             $subject = 'Your listing was approved';
             $html = view('emails.listing-approved', [
                 'user' => $vehicle->user,
@@ -62,7 +105,7 @@ class AdminVehicleController extends Controller
         $vehicle->rejection_reason = $data['rejection_reason'] ?? 'Rejected';
         $vehicle->save();
 
-        if (!empty($vehicle->user?->email)) {
+        if (! empty($vehicle->user?->email)) {
             $subject = 'Your listing was rejected';
             $html = view('emails.listing-rejected', [
                 'user' => $vehicle->user,
@@ -79,9 +122,7 @@ class AdminVehicleController extends Controller
 
     public function destroy(Vehicle $vehicle): RedirectResponse
     {
-        foreach ($vehicle->images as $image) {
-            Storage::disk('public')->delete(ltrim(\Illuminate\Support\Str::after($image->path, 'storage/'), '/'));
-        }
+        $this->deleteLocalVehicleImageFiles($vehicle);
 
         $vehicle->delete();
 
@@ -90,4 +131,3 @@ class AdminVehicleController extends Controller
             ->with('status', 'Listing deleted.');
     }
 }
-

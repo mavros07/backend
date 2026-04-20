@@ -10,10 +10,10 @@
   $socialLinkedin = $site['social_linkedin'] ?? 'https://www.linkedin.com/';
   $socialYoutube = $site['social_youtube'] ?? 'https://www.youtube.com/';
   $footerGallery = [
-    'assets/images/wp-uploads/sites/24/2022/09/nissan_altima_1-300x189-1.jpg',
-    'assets/images/wp-uploads/sites/24/2021/05/motor-1-795x463-1.jpg',
-    'assets/images/wp-uploads/sites/24/2021/05/4-1109x699-1.jpg',
-    'assets/images/wp-uploads/sites/24/2022/10/post_id_2027_srDqt-999x719-1.jpg',
+    'asset/images/branding/footer-1.jpg',
+    'asset/images/branding/footer-2.jpg',
+    'asset/images/branding/footer-3.jpg',
+    'asset/images/branding/footer-4.jpg',
   ];
   $footerPosts = [
     [

@@ -78,10 +78,10 @@
         <div class="listing-logo-main" style="margin-top: 6px;">
           <a class="bloglogo" href="{{ route('home') }}">
             <img
-              src="{{ asset('assets/images/wp-uploads/sites/24/2018/04/logo-1.png') }}"
-              style="width: 140px;"
+              src="{{ asset('asset/images/branding/logo.svg') }}"
+              style="width: 140px; height: auto;"
               title="Home"
-              alt="Logo"
+              alt="{{ config('app.name') }}"
             />
           </a>
         </div>
@@ -130,10 +130,10 @@
 <div class="stm-boats-mobile-header">
   <a class="bloglogo" href="{{ route('home') }}">
     <img
-      src="{{ asset('assets/images/wp-uploads/sites/24/2018/04/logo-1.png') }}"
-      style="width: 140px;"
+      src="{{ asset('asset/images/branding/logo.svg') }}"
+      style="width: 140px; height: auto;"
       title="Home"
-      alt="Logo"
+      alt="{{ config('app.name') }}"
     />
   </a>
 

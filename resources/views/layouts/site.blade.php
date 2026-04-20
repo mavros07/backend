@@ -32,11 +32,11 @@
 
     <base href="/" />
 
-    <link rel="stylesheet" href="{{ asset('assets/css/vendor-icons.css') }}" />
+    <link rel="stylesheet" href="{{ asset('asset/css/vendor-icons.css') }}" />
     @if (!empty($vendorCss))
       <link rel="stylesheet" href="{{ asset($vendorCss) }}" />
     @endif
-    <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}" />
+    <link rel="stylesheet" href="{{ asset('asset/css/main.css') }}" />
 
     <style>
       :root {
@@ -102,7 +102,7 @@
       @include('partials.footer')
     </div>
 
-    <script src="{{ asset('assets/js/main.js') }}"></script>
+    <script src="{{ asset('asset/js/main.js') }}"></script>
     @stack('scripts')
   </body>
 </html>

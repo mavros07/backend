@@ -68,7 +68,7 @@ class VehiclesSeeder extends Seeder
                     'features' => $v['features'] ?? null,
                     'exterior_color' => $v['exterior_color'],
                     'interior_color' => $v['interior_color'],
-                    'description' => 'Seed vehicle for UI placeholder. Replace with real content later.',
+                    'description' => $v['description'] ?? 'Seed vehicle for UI placeholder. Replace with real content later.',
                     'submitted_at' => now(),
                     'approved_at' => now(),
                     'approved_by' => $approver->id,

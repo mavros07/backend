@@ -1,8 +1,11 @@
+@php
+  $isAdminEdit = $isAdminEdit ?? false;
+@endphp
 <x-app-layout>
   <x-slot name="header">
     <div class="flex items-center justify-between gap-4">
       <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Edit Vehicle') }}
+        {{ $isAdminEdit ? __('Admin: Edit listing') : __('Edit Vehicle') }}
       </h2>
       @if($vehicle->status === 'approved')
         <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="text-sm text-indigo-600 hover:underline">
@@ -16,7 +19,7 @@
     <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 text-gray-900">
-          <form method="post" action="{{ route('dashboard.vehicles.update', $vehicle) }}" class="space-y-4" enctype="multipart/form-data">
+          <form method="post" action="{{ $isAdminEdit ? route('admin.vehicles.update', $vehicle) : route('dashboard.vehicles.update', $vehicle) }}" class="space-y-4" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -139,7 +142,7 @@
 
             <div class="flex items-center gap-3">
               <x-primary-button>Save</x-primary-button>
-              <a href="{{ route('dashboard.vehicles.index') }}" class="text-sm text-gray-600 hover:underline">Back</a>
+              <a href="{{ $isAdminEdit ? route('admin.vehicles.index') : route('dashboard.vehicles.index') }}" class="text-sm text-gray-600 hover:underline">Back</a>
             </div>
           </form>
         </div>
@@ -162,12 +165,12 @@
             <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               @foreach($vehicle->images as $image)
                 <div class="rounded-lg border border-gray-200 p-3">
-                  <img src="{{ asset($image->path) }}" alt="" class="h-40 w-full rounded-md object-cover" />
+                  <img src="{{ \App\Support\VehicleImageUrl::url($image->path) }}" alt="" class="h-40 w-full rounded-md object-cover" />
                   <div class="mt-3 flex items-center justify-between gap-3">
                     <span class="text-xs font-medium {{ $loop->first ? 'text-indigo-600' : 'text-gray-500' }}">
                       {{ $loop->first ? 'Featured image' : 'Gallery image' }}
                     </span>
-                    <form method="post" action="{{ route('dashboard.vehicles.images.destroy', [$vehicle, $image]) }}">
+                    <form method="post" action="{{ $isAdminEdit ? route('admin.vehicles.images.destroy', [$vehicle, $image]) : route('dashboard.vehicles.images.destroy', [$vehicle, $image]) }}">
                       @csrf
                       @method('DELETE')
                       <button type="submit" class="text-sm text-red-700 hover:underline">Remove</button>
@@ -180,6 +183,7 @@
         </div>
       </div>
 
+      @unless($isAdminEdit)
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 text-gray-900">
           <div class="flex items-start justify-between gap-4">
@@ -199,12 +203,25 @@
           </div>
         </div>
       </div>
+      @else
+      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="p-6 text-gray-900">
+          <h3 class="font-semibold">Listing status</h3>
+          <p class="text-sm text-gray-600 mt-1">
+            Status: <span class="font-medium">{{ strtoupper($vehicle->status) }}</span>
+          </p>
+          @if($vehicle->status === 'rejected' && $vehicle->rejection_reason)
+            <p class="text-sm text-red-600 mt-2">Reason: {{ $vehicle->rejection_reason }}</p>
+          @endif
+        </div>
+      </div>
+      @endunless
 
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 text-gray-900">
           <h3 class="font-semibold text-red-700">Delete listing</h3>
           <p class="mt-1 text-sm text-gray-600">This permanently removes the listing and any linked images.</p>
-          <form method="post" action="{{ route('dashboard.vehicles.destroy', $vehicle) }}" class="mt-4">
+          <form method="post" action="{{ $isAdminEdit ? route('admin.vehicles.destroy', $vehicle) : route('dashboard.vehicles.destroy', $vehicle) }}" class="mt-4">
             @csrf
             @method('DELETE')
             <button type="submit" class="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500">

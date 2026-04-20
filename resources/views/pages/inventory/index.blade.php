@@ -45,7 +45,7 @@
                           <img
                             loading="lazy"
                             decoding="async"
-                            src="{{ asset($img->path) }}"
+                            src="{{ \App\Support\VehicleImageUrl::url($img->path) }}"
                             class="img-responsive"
                             alt="{{ $vehicle->title }}"
                           />

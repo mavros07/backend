@@ -41,8 +41,8 @@
               <div class="swiper-wrapper">
                 @forelse($images as $img)
                   <div class="stm-single-image swiper-slide">
-                    <a href="{{ asset($img->path) }}" class="stm_fancybox" rel="stm-car-gallery">
-                      <img src="{{ asset($img->path) }}" class="img-responsive wp-post-image" alt="" decoding="async" />
+                    <a href="{{ \App\Support\VehicleImageUrl::url($img->path) }}" class="stm_fancybox" rel="stm-car-gallery">
+                      <img src="{{ \App\Support\VehicleImageUrl::url($img->path) }}" class="img-responsive wp-post-image" alt="" decoding="async" />
                     </a>
                   </div>
                 @empty

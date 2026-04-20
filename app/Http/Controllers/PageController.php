@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\CmsPage;
+use App\Models\SiteSetting;
 use App\Models\Vehicle;
 use App\Support\Compare;
+use App\Support\VehicleImageUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -25,23 +27,23 @@ class PageController extends Controller
         $filterOptions = $this->approvedVehicleFilterOptions();
         $filters = $this->defaultInventoryFilters();
 
-        return view('pages.home', [
+        $heroCover = $recentVehicles->first()?->images->first();
+        $ogImage = $heroCover ? url(VehicleImageUrl::url($heroCover->path)) : null;
+
+        return view('pages.home-luxemotive', [
             'title' => $page->title . ' | ' . $siteName,
             'metaDescription' => $page->meta_description,
             'canonicalUrl' => route('home', [], true),
             'ogTitle' => $page->title,
             'ogDescription' => $page->meta_description,
             'ogUrl' => route('home', [], true),
-            'vendorCss' => 'assets/css/vendor-autoptimize.css',
-            'bodyClass' => 'page-template-default page page-id-6123 theme-motors stm-hoverable-interactive-galleries stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-6123',
+            'ogImage' => $ogImage,
             'page' => $page,
-            'homeInventorySearchHtml' => view('pages.partials.home-inventory-search', [
-                'filterOptions' => $filterOptions,
-                'filters' => $filters,
-            ])->render(),
-            'homeRecentCarsHtml' => view('pages.partials.home-recent-cars', [
-                'vehicles' => $recentVehicles,
-            ])->render(),
+            'heroVehicle' => $recentVehicles->first(),
+            'recentVehicles' => $recentVehicles,
+            'filterOptions' => $filterOptions,
+            'filters' => $filters,
+            'dealerPhone' => SiteSetting::getValue('dealer_phone', '+1 878-9674-4455'),
         ]);
     }
 
@@ -57,7 +59,7 @@ class PageController extends Controller
             'ogTitle' => $page->title,
             'ogDescription' => $page->meta_description,
             'ogUrl' => route('about', [], true),
-            'vendorCss' => 'assets/css/vendor-autoptimize-about-us.css',
+            'vendorCss' => 'asset/css/vendor-autoptimize-about-us.css',
             'bodyClass' => 'page-template-default page page-id-4205 theme-motors stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-4205',
             'page' => $page,
         ]);
@@ -75,7 +77,7 @@ class PageController extends Controller
             'ogTitle' => $page->title,
             'ogDescription' => $page->meta_description,
             'ogUrl' => route('contact', [], true),
-            'vendorCss' => 'assets/css/vendor-autoptimize-contact-us.css',
+            'vendorCss' => 'asset/css/vendor-autoptimize-contact-us.css',
             'bodyClass' => 'page-template-default page page-id-4430 theme-motors stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-4430',
             'page' => $page,
         ]);
@@ -93,7 +95,7 @@ class PageController extends Controller
             'ogTitle' => $page->title,
             'ogDescription' => $page->meta_description,
             'ogUrl' => route('faq', [], true),
-            'vendorCss' => 'assets/css/vendor-autoptimize-faq.css',
+            'vendorCss' => 'asset/css/vendor-autoptimize-faq.css',
             'bodyClass' => 'page-template-default page page-id-4431 theme-motors stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-4431',
             'page' => $page,
         ]);
@@ -186,7 +188,7 @@ class PageController extends Controller
 
         return view('pages.inventory.index', [
             'title' => 'Inventory',
-            'vendorCss' => 'assets/css/vendor-autoptimize-inventory.css',
+            'vendorCss' => 'asset/css/vendor-autoptimize-inventory.css',
             'bodyClass' => 'page-template-default page page-id-1058 theme-motors stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-1058',
             'vehicles' => $vehicles,
             'filters' => array_merge($this->defaultInventoryFilters(), $filters),
@@ -235,7 +237,7 @@ class PageController extends Controller
         ];
     }
 
-    public function vehicleShow(Request $request, string $slug = '2016-mercedes-benz-c-class-c300-4matic')
+    public function vehicleShow(Request $request, string $slug = '2021-bmw-m4-competition')
     {
         $user = $request->user();
 
@@ -260,7 +262,7 @@ class PageController extends Controller
 
         $cover = $vehicle->images->first();
         $listingUrl = route('inventory.show', ['slug' => $vehicle->slug], true);
-        $ogImage = $cover ? url(asset($cover->path)) : null;
+        $ogImage = $cover ? url(VehicleImageUrl::url($cover->path)) : null;
 
         $isFavorited = $user && $user->favoriteVehicles()->whereKey($vehicle->id)->exists();
 
@@ -272,7 +274,7 @@ class PageController extends Controller
             'ogDescription' => $plainDesc,
             'ogUrl' => $listingUrl,
             'ogImage' => $ogImage,
-            'vendorCss' => 'assets/css/vendor-autoptimize-listing-2016-mercedes-benz-c-class-c300-4matic.css',
+            'vendorCss' => 'asset/css/vendor-autoptimize-listing-2016-mercedes-benz-c-class-c300-4matic.css',
             'bodyClass' => 'stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two single single-listings postid-3191 theme-motors stm-hoverable-interactive-galleries stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-layout-listing stm-inventory-page stm-inventory-detail-page has-breadcrumb_navxt elementor-default elementor-kit-3904',
             'slug' => $slug,
             'vehicle' => $vehicle,
@@ -291,7 +293,7 @@ class PageController extends Controller
 
         return view('pages.compare', [
             'title' => 'Compare',
-            'vendorCss' => 'assets/css/vendor-autoptimize-compare.css',
+            'vendorCss' => 'asset/css/vendor-autoptimize-compare.css',
             'bodyClass' => 'page-template-default page page-id-4296 theme-motors stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-4296',
             'vehicles' => $vehicles,
         ]);

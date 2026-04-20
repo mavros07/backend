@@ -89,6 +89,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         ]);
     })->name('admin.dashboard');
     Route::get('/vehicles', [AdminVehicleController::class, 'index'])->name('admin.vehicles.index');
+    Route::get('/vehicles/{vehicle}/edit', [AdminVehicleController::class, 'edit'])->name('admin.vehicles.edit');
+    Route::put('/vehicles/{vehicle}', [AdminVehicleController::class, 'update'])->name('admin.vehicles.update');
+    Route::delete('/vehicles/{vehicle}/images/{image}', [AdminVehicleController::class, 'destroyImage'])->name('admin.vehicles.images.destroy');
     Route::post('/vehicles/{vehicle}/approve', [AdminVehicleController::class, 'approve'])->name('admin.vehicles.approve');
     Route::post('/vehicles/{vehicle}/reject', [AdminVehicleController::class, 'reject'])->name('admin.vehicles.reject');
     Route::delete('/vehicles/{vehicle}', [AdminVehicleController::class, 'destroy'])->name('admin.vehicles.destroy');

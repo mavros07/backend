@@ -25,7 +25,7 @@
                   @if($img?->path)
                     <img
                       class="img-responsive"
-                      src="{{ asset($img->path) }}"
+                      src="{{ \App\Support\VehicleImageUrl::url($img->path) }}"
                       alt="{{ $vehicle->title }}"
                     />
                   @else

@@ -69,6 +69,7 @@
                         {{ optional($vehicle->submitted_at)->format('Y-m-d') }}
                       </td>
                       <td class="py-2 text-right space-x-2 whitespace-nowrap">
+                        <a class="text-indigo-600 hover:underline" href="{{ route('admin.vehicles.edit', $vehicle) }}">Edit</a>
                         @if($vehicle->status === 'approved')
                           <a class="text-indigo-600 hover:underline" href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}">View</a>
                         @endif

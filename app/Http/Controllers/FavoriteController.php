@@ -20,7 +20,7 @@ class FavoriteController extends Controller
 
         return view('pages.favorites.index', [
             'title' => 'Saved listings',
-            'vendorCss' => 'assets/css/vendor-autoptimize-inventory.css',
+            'vendorCss' => 'asset/css/vendor-autoptimize-inventory.css',
             'bodyClass' => 'page-template-default theme-motors stm-user-not-logged-in woocommerce-no-js no_margin stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two',
             'vehicles' => $vehicles,
         ]);
