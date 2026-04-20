@@ -54,12 +54,24 @@ Route::post('/compare/clear', [CompareController::class, 'clear'])->name('compar
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();
 
+    if ($user->hasRole('admin')) {
+        return view('dashboard', [
+            'stats' => [
+                'total' => Vehicle::query()->count(),
+                'pending' => Vehicle::query()->where('status', 'pending')->count(),
+                'approved' => Vehicle::query()->where('status', 'approved')->count(),
+            ],
+            'adminOverview' => true,
+        ]);
+    }
+
     return view('dashboard', [
         'stats' => [
             'total' => $user->vehicles()->count(),
             'pending' => $user->vehicles()->where('status', 'pending')->count(),
             'approved' => $user->vehicles()->where('status', 'approved')->count(),
         ],
+        'adminOverview' => false,
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -89,17 +101,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             'stats' => [
                 'total_listings' => Vehicle::query()->count(),
                 'pending_listings' => Vehicle::query()->where('status', 'pending')->count(),
+                'approved_listings' => Vehicle::query()->where('status', 'approved')->count(),
                 'users_count' => User::query()->count(),
             ],
         ]);
     })->name('admin.dashboard');
-    Route::get('/vehicles', [AdminVehicleController::class, 'index'])->name('admin.vehicles.index');
-    Route::get('/vehicles/{vehicle}/edit', [AdminVehicleController::class, 'edit'])->name('admin.vehicles.edit');
-    Route::put('/vehicles/{vehicle}', [AdminVehicleController::class, 'update'])->name('admin.vehicles.update');
-    Route::delete('/vehicles/{vehicle}/images/{image}', [AdminVehicleController::class, 'destroyImage'])->name('admin.vehicles.images.destroy');
+
+    Route::redirect('/vehicles', '/dashboard/vehicles')->name('admin.vehicles.index');
+    Route::get('/vehicles/{vehicle}/edit', fn (Vehicle $vehicle) => redirect()->route('dashboard.vehicles.edit', $vehicle))->name('admin.vehicles.edit');
+
     Route::post('/vehicles/{vehicle}/approve', [AdminVehicleController::class, 'approve'])->name('admin.vehicles.approve');
     Route::post('/vehicles/{vehicle}/reject', [AdminVehicleController::class, 'reject'])->name('admin.vehicles.reject');
-    Route::delete('/vehicles/{vehicle}', [AdminVehicleController::class, 'destroy'])->name('admin.vehicles.destroy');
 
     Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
     Route::post('/users', [AdminUserController::class, 'store'])->name('admin.users.store');

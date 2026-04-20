@@ -15,11 +15,31 @@
     </div>
   </x-slot>
 
-  <div class="py-12">
-    <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
+  <div class="p-4 sm:p-6 lg:p-8">
+    <div class="mx-auto max-w-3xl space-y-6">
+      @if($isAdminEdit)
+        @php $u = $vehicle->user; @endphp
+        <div class="rounded-xl border border-indigo-200 bg-indigo-50/80 p-4 text-sm text-indigo-950 shadow-sm ring-1 ring-indigo-100">
+          <div class="font-semibold text-indigo-900">{{ __('Listing owner') }}</div>
+          <div class="mt-2 grid gap-2 sm:grid-cols-2">
+            <div><span class="text-indigo-700">{{ __('Name') }}:</span> {{ $u?->name ?? '—' }}</div>
+            <div><span class="text-indigo-700">{{ __('Email') }}:</span> {{ $u?->email ?? '—' }}</div>
+            <div><span class="text-indigo-700">{{ __('Created') }}:</span> {{ $vehicle->created_at?->format('M j, Y g:i a') }}</div>
+            <div><span class="text-indigo-700">{{ __('Submitted') }}:</span> {{ $vehicle->submitted_at?->format('M j, Y g:i a') ?? '—' }}</div>
+            <div class="sm:col-span-2">
+              <span class="text-indigo-700">{{ __('Account type') }}:</span>
+              @if($u?->hasRole('admin'))
+                {{ __('Staff (admin role)') }}
+              @else
+                {{ __('Vendor') }}
+              @endif
+            </div>
+          </div>
+        </div>
+      @endif
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 text-gray-900">
-          <form method="post" action="{{ $isAdminEdit ? route('admin.vehicles.update', $vehicle) : route('dashboard.vehicles.update', $vehicle) }}" class="space-y-4" enctype="multipart/form-data">
+          <form method="post" action="{{ route('dashboard.vehicles.update', $vehicle) }}" class="space-y-4" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -142,7 +162,7 @@
 
             <div class="flex items-center gap-3">
               <x-primary-button>Save</x-primary-button>
-              <a href="{{ $isAdminEdit ? route('admin.vehicles.index') : route('dashboard.vehicles.index') }}" class="text-sm text-gray-600 hover:underline">Back</a>
+              <a href="{{ route('dashboard.vehicles.index') }}" class="text-sm text-gray-600 hover:underline">Back</a>
             </div>
           </form>
         </div>
@@ -170,7 +190,7 @@
                     <span class="text-xs font-medium {{ $loop->first ? 'text-indigo-600' : 'text-gray-500' }}">
                       {{ $loop->first ? 'Featured image' : 'Gallery image' }}
                     </span>
-                    <form method="post" action="{{ $isAdminEdit ? route('admin.vehicles.images.destroy', [$vehicle, $image]) : route('dashboard.vehicles.images.destroy', [$vehicle, $image]) }}">
+                    <form method="post" action="{{ route('dashboard.vehicles.images.destroy', [$vehicle, $image]) }}">
                       @csrf
                       @method('DELETE')
                       <button type="submit" class="text-sm text-red-700 hover:underline">Remove</button>
@@ -221,7 +241,7 @@
         <div class="p-6 text-gray-900">
           <h3 class="font-semibold text-red-700">Delete listing</h3>
           <p class="mt-1 text-sm text-gray-600">This permanently removes the listing and any linked images.</p>
-          <form method="post" action="{{ $isAdminEdit ? route('admin.vehicles.destroy', $vehicle) : route('dashboard.vehicles.destroy', $vehicle) }}" class="mt-4">
+          <form method="post" action="{{ route('dashboard.vehicles.destroy', $vehicle) }}" class="mt-4">
             @csrf
             @method('DELETE')
             <button type="submit" class="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500">

@@ -17,13 +17,32 @@ class UserVehicleController extends Controller
 
     public function index(Request $request): View
     {
-        $vehicles = Vehicle::query()
-            ->where('user_id', $request->user()->id)
-            ->latest()
-            ->paginate(10);
+        $isAdmin = $request->user()->hasRole('admin');
+
+        $query = Vehicle::query()
+            ->with(['user.roles'])
+            ->latest();
+
+        if (! $isAdmin) {
+            $query->where('user_id', $request->user()->id);
+        } else {
+            $status = $request->query('status');
+            if (is_string($status) && in_array($status, ['pending', 'approved', 'draft', 'rejected'], true)) {
+                $query->where('status', $status);
+            }
+        }
+
+        $vehicles = $query->paginate(15)->withQueryString();
 
         return view('dashboard.vehicles.index', [
             'vehicles' => $vehicles,
+            'isAdminList' => $isAdmin,
+            'statusFilter' => $isAdmin ? (string) $request->query('status', '') : '',
+            'stats' => $isAdmin ? [
+                'total' => Vehicle::query()->count(),
+                'pending' => Vehicle::query()->where('status', 'pending')->count(),
+                'approved' => Vehicle::query()->where('status', 'approved')->count(),
+            ] : null,
         ]);
     }
 
@@ -50,18 +69,19 @@ class UserVehicleController extends Controller
 
     public function edit(Request $request, Vehicle $vehicle): View
     {
-        abort_unless($vehicle->user_id === $request->user()->id, 403);
+        $this->authorizeVehicleAccess($request, $vehicle);
 
-        $vehicle->load('images');
+        $vehicle->load(['images', 'user']);
 
         return view('dashboard.vehicles.edit', [
             'vehicle' => $vehicle,
+            'isAdminEdit' => $request->user()->hasRole('admin'),
         ]);
     }
 
     public function update(Request $request, Vehicle $vehicle): RedirectResponse
     {
-        abort_unless($vehicle->user_id === $request->user()->id, 403);
+        $this->authorizeVehicleAccess($request, $vehicle);
 
         $data = $this->validateVehicleData($request);
 
@@ -95,7 +115,7 @@ class UserVehicleController extends Controller
             $html = view('emails.listing-submitted', [
                 'user' => $request->user(),
                 'vehicle' => $vehicle,
-                'adminUrl' => route('admin.vehicles.index'),
+                'adminUrl' => route('dashboard.vehicles.index'),
             ])->render();
 
             app(OutboundMailService::class)->send($to, 'Admin', $subject, $html);
@@ -106,7 +126,7 @@ class UserVehicleController extends Controller
 
     public function destroy(Request $request, Vehicle $vehicle): RedirectResponse
     {
-        abort_unless($vehicle->user_id === $request->user()->id, 403);
+        $this->authorizeVehicleAccess($request, $vehicle);
 
         $this->deleteLocalVehicleImageFiles($vehicle);
         $vehicle->delete();
@@ -118,7 +138,7 @@ class UserVehicleController extends Controller
 
     public function destroyImage(Request $request, Vehicle $vehicle, VehicleImage $image): RedirectResponse
     {
-        abort_unless($vehicle->user_id === $request->user()->id, 403);
+        $this->authorizeVehicleAccess($request, $vehicle);
         abort_unless($image->vehicle_id === $vehicle->id, 404);
 
         $rel = $this->relativeStoragePathForDelete($image->path);
@@ -129,5 +149,14 @@ class UserVehicleController extends Controller
         $this->resequenceImages($vehicle);
 
         return back()->with('status', 'Image removed.');
+    }
+
+    private function authorizeVehicleAccess(Request $request, Vehicle $vehicle): void
+    {
+        if ($request->user()->hasRole('admin')) {
+            return;
+        }
+
+        abort_unless($vehicle->user_id === $request->user()->id, 403);
     }
 }

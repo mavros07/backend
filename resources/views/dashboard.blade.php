@@ -1,51 +1,50 @@
+@php $adminOverview = $adminOverview ?? false; @endphp
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-4">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Dashboard') }}
+        <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <h2 class="text-xl font-semibold text-slate-800">
+                {{ $adminOverview ? __('Overview') : __('Dashboard') }}
             </h2>
-            <div class="text-sm text-gray-600">
-                {{ Auth::user()->email }}
-            </div>
+            @unless($adminOverview)
+                <div class="text-sm text-slate-500">{{ Auth::user()->email }}</div>
+            @endunless
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <div class="text-sm text-gray-500">My listings</div>
-                    <div class="mt-2 text-2xl font-semibold text-gray-900">{{ $stats['total'] ?? 0 }}</div>
-                </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <div class="text-sm text-gray-500">Pending approval</div>
-                    <div class="mt-2 text-2xl font-semibold text-amber-600">{{ $stats['pending'] ?? 0 }}</div>
-                </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <div class="text-sm text-gray-500">Approved listings</div>
-                    <div class="mt-2 text-2xl font-semibold text-green-600">{{ $stats['approved'] ?? 0 }}</div>
-                </div>
+    <div class="p-4 sm:p-6 lg:p-8">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $adminOverview ? __('Total listings') : __('My listings') }}</div>
+                <div class="mt-2 text-3xl font-bold text-slate-900">{{ $stats['total'] ?? 0 }}</div>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <a href="{{ route('dashboard.vehicles.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition">
-                    <div class="text-sm text-gray-500">Listings</div>
-                    <div class="mt-1 text-lg font-semibold text-gray-900">My Vehicles</div>
-                    <div class="mt-3 text-indigo-600 text-sm">Manage listings →</div>
-                </a>
-
-                <a href="{{ route('dashboard.vehicles.create') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition">
-                    <div class="text-sm text-gray-500">Create</div>
-                    <div class="mt-1 text-lg font-semibold text-gray-900">New Listing</div>
-                    <div class="mt-3 text-indigo-600 text-sm">Add a vehicle →</div>
-                </a>
-
-                <a href="{{ route('inventory.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition">
-                    <div class="text-sm text-gray-500">Public</div>
-                    <div class="mt-1 text-lg font-semibold text-gray-900">Inventory</div>
-                    <div class="mt-3 text-indigo-600 text-sm">View website →</div>
-                </a>
+            <div class="rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-wide text-amber-900">{{ __('Pending approval') }}</div>
+                <div class="mt-2 text-3xl font-bold text-amber-950">{{ $stats['pending'] ?? 0 }}</div>
             </div>
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
+                <div class="text-xs font-semibold uppercase tracking-wide text-emerald-900">{{ __('Approved listings') }}</div>
+                <div class="mt-2 text-3xl font-bold text-emerald-950">{{ $stats['approved'] ?? 0 }}</div>
+            </div>
+        </div>
+
+        <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <a href="{{ route('dashboard.vehicles.index') }}" class="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-amber-300 hover:shadow-md">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Inventory') }}</div>
+                <div class="mt-1 text-lg font-bold text-slate-900">{{ $adminOverview ? __('All listings') : __('My vehicles') }}</div>
+                <div class="mt-3 text-sm font-medium text-amber-600 group-hover:text-amber-700">{{ __('Manage →') }}</div>
+            </a>
+
+            <a href="{{ route('dashboard.vehicles.create') }}" class="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-amber-300 hover:shadow-md">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Create') }}</div>
+                <div class="mt-1 text-lg font-bold text-slate-900">{{ __('New listing') }}</div>
+                <div class="mt-3 text-sm font-medium text-amber-600 group-hover:text-amber-700">{{ __('Add a vehicle →') }}</div>
+            </a>
+
+            <a href="{{ route('inventory.index') }}" class="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-amber-300 hover:shadow-md">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ __('Website') }}</div>
+                <div class="mt-1 text-lg font-bold text-slate-900">{{ __('Public inventory') }}</div>
+                <div class="mt-3 text-sm font-medium text-amber-600 group-hover:text-amber-700">{{ __('View site →') }}</div>
+            </a>
         </div>
     </div>
 </x-app-layout>

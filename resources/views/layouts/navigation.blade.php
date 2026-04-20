@@ -23,21 +23,6 @@
                     <x-nav-link :href="route('inventory.index')" :active="request()->routeIs('inventory.*')">
                         {{ __('Public Inventory') }}
                     </x-nav-link>
-
-                    @if(Auth::user()->hasRole('admin'))
-                        <x-nav-link :href="route('admin.pages.index')" :active="request()->routeIs('admin.pages.*')">
-                            {{ __('Page Editors') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.media.index')" :active="request()->routeIs('admin.media.*')">
-                            {{ __('Media') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.vehicles.index')" :active="request()->routeIs('admin.vehicles.*')">
-                            {{ __('Admin Vehicles') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                            {{ __('Admin Users') }}
-                        </x-nav-link>
-                    @endif
                 </div>
             </div>
 
@@ -101,21 +86,6 @@
             <x-responsive-nav-link :href="route('inventory.index')" :active="request()->routeIs('inventory.*')">
                 {{ __('Public Inventory') }}
             </x-responsive-nav-link>
-
-            @if(Auth::user()->hasRole('admin'))
-                <x-responsive-nav-link :href="route('admin.pages.index')" :active="request()->routeIs('admin.pages.*')">
-                    {{ __('Page Editors') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.media.index')" :active="request()->routeIs('admin.media.*')">
-                    {{ __('Media') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.vehicles.index')" :active="request()->routeIs('admin.vehicles.*')">
-                    {{ __('Admin Vehicles') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                    {{ __('Admin Users') }}
-                </x-responsive-nav-link>
-            @endif
         </div>
 
         <!-- Responsive Settings Options -->
