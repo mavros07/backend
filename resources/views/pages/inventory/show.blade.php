@@ -10,12 +10,21 @@
 
   <section class="bg-black text-white py-12">
     <div class="max-w-7xl mx-auto px-6">
-      <p class="text-primary text-xs font-bold uppercase tracking-[0.2em]">Vehicle Detail</p>
+      <p class="text-primary text-xs font-bold uppercase tracking-[0.2em]">{{ $sections['heading'] ?? ($page?->title ?? 'Vehicle Detail') }}</p>
       <h1 class="font-headline text-4xl font-black uppercase mt-3">{{ $vehicle?->title }}</h1>
+      @if (!empty($sections['intro']) || !empty($page?->meta_description))
+        <p class="mt-3 text-sm text-slate-300 max-w-2xl">{{ $sections['intro'] ?? $page->meta_description }}</p>
+      @endif
     </div>
   </section>
 
   <section class="max-w-7xl mx-auto px-6 py-10">
+    @if (!empty($page?->content_html))
+      <div class="mb-8 rounded-lg border border-slate-200 bg-white p-6 prose prose-slate max-w-none">
+        {!! $page->content_html !!}
+      </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2 space-y-6">
         <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">

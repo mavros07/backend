@@ -3,7 +3,12 @@
 @section('content')
   <div class="max-w-[1400px] mx-auto px-6 md:px-12 pb-20 pt-10 bg-black text-white min-h-screen">
     <section class="py-10 flex flex-col md:flex-row md:justify-between md:items-end border-b border-white/10 mb-8 gap-4">
-      <h1 class="text-2xl font-black font-headline uppercase tracking-tight">Vehicles For Sale</h1>
+      <div>
+        <h1 class="text-2xl font-black font-headline uppercase tracking-tight">{{ $sections['heading'] ?? ($page?->title ?? 'Vehicles For Sale') }}</h1>
+        @if (!empty($sections['intro']) || !empty($page?->meta_description))
+          <p class="mt-2 text-sm text-slate-400 max-w-2xl">{{ $sections['intro'] ?? $page->meta_description }}</p>
+        @endif
+      </div>
       <div class="flex items-center gap-6 flex-wrap">
         <div class="flex items-center gap-3">
           <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sort by:</span>
@@ -21,12 +26,18 @@
       </div>
     </section>
 
+    @if (!empty($page?->content_html))
+      <section class="mb-8 rounded bg-white/5 border border-white/10 p-6 prose prose-invert max-w-none">
+        {!! $page->content_html !!}
+      </section>
+    @endif
+
     <div class="flex flex-col lg:flex-row gap-8">
       <div class="flex-1 space-y-6">
         @forelse ($vehicles as $vehicle)
           @php
             $image = $vehicle->images->first();
-            $photo = $image ? \App\Support\VehicleImageUrl::url($image->path) : asset('asset/images/media/inventory-listing-fallback.jpg');
+            $photo = $image ? \App\Support\VehicleImageUrl::url($image->path) : asset($sections['fallback_image'] ?? 'asset/images/media/inventory-listing-fallback.jpg');
           @endphp
           <article class="bg-card_bg overflow-hidden flex flex-col md:flex-row relative group">
             <div class="md:w-[320px] h-[240px] relative overflow-hidden shrink-0">

@@ -10,6 +10,8 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\VehicleInquiryController;
 use App\Http\Controllers\TemporaryAdminController;
+use App\Http\Controllers\AdminPageController;
+use App\Http\Controllers\AdminMediaController;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
@@ -99,6 +101,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
     Route::post('/users', [AdminUserController::class, 'store'])->name('admin.users.store');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+
+    Route::get('/pages', [AdminPageController::class, 'index'])->name('admin.pages.index');
+    Route::get('/pages/{slug}/edit', [AdminPageController::class, 'edit'])->name('admin.pages.edit');
+    Route::put('/pages/{slug}', [AdminPageController::class, 'update'])->name('admin.pages.update');
+    Route::get('/media', [AdminMediaController::class, 'index'])->name('admin.media.index');
+    Route::post('/media', [AdminMediaController::class, 'upload'])->name('admin.media.upload');
+    Route::get('/api/media', [AdminMediaController::class, 'list'])->name('admin.media.list');
 });
 
 require __DIR__.'/auth.php';

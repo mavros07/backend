@@ -35,6 +35,18 @@
           <div class="mt-3 text-indigo-600 text-sm">Manage users →</div>
         </a>
 
+        <a href="{{ route('admin.pages.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition">
+          <div class="text-sm text-gray-500">Content</div>
+          <div class="mt-1 text-lg font-semibold text-gray-900">Page Editors</div>
+          <div class="mt-3 text-indigo-600 text-sm">Edit page content →</div>
+        </a>
+
+        <a href="{{ route('admin.media.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition">
+          <div class="text-sm text-gray-500">Assets</div>
+          <div class="mt-1 text-lg font-semibold text-gray-900">Media Library</div>
+          <div class="mt-3 text-indigo-600 text-sm">Manage uploaded images →</div>
+        </a>
+
         <a href="{{ route('inventory.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 hover:shadow-md transition">
           <div class="text-sm text-gray-500">Website</div>
           <div class="mt-1 text-lg font-semibold text-gray-900">Public Inventory</div>

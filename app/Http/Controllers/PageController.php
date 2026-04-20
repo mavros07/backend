@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CmsPage;
+use App\Models\PageSection;
 use App\Models\SiteSetting;
 use App\Models\Vehicle;
 use App\Support\Compare;
@@ -13,9 +14,26 @@ use Illuminate\Validation\Rule;
 
 class PageController extends Controller
 {
+    /**
+     * @param  array<string, string>  $defaults
+     * @return array<string, string>
+     */
+    protected function pageSections(string $slug, array $defaults): array
+    {
+        $stored = PageSection::query()
+            ->where('page', $slug)
+            ->pluck('content', 'section_key');
+        $out = [];
+        foreach ($defaults as $key => $default) {
+            $out[$key] = (string) ($stored[$key] ?? SiteSetting::getValue('page_'.$slug.'_'.$key, $default) ?? $default);
+        }
+
+        return $out;
+    }
+
     public function home()
     {
-        $page = CmsPage::query()->where('slug', 'home')->firstOrFail();
+        $page = CmsPage::query()->where('slug', 'home')->where('is_active', true)->firstOrFail();
         $siteName = config('app.name');
         $recentVehicles = Vehicle::query()
             ->with('images')
@@ -44,12 +62,21 @@ class PageController extends Controller
             'filterOptions' => $filterOptions,
             'filters' => $filters,
             'dealerPhone' => SiteSetting::getValue('dealer_phone', '+1 878-9674-4455'),
+            'sections' => $this->pageSections('home', [
+                'hero_title' => 'Mercedes-Benz AMG GT 2017',
+                'hero_subtitle' => '$320 /mo for 36 months',
+                'recent_title' => 'Recent Cars',
+                'recent_subtitle' => 'Curabitur tellus leo, euismod sit amet gravida at, egestas sed commodo.',
+                'hero_image' => 'asset/images/media/home-hero-main.jpg',
+                'cta_left_image' => 'asset/images/media/home-cta-left.jpg',
+                'cta_right_image' => 'asset/images/media/home-cta-right.jpg',
+            ]),
         ]);
     }
 
     public function about()
     {
-        $page = CmsPage::query()->where('slug', 'about')->firstOrFail();
+        $page = CmsPage::query()->where('slug', 'about')->where('is_active', true)->firstOrFail();
         $siteName = config('app.name');
 
         return view('pages.about', [
@@ -65,7 +92,7 @@ class PageController extends Controller
 
     public function contact()
     {
-        $page = CmsPage::query()->where('slug', 'contact')->firstOrFail();
+        $page = CmsPage::query()->where('slug', 'contact')->where('is_active', true)->firstOrFail();
         $siteName = config('app.name');
 
         return view('pages.contact', [
@@ -76,12 +103,18 @@ class PageController extends Controller
             'ogDescription' => $page->meta_description,
             'ogUrl' => route('contact', [], true),
             'page' => $page,
+            'sections' => $this->pageSections('contact', [
+                'heading' => 'Contact Us',
+                'intro' => 'Reach our team using the form below.',
+                'hero_image' => 'asset/images/media/contact-hero-bg.jpg',
+                'map_image' => 'asset/images/media/contact-map.jpg',
+            ]),
         ]);
     }
 
     public function faq()
     {
-        $page = CmsPage::query()->where('slug', 'faq')->firstOrFail();
+        $page = CmsPage::query()->where('slug', 'faq')->where('is_active', true)->firstOrFail();
         $siteName = config('app.name');
 
         return view('pages.faq', [
@@ -97,6 +130,7 @@ class PageController extends Controller
 
     public function inventory(Request $request)
     {
+        $page = CmsPage::query()->where('slug', 'inventory')->where('is_active', true)->firstOrFail();
         $yearUpper = (int) date('Y') + 1;
 
         $filters = $request->validate([
@@ -181,10 +215,16 @@ class PageController extends Controller
         $vehicles = $query->paginate(9)->withQueryString();
 
         return view('pages.inventory.index', [
-            'title' => 'Inventory',
+            'title' => ($page->title ?: 'Inventory'),
             'vehicles' => $vehicles,
             'filters' => array_merge($this->defaultInventoryFilters(), $filters),
             'filterOptions' => $this->approvedVehicleFilterOptions(),
+            'page' => $page,
+            'sections' => $this->pageSections('inventory', [
+                'heading' => 'Vehicles For Sale',
+                'intro' => 'Browse approved listings. Vehicle cards are dynamic and come from the listings module.',
+                'fallback_image' => 'asset/images/media/inventory-listing-fallback.jpg',
+            ]),
         ]);
     }
 
@@ -231,6 +271,7 @@ class PageController extends Controller
 
     public function vehicleShow(Request $request, string $slug = '2021-bmw-m4-competition')
     {
+        $page = CmsPage::query()->where('slug', 'listing-detail')->where('is_active', true)->firstOrFail();
         $user = $request->user();
 
         $vehicle = Vehicle::query()
@@ -259,7 +300,7 @@ class PageController extends Controller
         $isFavorited = $user && $user->favoriteVehicles()->whereKey($vehicle->id)->exists();
 
         return view('pages.inventory.show', [
-            'title' => $vehicle->title . ' | ' . $siteName,
+            'title' => (($page->title ?: $vehicle->title) . ' | ' . $siteName),
             'metaDescription' => $plainDesc,
             'canonicalUrl' => $listingUrl,
             'ogTitle' => $vehicle->title,
@@ -269,11 +310,17 @@ class PageController extends Controller
             'slug' => $slug,
             'vehicle' => $vehicle,
             'isFavorited' => $isFavorited,
+            'page' => $page,
+            'sections' => $this->pageSections('listing-detail', [
+                'heading' => 'Vehicle Detail',
+                'intro' => 'Vehicle details and gallery are dynamic from listing data.',
+            ]),
         ]);
     }
 
     public function compare()
     {
+        $page = CmsPage::query()->where('slug', 'compare')->where('is_active', true)->firstOrFail();
         $vehicles = Vehicle::query()
             ->with('images')
             ->whereIn('id', Compare::ids())
@@ -282,8 +329,13 @@ class PageController extends Controller
             ->values();
 
         return view('pages.compare', [
-            'title' => 'Compare',
+            'title' => ($page->title ?: 'Compare'),
             'vehicles' => $vehicles,
+            'page' => $page,
+            'sections' => $this->pageSections('compare', [
+                'heading' => 'Compare Vehicles',
+                'intro' => 'Compare list is dynamic and comes from visitor selections.',
+            ]),
         ]);
     }
 }

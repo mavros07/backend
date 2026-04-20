@@ -3,24 +3,33 @@
 @php
   $hero = $heroVehicle ?? null;
   $brand = config('app.name', 'LUXEMOTIVE');
-  $heroTitle = $hero?->title ?? 'Mercedes-Benz AMG GT 2017';
+  $heroTitle = $sections['hero_title'] ?? ($hero?->title ?? 'Mercedes-Benz AMG GT 2017');
+  $heroSubtitle = $sections['hero_subtitle'] ?? '$320 /mo for 36 months';
   $heroBg = $hero?->images?->first()?->path
       ? \App\Support\VehicleImageUrl::url($hero->images->first()->path)
-      : asset('asset/images/media/home-hero-main.jpg');
-  $ctaLeftBg = asset('asset/images/media/home-cta-left.jpg');
-  $ctaRightBg = asset('asset/images/media/home-cta-right.jpg');
+      : asset($sections['hero_image'] ?? 'asset/images/media/home-hero-main.jpg');
+  $ctaLeftBg = asset($sections['cta_left_image'] ?? 'asset/images/media/home-cta-left.jpg');
+  $ctaRightBg = asset($sections['cta_right_image'] ?? 'asset/images/media/home-cta-right.jpg');
   $statsBg = asset('asset/images/media/home-stats-bg.jpg');
   $testimonialAvatar = asset('asset/images/media/home-testimonial-avatar.jpg');
   $statsCar = asset('asset/images/media/home-stats-car.jpg');
 @endphp
 
 @section('content')
+  @if (!empty($page?->content_html))
+    <section class="bg-white border-b border-slate-200">
+      <div class="container mx-auto px-8 py-8 prose prose-slate max-w-none">
+        {!! $page->content_html !!}
+      </div>
+    </section>
+  @endif
+
   <section class="relative h-[85vh] flex items-center overflow-hidden">
     <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ e($heroBg) }}');"></div>
     <div class="absolute inset-0 hero-gradient"></div>
     <div class="relative z-10 container mx-auto px-8 text-center">
       <h1 class="text-white font-headline font-black text-4xl md:text-7xl leading-tight tracking-tight uppercase">{{ $heroTitle }}</h1>
-      <p class="text-primary font-bold tracking-widest mt-6 text-3xl uppercase">$320 <span class="text-white text-xl">/mo for 36 months</span></p>
+      <p class="text-primary font-bold tracking-widest mt-6 text-3xl uppercase">{{ $heroSubtitle }}</p>
     </div>
   </section>
 
@@ -65,8 +74,8 @@
   <section class="py-24 bg-white">
     <div class="container mx-auto px-8">
       <div class="text-center mb-16">
-        <h2 class="font-headline font-black text-4xl tracking-tight text-on_surface uppercase inline-block section-line">RECENT <span class="text-primary">CARS</span></h2>
-        <p class="text-slate-500 mt-4 max-w-lg mx-auto">Curabitur tellus leo, euismod sit amet gravida at, egestas sed commodo.</p>
+        <h2 class="font-headline font-black text-4xl tracking-tight text-on_surface uppercase inline-block section-line">{{ $sections['recent_title'] ?? 'Recent Cars' }}</h2>
+        <p class="text-slate-500 mt-4 max-w-lg mx-auto">{{ $sections['recent_subtitle'] ?? 'Curabitur tellus leo, euismod sit amet gravida at, egestas sed commodo.' }}</p>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse ($recentVehicles as $vehicle)

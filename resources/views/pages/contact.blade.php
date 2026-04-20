@@ -8,6 +8,14 @@
 @endphp
 
 @section('content')
+  @if (!empty($page?->content_html))
+    <section class="bg-white border-b border-slate-200">
+      <div class="max-w-6xl mx-auto px-6 py-8 prose prose-slate max-w-none">
+        {!! $page->content_html !!}
+      </div>
+    </section>
+  @endif
+
   @if(session('status'))
     <div class="max-w-5xl mx-auto px-4 pt-8"><div class="p-4 bg-green-100 text-green-900 rounded">{{ session('status') }}</div></div>
   @endif
@@ -17,10 +25,13 @@
   @endif
 
   <section class="relative min-h-[700px] flex items-center justify-center py-20 px-4 overflow-hidden">
-    <img src="{{ asset('asset/images/media/contact-hero-bg.jpg') }}" alt="" class="absolute inset-0 h-full w-full object-cover" />
+    <img src="{{ asset($sections['hero_image'] ?? 'asset/images/media/contact-hero-bg.jpg') }}" alt="" class="absolute inset-0 h-full w-full object-cover" />
     <div class="absolute inset-0 bg-black/30"></div>
     <div class="relative w-full max-w-5xl bg-white shadow-2xl rounded-sm p-10 md:p-16">
-      <h1 class="font-headline text-4xl md:text-5xl font-black mb-12 tracking-tight text-slate-900">CONTACT US</h1>
+      <h1 class="font-headline text-4xl md:text-5xl font-black mb-12 tracking-tight text-slate-900">{{ $sections['heading'] ?? 'CONTACT US' }}</h1>
+      @if (!empty($sections['intro']))
+        <p class="mb-8 text-slate-600">{{ $sections['intro'] }}</p>
+      @endif
       <form class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" method="post" action="{{ route('contact.submit') }}">
         @csrf
         <div class="space-y-2"><label class="text-[13px] font-bold text-slate-900">First Name*</label><input name="first_name" class="w-full bg-[#ebf1f7] border-none p-4 rounded-sm text-sm focus:ring-1 focus:ring-motors_blue" placeholder="Enter your first name" type="text" value="{{ old('first_name') }}" required /></div>
@@ -52,7 +63,7 @@
       </div>
 
       <div class="lg:col-span-8 h-[550px] relative rounded shadow-lg overflow-hidden grayscale contrast-125 border border-gray-100">
-        <img alt="Map" class="w-full h-full object-cover" src="{{ asset('asset/images/media/contact-map.jpg') }}"/>
+        <img alt="Map" class="w-full h-full object-cover" src="{{ asset($sections['map_image'] ?? 'asset/images/media/contact-map.jpg') }}"/>
         <div class="absolute inset-0 pointer-events-none border-[12px] border-white/10"></div>
       </div>
     </div>

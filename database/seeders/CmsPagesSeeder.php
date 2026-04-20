@@ -12,23 +12,38 @@ class CmsPagesSeeder extends Seeder
         $definitions = [
             'home' => [
                 'title' => 'Home',
-                'meta_description' => 'Browse premium vehicles and find your next car.',
+                'meta_description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                 'file' => 'cms-home-body.html',
             ],
             'about' => [
                 'title' => 'About Us',
-                'meta_description' => 'Learn about our dealership and team.',
+                'meta_description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                 'file' => 'cms-about-body.html',
             ],
             'faq' => [
                 'title' => 'FAQ',
-                'meta_description' => 'Frequently asked questions about buying and selling vehicles.',
+                'meta_description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                 'file' => 'cms-faq-body.html',
             ],
             'contact' => [
                 'title' => 'Contact Us',
-                'meta_description' => 'Get in touch with our sales and service team.',
+                'meta_description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                 'file' => 'cms-contact-intro-body.html',
+            ],
+            'inventory' => [
+                'title' => 'Inventory',
+                'meta_description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                'file' => '',
+            ],
+            'compare' => [
+                'title' => 'Compare Vehicles',
+                'meta_description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                'file' => '',
+            ],
+            'listing-detail' => [
+                'title' => 'Vehicle Detail',
+                'meta_description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                'file' => '',
             ],
         ];
 
@@ -42,6 +57,7 @@ class CmsPagesSeeder extends Seeder
                     'title' => $def['title'],
                     'meta_description' => $def['meta_description'],
                     'content_html' => $html,
+                    'is_active' => true,
                 ]
             );
         }

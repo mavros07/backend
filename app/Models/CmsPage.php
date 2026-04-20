@@ -11,6 +11,7 @@ class CmsPage extends Model
         'title',
         'meta_description',
         'content_html',
+        'is_active',
     ];
 
     public static function findBySlug(string $slug): ?self
