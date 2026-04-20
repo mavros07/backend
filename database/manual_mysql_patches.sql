@@ -396,6 +396,16 @@ WHERE `slug` = 'home'
 -- Optional: drop old per-section keys in `site_settings` so `page_sections` + defaults win (uncomment if hero still shows old copy).
 -- DELETE FROM `site_settings` WHERE `key` LIKE 'page_home_%';
 
+-- 2026-04-21: Ensure CMS rows exist and stay active so public routes never 404 on `firstOrFail`-style CMS checks (imports often omit `listing-detail`).
+INSERT INTO `cms_pages` (`slug`, `title`, `meta_description`, `content_html`, `is_active`, `created_at`, `updated_at`)
+VALUES
+('listing-detail', 'Vehicle Detail', 'Lorem ipsum dolor sit amet.', '', 1, NOW(), NOW()),
+('inventory', 'Inventory', 'Lorem ipsum dolor sit amet.', '', 1, NOW(), NOW()),
+('compare', 'Compare Vehicles', 'Lorem ipsum dolor sit amet.', '', 1, NOW(), NOW())
+ON DUPLICATE KEY UPDATE
+  `is_active` = 1,
+  `updated_at` = VALUES(`updated_at`);
+
 -- -----------------------------------------------------------------------------
 -- 2026-04-21: Seed `page_sections` (same data as `Database\Seeders\PageSectionsSeeder`).
 -- Run after `CREATE TABLE IF NOT EXISTS page_sections` above. No Artisan required.

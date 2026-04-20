@@ -18,7 +18,7 @@
       <h4 class="text-white font-bold text-xs uppercase tracking-widest">Photo Gallery</h4>
       <div class="grid grid-cols-4 gap-2">
         @foreach (['footer-1.jpg', 'footer-2.jpg', 'footer-3.jpg', 'footer-4.jpg'] as $img)
-          <img src="{{ asset('asset/images/media/footer-' . $img) }}" alt="Footer gallery" class="w-full h-12 object-cover rounded-sm" loading="lazy" />
+          <img src="{{ \App\Support\PlaceholderMedia::url('asset/images/media/' . $img) }}" alt="" class="w-full h-12 object-cover rounded-sm bg-slate-700" loading="lazy" />
         @endforeach
       </div>
     </div>
@@ -65,7 +65,7 @@
   </div>
 
   <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-[11px] text-slate-500 font-bold uppercase tracking-widest">
-    <p>? {{ date('Y') }} {{ $copyrightName }}. All Rights Reserved.</p>
+    <p>&copy; {{ date('Y') }} {{ $copyrightName }}. All Rights Reserved.</p>
     <div class="flex items-center gap-6 mt-4 md:mt-0">
       <a class="hover:text-white transition-colors" href="#">Privacy Policy</a>
       <a class="hover:text-white transition-colors" href="#">Terms of Service</a>

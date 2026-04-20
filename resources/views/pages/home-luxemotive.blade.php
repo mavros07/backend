@@ -4,12 +4,12 @@
   $s = $sections ?? [];
   $heroTitle = $s['hero_title'] ?? 'Lorem ipsum dolor sit amet';
   $heroSubtitle = $s['hero_subtitle'] ?? 'Consectetur adipiscing elit';
-  $heroBg = asset($s['hero_image'] ?? 'asset/images/media/home-hero-main.jpg');
-  $ctaLeftBg = asset($s['cta_left_image'] ?? 'asset/images/media/home-cta-left.jpg');
-  $ctaRightBg = asset($s['cta_right_image'] ?? 'asset/images/media/home-cta-right.jpg');
-  $statsBg = asset('asset/images/media/home-stats-bg.jpg');
-  $testimonialAvatar = asset('asset/images/media/home-testimonial-avatar.jpg');
-  $statsCar = asset('asset/images/media/home-stats-car.jpg');
+  $heroBg = \App\Support\PlaceholderMedia::url($s['hero_image'] ?? 'asset/images/media/home-hero-main.jpg');
+  $ctaLeftBg = \App\Support\PlaceholderMedia::url($s['cta_left_image'] ?? 'asset/images/media/home-cta-left.jpg');
+  $ctaRightBg = \App\Support\PlaceholderMedia::url($s['cta_right_image'] ?? 'asset/images/media/home-cta-right.jpg');
+  $statsBg = \App\Support\PlaceholderMedia::url('asset/images/media/home-stats-bg.jpg');
+  $testimonialAvatar = \App\Support\PlaceholderMedia::url('asset/images/media/home-testimonial-avatar.jpg');
+  $statsCar = \App\Support\PlaceholderMedia::url('asset/images/media/home-stats-car.jpg');
   $heroCtaHref = $s['hero_cta_href'] ?? '/inventory';
   $heroCtaUrl = \Illuminate\Support\Str::startsWith($heroCtaHref, ['http://', 'https://']) ? $heroCtaHref : url($heroCtaHref);
   $approvedCount = (int) ($approvedListingCount ?? 0);
@@ -78,7 +78,7 @@
         @forelse ($recentVehicles as $vehicle)
           @php
             $img = $vehicle->images->first();
-            $url = $img ? \App\Support\VehicleImageUrl::url($img->path) : asset('asset/images/media/home-recent-fallback.jpg');
+            $url = $img ? \App\Support\VehicleImageUrl::url($img->path) : \App\Support\PlaceholderMedia::url('asset/images/media/home-recent-fallback.jpg');
           @endphp
           <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="bg-[#232628] rounded-lg overflow-hidden group cursor-pointer border border-slate-800 block">
             <div class="relative aspect-[16/10] overflow-hidden">

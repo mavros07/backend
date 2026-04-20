@@ -151,7 +151,7 @@ class PageController extends Controller
 
     public function inventory(Request $request)
     {
-        $page = CmsPage::query()->where('slug', 'inventory')->where('is_active', true)->firstOrFail();
+        $page = CmsPage::query()->where('slug', 'inventory')->where('is_active', true)->first();
         $yearUpper = (int) date('Y') + 1;
 
         $filters = $request->validate([
@@ -236,7 +236,7 @@ class PageController extends Controller
         $vehicles = $query->paginate(9)->withQueryString();
 
         return view('pages.inventory.index', [
-            'title' => ($page->title ?: 'Inventory'),
+            'title' => ($page?->title ?: 'Inventory'),
             'vehicles' => $vehicles,
             'filters' => array_merge($this->defaultInventoryFilters(), $filters),
             'filterOptions' => $this->approvedVehicleFilterOptions(),
@@ -292,7 +292,8 @@ class PageController extends Controller
 
     public function vehicleShow(Request $request, string $slug = '2021-bmw-m4-competition')
     {
-        $page = CmsPage::query()->where('slug', 'listing-detail')->where('is_active', true)->firstOrFail();
+        // CMS row is optional: do not 404 listings when `listing-detail` is missing or inactive after a DB import.
+        $page = CmsPage::query()->where('slug', 'listing-detail')->where('is_active', true)->first();
         $user = $request->user();
 
         $vehicle = Vehicle::query()
@@ -321,8 +322,8 @@ class PageController extends Controller
         $isFavorited = $user && $user->favoriteVehicles()->whereKey($vehicle->id)->exists();
 
         return view('pages.inventory.show', [
-            'title' => (($page->title ?: $vehicle->title) . ' | ' . $siteName),
-            'metaDescription' => $plainDesc,
+            'title' => (($page?->title ?: $vehicle->title) . ' | ' . $siteName),
+            'metaDescription' => $page?->meta_description ?: $plainDesc,
             'canonicalUrl' => $listingUrl,
             'ogTitle' => $vehicle->title,
             'ogDescription' => $plainDesc,
@@ -341,7 +342,7 @@ class PageController extends Controller
 
     public function compare()
     {
-        $page = CmsPage::query()->where('slug', 'compare')->where('is_active', true)->firstOrFail();
+        $page = CmsPage::query()->where('slug', 'compare')->where('is_active', true)->first();
         $vehicles = Vehicle::query()
             ->with('images')
             ->whereIn('id', Compare::ids())
@@ -350,7 +351,7 @@ class PageController extends Controller
             ->values();
 
         return view('pages.compare', [
-            'title' => ($page->title ?: 'Compare'),
+            'title' => ($page?->title ?: 'Compare'),
             'vehicles' => $vehicles,
             'page' => $page,
             'sections' => $this->pageSections('compare', [

@@ -6,7 +6,7 @@
       <div>
         <h1 class="text-2xl font-black font-headline uppercase tracking-tight">{{ $sections['heading'] ?? ($page?->title ?? 'Vehicles For Sale') }}</h1>
         @if (!empty($sections['intro']) || !empty($page?->meta_description))
-          <p class="mt-2 text-sm text-slate-400 max-w-2xl">{{ $sections['intro'] ?? $page->meta_description }}</p>
+          <p class="mt-2 text-sm text-slate-400 max-w-2xl">{{ $sections['intro'] ?? $page?->meta_description }}</p>
         @endif
       </div>
       <div class="flex items-center gap-6 flex-wrap">
@@ -37,7 +37,7 @@
         @forelse ($vehicles as $vehicle)
           @php
             $image = $vehicle->images->first();
-            $photo = $image ? \App\Support\VehicleImageUrl::url($image->path) : asset($sections['fallback_image'] ?? 'asset/images/media/inventory-listing-fallback.jpg');
+            $photo = $image ? \App\Support\VehicleImageUrl::url($image->path) : \App\Support\PlaceholderMedia::url($sections['fallback_image'] ?? 'asset/images/media/inventory-listing-fallback.jpg');
           @endphp
           <article class="bg-card_bg overflow-hidden flex flex-col md:flex-row relative group">
             <div class="md:w-[320px] h-[240px] relative overflow-hidden shrink-0">

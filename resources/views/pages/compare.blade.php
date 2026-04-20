@@ -6,7 +6,7 @@
       <div>
         <h1 class="font-headline text-4xl font-black uppercase">{{ $sections['heading'] ?? ($page?->title ?? 'Compare Vehicles') }}</h1>
         @if (!empty($sections['intro']) || !empty($page?->meta_description))
-          <p class="mt-3 text-sm text-slate-300 max-w-2xl">{{ $sections['intro'] ?? $page->meta_description }}</p>
+          <p class="mt-3 text-sm text-slate-300 max-w-2xl">{{ $sections['intro'] ?? $page?->meta_description }}</p>
         @endif
       </div>
       <form method="post" action="{{ route('compare.clear') }}">@csrf<button class="px-4 py-2 border border-white/30 rounded text-xs font-bold uppercase tracking-wider hover:bg-white/10" type="submit">Clear All</button></form>
@@ -16,7 +16,7 @@
   <section class="max-w-7xl mx-auto px-6 py-12">
     @if (!empty($page?->content_html))
       <div class="mb-8 rounded-lg border border-slate-200 bg-white p-6 prose prose-slate max-w-none">
-        {!! $page->content_html !!}
+        {!! $page?->content_html !!}
       </div>
     @endif
 

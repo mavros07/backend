@@ -13,7 +13,7 @@
       <p class="text-primary text-xs font-bold uppercase tracking-[0.2em]">{{ $sections['heading'] ?? ($page?->title ?? 'Vehicle Detail') }}</p>
       <h1 class="font-headline text-4xl font-black uppercase mt-3">{{ $vehicle?->title }}</h1>
       @if (!empty($sections['intro']) || !empty($page?->meta_description))
-        <p class="mt-3 text-sm text-slate-300 max-w-2xl">{{ $sections['intro'] ?? $page->meta_description }}</p>
+        <p class="mt-3 text-sm text-slate-300 max-w-2xl">{{ $sections['intro'] ?? $page?->meta_description }}</p>
       @endif
     </div>
   </section>
