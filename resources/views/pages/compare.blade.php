@@ -1,67 +1,38 @@
 @extends('layouts.site')
 
 @section('content')
-  <div class="container" style="padding: 24px 0;">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
-      <h1 class="heading-font" style="margin:0;">Compare</h1>
-      <form method="post" action="{{ route('compare.clear') }}">
-        @csrf
-        <button type="submit" class="button">Clear</button>
-      </form>
+  <section class="bg-black text-white py-16">
+    <div class="max-w-7xl mx-auto px-6 flex items-center justify-between gap-4 flex-wrap">
+      <h1 class="font-headline text-4xl font-black uppercase">Compare Vehicles</h1>
+      <form method="post" action="{{ route('compare.clear') }}">@csrf<button class="px-4 py-2 border border-white/30 rounded text-xs font-bold uppercase tracking-wider hover:bg-white/10" type="submit">Clear All</button></form>
     </div>
+  </section>
 
-    @if(($vehicles ?? collect())->isEmpty())
-      <div class="stm-listings-empty" style="margin-top: 20px;">
-        <span class="stm-listings-empty__not-found">No vehicles in compare.</span>
-      </div>
+  <section class="max-w-7xl mx-auto px-6 py-12">
+    @if (($vehicles ?? collect())->isEmpty())
+      <div class="rounded-lg bg-white p-12 text-center border border-slate-200 text-slate-500">No vehicles in compare list yet.</div>
     @else
-      <div class="row" style="margin-top: 20px;">
-        @foreach($vehicles as $vehicle)
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach ($vehicles as $vehicle)
           @php $img = ($vehicle->images ?? collect())->first(); @endphp
-          <div class="col-md-4 col-sm-6" style="margin-bottom: 18px;">
-            <div class="listing-list-loop stm-listing-directory-list-loop listing_is_active">
-              <div class="image">
-                <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="rmv_txt_drctn">
-                  @if($img?->path)
-                    <img
-                      class="img-responsive"
-                      src="{{ \App\Support\VehicleImageUrl::url($img->path) }}"
-                      alt="{{ $vehicle->title }}"
-                    />
-                  @else
-                    <div class="img-responsive" style="width:100%; aspect-ratio: 795 / 463; background: #f0f3f7; display:flex; align-items:center; justify-content:center;">
-                      <span class="heading-font" style="opacity:.7;">No image</span>
-                    </div>
-                  @endif
-                </a>
+          <article class="bg-[#232628] rounded-lg overflow-hidden text-white">
+            <div class="h-56 w-full overflow-hidden">@if ($img?->path)<img src="{{ \App\Support\VehicleImageUrl::url($img->path) }}" alt="{{ $vehicle->title }}" class="w-full h-full object-cover" />@else<div class="w-full h-full bg-slate-700 flex items-center justify-center text-slate-300">No image</div>@endif</div>
+            <div class="p-6 space-y-4">
+              <h2 class="font-headline text-xl font-bold uppercase">{{ $vehicle->title }}</h2>
+              <p class="text-primary font-bold text-2xl">@if(!is_null($vehicle->price))${{ number_format($vehicle->price, 0, '.', ',') }}@else Ask @endif</p>
+              <div class="text-xs text-slate-300 space-y-1 uppercase tracking-wide">
+                <p><span class="text-slate-400">Mileage:</span> {{ number_format((int) ($vehicle->mileage ?? 0)) }} mi</p>
+                <p><span class="text-slate-400">Fuel:</span> {{ $vehicle->fuel_type ?? 'N/A' }}</p>
+                <p><span class="text-slate-400">Transmission:</span> {{ $vehicle->transmission ?? 'N/A' }}</p>
               </div>
-              <div class="content" style="padding: 12px;">
-                <div class="title heading-font" style="margin-bottom: 6px;">
-                  <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="rmv_txt_drctn">
-                    {{ $vehicle->title }}
-                  </a>
-                </div>
-                <div class="heading-font" style="margin-bottom: 10px;">
-                  @if(!is_null($vehicle->price))
-                    ${{ number_format($vehicle->price, 0, '.', ' ') }}
-                  @endif
-                </div>
-                <div style="display:flex; gap: 10px; flex-wrap:wrap; font-size: 13px;">
-                  <span><strong>Mileage:</strong> {{ $vehicle->mileage ?? '' }}</span>
-                  <span><strong>Fuel:</strong> {{ $vehicle->fuel_type ?? '' }}</span>
-                  <span><strong>Trans:</strong> {{ $vehicle->transmission ?? '' }}</span>
-                </div>
-
-                <form method="post" action="{{ route('compare.remove', ['vehicle' => $vehicle->id]) }}" style="margin-top: 12px;">
-                  @csrf
-                  <button type="submit" class="button">Remove</button>
-                </form>
+              <div class="grid grid-cols-2 gap-3">
+                <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="text-center py-2 border border-white/30 rounded text-xs font-bold uppercase tracking-wider hover:bg-white/10">Details</a>
+                <form method="post" action="{{ route('compare.remove', ['vehicle' => $vehicle->id]) }}">@csrf<button class="w-full py-2 border border-white/30 rounded text-xs font-bold uppercase tracking-wider hover:bg-white/10" type="submit">Remove</button></form>
               </div>
             </div>
-          </div>
+          </article>
         @endforeach
       </div>
     @endif
-  </div>
+  </section>
 @endsection
-

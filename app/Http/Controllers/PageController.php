@@ -59,8 +59,6 @@ class PageController extends Controller
             'ogTitle' => $page->title,
             'ogDescription' => $page->meta_description,
             'ogUrl' => route('about', [], true),
-            'vendorCss' => 'asset/css/vendor-autoptimize-about-us.css',
-            'bodyClass' => 'page-template-default page page-id-4205 theme-motors stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-4205',
             'page' => $page,
         ]);
     }
@@ -77,8 +75,6 @@ class PageController extends Controller
             'ogTitle' => $page->title,
             'ogDescription' => $page->meta_description,
             'ogUrl' => route('contact', [], true),
-            'vendorCss' => 'asset/css/vendor-autoptimize-contact-us.css',
-            'bodyClass' => 'page-template-default page page-id-4430 theme-motors stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-4430',
             'page' => $page,
         ]);
     }
@@ -95,8 +91,6 @@ class PageController extends Controller
             'ogTitle' => $page->title,
             'ogDescription' => $page->meta_description,
             'ogUrl' => route('faq', [], true),
-            'vendorCss' => 'asset/css/vendor-autoptimize-faq.css',
-            'bodyClass' => 'page-template-default page page-id-4431 theme-motors stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-4431',
             'page' => $page,
         ]);
     }
@@ -188,8 +182,6 @@ class PageController extends Controller
 
         return view('pages.inventory.index', [
             'title' => 'Inventory',
-            'vendorCss' => 'asset/css/vendor-autoptimize-inventory.css',
-            'bodyClass' => 'page-template-default page page-id-1058 theme-motors stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-1058',
             'vehicles' => $vehicles,
             'filters' => array_merge($this->defaultInventoryFilters(), $filters),
             'filterOptions' => $this->approvedVehicleFilterOptions(),
@@ -274,8 +266,6 @@ class PageController extends Controller
             'ogDescription' => $plainDesc,
             'ogUrl' => $listingUrl,
             'ogImage' => $ogImage,
-            'vendorCss' => 'asset/css/vendor-autoptimize-listing-2016-mercedes-benz-c-class-c300-4matic.css',
-            'bodyClass' => 'stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two single single-listings postid-3191 theme-motors stm-hoverable-interactive-galleries stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-layout-listing stm-inventory-page stm-inventory-detail-page has-breadcrumb_navxt elementor-default elementor-kit-3904',
             'slug' => $slug,
             'vehicle' => $vehicle,
             'isFavorited' => $isFavorited,
@@ -293,8 +283,6 @@ class PageController extends Controller
 
         return view('pages.compare', [
             'title' => 'Compare',
-            'vendorCss' => 'asset/css/vendor-autoptimize-compare.css',
-            'bodyClass' => 'page-template-default page page-id-4296 theme-motors stm-user-not-logged-in woocommerce-no-js no_margin title-box-hide breadcrumbs-hide stm-template-car_dealer_two_elementor stm-layout-header-car_dealer_two has-breadcrumb_navxt elementor-default elementor-kit-3904 elementor-page elementor-page-4296',
             'vehicles' => $vehicles,
         ]);
     }

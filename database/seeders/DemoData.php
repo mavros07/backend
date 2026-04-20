@@ -15,14 +15,14 @@ final class DemoData
 
     public const DEFAULT_PASSWORD = 'password';
 
-    /** Rotating pool of JPGs shipped with the app (`public/asset/images/media/demo/`). */
+    /** Rotating pool of JPGs shipped with the app (`public/asset/images/media/`). */
     public static function localDemoPool(): array
     {
         return [
-            'asset/images/media/demo/01-6-1-1.jpg',
-            'asset/images/media/demo/01-7-1-1.jpg',
-            'asset/images/media/demo/01-10-1.jpg',
-            'asset/images/media/demo/01-24-1.jpg',
+            'asset/images/media/01-6-1-1.jpg',
+            'asset/images/media/01-7-1-1.jpg',
+            'asset/images/media/01-10-1.jpg',
+            'asset/images/media/01-24-1.jpg',
         ];
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Rewrites vehicle_images paths in SQL dumps to match DemoData (local asset paths or HTTPS).
+ * Rewrites legacy vehicle_images paths in manual SQL patches to match DemoData.
  * Run from backend: php database/scripts/patch_manual_mysql_demo_images.php
  */
 
@@ -24,9 +24,8 @@ $replaceBlock = function (string $slug, int $sort, string $url, string $tsPair) 
 };
 
 $patchPatterns = [
-    // Legacy wp-uploads paths in SQL
+    // Legacy external and wp-exported paths in SQL
     "/SELECT v\\.id, 'assets\\/images\\/wp-uploads\\/[^']+', (\\d+), (?:@demo_ts, @demo_ts|'[^']+', '[^']+')\\s+FROM `vehicles` v\\s+WHERE v\\.slug = '([^']+)';/s",
-    // Google CDN URLs (may be truncated if column was VARCHAR)
     "/SELECT v\\.id, 'https:\\/\\/lh3\\.googleusercontent\\.com[^']+', (\\d+), (?:@demo_ts, @demo_ts|'[^']+', '[^']+')\\s+FROM `vehicles` v\\s+WHERE v\\.slug = '([^']+)';/s",
 ];
 
@@ -50,4 +49,3 @@ $patchFile = function (string $path, string $tsPair) use ($bySlug, $replaceBlock
 };
 
 $patchFile(dirname(__DIR__).'/manual_mysql_patches.sql', '@demo_ts, @demo_ts');
-$patchFile(dirname(__DIR__).'/myauto_torque_db.sql', "'2026-04-20 02:43:54', '2026-04-20 02:43:54'");

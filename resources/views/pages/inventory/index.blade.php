@@ -1,154 +1,131 @@
 @extends('layouts.site')
 
 @section('content')
-  <div class="container">
-    <div class="stm-car-listing-sort-units stm-car-listing-directory-sort-units clearfix">
-      <div class="stm-listing-directory-title">
-        <div class="stm-listing-directory-total-matches total stm-secondary-color heading-font">
-          <span>{{ isset($vehicles) ? $vehicles->total() : 0 }}</span>
-          matches
+  <div class="max-w-[1400px] mx-auto px-6 md:px-12 pb-20 pt-10 bg-black text-white min-h-screen">
+    <section class="py-10 flex flex-col md:flex-row md:justify-between md:items-end border-b border-white/10 mb-8 gap-4">
+      <h1 class="text-2xl font-black font-headline uppercase tracking-tight">Vehicles For Sale</h1>
+      <div class="flex items-center gap-6 flex-wrap">
+        <div class="flex items-center gap-3">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sort by:</span>
+          <div class="relative">
+            <select name="sort" form="inventory-filter-form" class="bg-transparent border border-white/20 text-white font-medium text-xs px-4 py-2 pr-8 rounded-sm focus:ring-0 cursor-pointer appearance-none">
+              <option value="newest" @selected(($filters['sort'] ?? 'newest') === 'newest')>Date: newest first</option>
+              <option value="price_low" @selected(($filters['sort'] ?? '') === 'price_low')>Price: low to high</option>
+              <option value="price_high" @selected(($filters['sort'] ?? '') === 'price_high')>Price: high to low</option>
+              <option value="year_new" @selected(($filters['sort'] ?? '') === 'year_new')>Year: newest</option>
+              <option value="year_old" @selected(($filters['sort'] ?? '') === 'year_old')>Year: oldest</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-2 text-xs pointer-events-none">expand_more</span>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <form method="get" action="{{ route('inventory.index') }}" class="mb-6" style="padding:16px; background:#f6f7f9; border-radius:8px;">
-      @include('pages.partials.inventory-filters-fields', [
-        'filters' => $filters,
-        'filterOptions' => $filterOptions,
-        'submitLabel' => 'Apply filters',
-        'useSearchIcon' => false,
-      ])
-    </form>
-
-    <div class="motors-elementor-inventory-search-results" id="listings-result" data-custom-img-size="stm-img-796-466">
-      <div class="stm-isotope-sorting stm-isotope-sorting-main stm-isotope-sorting-list">
-        @foreach($vehicles as $vehicle)
+    <div class="flex flex-col lg:flex-row gap-8">
+      <div class="flex-1 space-y-6">
+        @forelse ($vehicles as $vehicle)
           @php
-            $images = $vehicle->images ?? collect();
-            $hover = $images->slice(0, 5);
+            $image = $vehicle->images->first();
+            $photo = $image ? \App\Support\VehicleImageUrl::url($image->path) : asset('asset/images/media/inventory-listing-fallback.jpg');
           @endphp
-
-          <div
-            class="listing-list-loop stm-listing-directory-list-loop stm-isotope-listing-item all listing_is_active stm-special-car-top-on"
-            data-price="{{ $vehicle->price ?? '' }}"
-            data-mileage="{{ $vehicle->mileage ?? '' }}"
-          >
-            <div class="image">
-              <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="rmv_txt_drctn">
-                <div class="image-inner interactive-hoverable">
-                  <div class="stm-badge-directory heading-font">Special</div>
-
-                  <div class="hoverable-wrap">
-                    @forelse($hover as $idx => $img)
-                      <div class="hoverable-unit {{ $idx === 0 ? 'active' : '' }}">
-                        <div class="thumb">
-                          <img
-                            loading="lazy"
-                            decoding="async"
-                            src="{{ \App\Support\VehicleImageUrl::url($img->path) }}"
-                            class="img-responsive"
-                            alt="{{ $vehicle->title }}"
-                          />
-                        </div>
-                      </div>
-                    @empty
-                      <div class="hoverable-unit active">
-                        <div
-                          class="thumb img-responsive"
-                          style="width:100%; aspect-ratio: 795 / 463; background: #f0f3f7; display:flex; align-items:center; justify-content:center;"
-                        >
-                          <span class="heading-font" style="opacity:.7;">No image</span>
-                        </div>
-                      </div>
-                    @endforelse
-                  </div>
-
-                  @if($hover->isNotEmpty())
-                    <div class="hoverable-indicators">
-                      @foreach($hover as $idx => $img)
-                        <div class="indicator {{ $idx === 0 ? 'active' : '' }}"></div>
-                      @endforeach
-                    </div>
+          <article class="bg-card_bg overflow-hidden flex flex-col md:flex-row relative group">
+            <div class="md:w-[320px] h-[240px] relative overflow-hidden shrink-0">
+              <img class="w-full h-full object-cover" alt="{{ $vehicle->title }}" src="{{ $photo }}" />
+              <div class="sold-ribbon">Special</div>
+            </div>
+            <div class="flex-1 p-6 flex flex-col justify-between">
+              <div class="flex justify-between items-start gap-4">
+                <div>
+                  <h3 class="text-white text-xs font-bold uppercase tracking-wider font-body">{{ $vehicle->model ?? 'Vehicle' }}</h3>
+                  <p class="text-3xl font-black font-headline leading-none mt-1">{{ $vehicle->year ?? '----' }}</p>
+                </div>
+                <div class="bg-motors_blue px-4 py-2 rounded-sm text-white font-bold text-xs uppercase text-right">
+                  <span class="opacity-70 font-normal">Our Price</span>
+                  @if (!is_null($vehicle->price))
+                    ${{ number_format((float) $vehicle->price, 0, '.', ' ') }}
+                  @else
+                    Ask
                   @endif
                 </div>
-              </a>
-            </div>
-
-            <div class="content">
-              <div class="meta-top">
-                <div class="sell-online-wrap price">
-                  <div class="normal-price">
-                    <span class="normal_font">BUY CAR ONLINE</span>
-                    <span class="heading-font">
-                      @if(!is_null($vehicle->price))
-                        ${{ number_format($vehicle->price, 0, '.', ' ') }}
-                      @endif
-                    </span>
-                  </div>
-                </div>
-                <div class="title heading-font">
-                  <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="rmv_txt_drctn">
-                    <div class="labels">{{ $vehicle->model ?? '' }}</div>
-                    {{ $vehicle->year ?? '' }}
-                  </a>
-                </div>
               </div>
 
-              <div class="meta-middle">
-                <div class="meta-middle-row clearfix">
-                  <div class="meta-middle-unit font-exists mileage">
-                    <div class="meta-middle-unit-top">
-                      <div class="icon"><i class="stm-icon-road"></i></div>
-                      <div class="name">Mileage</div>
-                    </div>
-                    <div class="value">{{ $vehicle->mileage ?? '' }} mi</div>
+              <div class="flex flex-wrap gap-8 mt-6">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary">speed</span>
+                  <div>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase">Mileage</p>
+                    <p class="text-[11px] font-bold">{{ number_format((int) ($vehicle->mileage ?? 0)) }} mi</p>
                   </div>
-                  <div class="meta-middle-unit meta-middle-divider"></div>
-
-                  <div class="meta-middle-unit font-exists fuel">
-                    <div class="meta-middle-unit-top">
-                      <div class="icon"><i class="stm-icon-fuel"></i></div>
-                      <div class="name">Fuel type</div>
-                    </div>
-                    <div class="value">{{ $vehicle->fuel_type ?? '' }}</div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary">local_gas_station</span>
+                  <div>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase">Fuel Type</p>
+                    <p class="text-[11px] font-bold">{{ $vehicle->fuel_type ?? 'N/A' }}</p>
                   </div>
-                  <div class="meta-middle-unit meta-middle-divider"></div>
-
-                  <div class="meta-middle-unit font-exists engine">
-                    <div class="meta-middle-unit-top">
-                      <div class="icon"><i class="stm-icon-engine_fill"></i></div>
-                      <div class="name">Transmission</div>
-                    </div>
-                    <div class="value">{{ $vehicle->transmission ?? '' }}</div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary">settings</span>
+                  <div>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase">Engine</p>
+                    <p class="text-[11px] font-bold">{{ $vehicle->engine_size ?? 'N/A' }}</p>
                   </div>
                 </div>
               </div>
 
-              <div class="actions" style="margin-top: 10px;">
-                <form method="post" action="{{ route('compare.add', ['vehicle' => $vehicle->id]) }}">
-                  @csrf
-                  <button type="submit" class="button">
-                    Add to compare
-                  </button>
-                </form>
+              <div class="flex flex-wrap gap-3 mt-6">
+                <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="border border-white/20 hover:bg-white/5 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2"><span class="material-symbols-outlined text-[14px] text-primary">play_circle</span> Details</a>
+                <form method="post" action="{{ route('compare.add', ['vehicle' => $vehicle->id]) }}">@csrf<button class="border border-white/20 hover:bg-white/5 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2" type="submit"><span class="material-symbols-outlined text-[14px] text-primary">compare_arrows</span> Add to Compare</button></form>
+                <button class="border border-white/20 hover:bg-white/5 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2" type="button"><span class="material-symbols-outlined text-[14px] text-primary">share</span> Share This</button>
               </div>
             </div>
-          </div>
-        @endforeach
+          </article>
+        @empty
+          <div class="text-center py-12 text-slate-400">No vehicles found.</div>
+        @endforelse
 
-        @if($vehicles->total() === 0)
-          <div class="stm-listings-empty">
-            <span class="stm-listings-empty__not-found">No vehicles found</span>
-          </div>
+        @if($vehicles->hasPages())
+          <div class="pt-8">{{ $vehicles->links() }}</div>
         @endif
       </div>
-    </div>
 
-    @if($vehicles->hasPages())
-      <div style="margin: 24px 0 40px;">
-        {{ $vehicles->links() }}
-      </div>
-    @endif
+      <aside class="w-full lg:w-[280px] space-y-4">
+        <h2 class="text-xl font-bold font-headline uppercase mb-4">Search Options</h2>
+        <form id="inventory-filter-form" method="get" action="{{ route('inventory.index') }}" class="space-y-2">
+          <div class="relative">
+            <select name="condition" class="w-full bg-black border border-white/20 text-white text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-motors_blue transition-colors"><option value="">Condition</option><option value="new" @selected(($filters['condition'] ?? '')==='new')>New</option><option value="used" @selected(($filters['condition'] ?? '')==='used')>Used</option></select>
+            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+          </div>
+          <div class="relative">
+            <select name="body_type" class="w-full bg-black border border-white/20 text-white text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-motors_blue transition-colors"><option value="">Body</option>@foreach(($filterOptions['body_types'] ?? collect()) as $bodyType)<option value="{{ $bodyType }}" @selected(($filters['body_type'] ?? '') === $bodyType)>{{ $bodyType }}</option>@endforeach</select>
+            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+          </div>
+          <div class="relative">
+            <select name="make" class="w-full bg-black border border-white/20 text-white text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-motors_blue transition-colors"><option value="">Make</option>@foreach(($filterOptions['makes'] ?? collect()) as $make)<option value="{{ $make }}" @selected(($filters['make'] ?? '') === $make)>{{ $make }}</option>@endforeach</select>
+            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+          </div>
+          <div class="relative">
+            <select name="model" class="w-full bg-black border border-white/20 text-white text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-motors_blue transition-colors"><option value="">Model</option>@foreach(($filterOptions['models'] ?? collect()) as $model)<option value="{{ $model }}" @selected(($filters['model'] ?? '') === $model)>{{ $model }}</option>@endforeach</select>
+            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+          </div>
+          <div class="relative">
+            <select name="transmission" class="w-full bg-black border border-white/20 text-white text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-motors_blue transition-colors"><option value="">Transmission</option>@foreach(($filterOptions['transmissions'] ?? collect()) as $transmission)<option value="{{ $transmission }}" @selected(($filters['transmission'] ?? '') === $transmission)>{{ $transmission }}</option>@endforeach</select>
+            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+          </div>
+          <div class="relative">
+            <select name="fuel_type" class="w-full bg-black border border-white/20 text-white text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-motors_blue transition-colors"><option value="">Fuel Type</option>@foreach(($filterOptions['fuel_types'] ?? collect()) as $fuel)<option value="{{ $fuel }}" @selected(($filters['fuel_type'] ?? '') === $fuel)>{{ $fuel }}</option>@endforeach</select>
+            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+          </div>
+          <div class="relative"><input name="location" value="{{ $filters['location'] ?? '' }}" class="w-full bg-black border border-white/20 text-white text-[11px] font-bold uppercase px-10 py-3 focus:ring-0 focus:border-motors_blue transition-colors" placeholder="Any location" type="text"/><span class="material-symbols-outlined absolute left-3 top-3 text-xs">location_on</span></div>
+          <div class="relative"><input name="q" value="{{ $filters['q'] ?? '' }}" class="w-full bg-black border border-white/20 text-white text-[11px] px-4 py-3 focus:ring-0 focus:border-motors_blue" placeholder="Search" type="text"/></div>
+          <div class="grid grid-cols-2 gap-2">
+            <input name="price_min" value="{{ $filters['price_min'] ?? '' }}" type="number" placeholder="Min" class="w-full bg-black border border-white/20 text-white text-[11px] px-3 py-2" />
+            <input name="price_max" value="{{ $filters['price_max'] ?? '' }}" type="number" placeholder="Max" class="w-full bg-black border border-white/20 text-white text-[11px] px-3 py-2" />
+          </div>
+          <button class="w-full bg-motors_blue hover:bg-motors_blue/90 text-white font-bold py-3 uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 mt-4" type="submit"><span class="material-symbols-outlined text-[16px]">search</span> Apply Filters</button>
+          <a href="{{ route('inventory.index') }}" class="w-full bg-motors_blue hover:bg-motors_blue/90 text-white font-bold py-3 uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 mt-2"><span class="material-symbols-outlined text-[16px]">restart_alt</span> Reset All</a>
+        </form>
+      </aside>
+    </div>
   </div>
 @endsection
-
