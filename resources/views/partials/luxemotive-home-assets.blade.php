@@ -7,9 +7,14 @@
   href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
   rel="stylesheet"
 />
+{{-- Preflight MUST stay off: the full page includes Motors CSS (header/footer). Tailwind's reset would strip theme styles site-wide. --}}
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script id="tailwind-config">
   tailwind.config = {
+    corePlugins: {
+      preflight: false,
+    },
+    important: '.luxemotive-home-scope',
     darkMode: 'class',
     theme: {
       extend: {

@@ -9,8 +9,9 @@
 --
 -- Same role as Stay Eazi `manual_mysql_patches.sql`: fallback + hotfixes, not routine deploys.
 --
--- DEMO INVENTORY: six approved placeholder listings from `DemoData` / `VehiclesSeeder`, each with
--- six gallery image URLs (same HTTPS set as the Laravel seeder — no WordPress upload paths). Safe to run multiple times.
+-- DEMO INVENTORY: six approved listings from `DemoData` / `VehiclesSeeder`, each with six gallery rows.
+-- `vehicle_images.path` values are web paths under `public/` (e.g. asset/images/media/demo/01-6-1-1.jpg), same as
+-- the seeder — resolved in PHP via `asset()` / VehicleImageUrl (not filesystem paths like public/...). Safe to re-run.
 -- =============================================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -59,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 -- =============================================================================
 -- Prerequisite tables: `users`, `roles`, `model_has_roles`, `vehicles`, `vehicle_images`
 -- Password hash below matches Laravel demo login from seeders (`password`).
--- Image paths match Motors Elementor Dealer Two exports (see `database/seed-data/cms-home-body.html`).
+-- Image paths: `asset/images/media/demo/*.jpg` (bundled under `public/asset/`), kept in sync with `DemoData::localDemoPool()`.
 -- =============================================================================
 
 SET @demo_ts = '2026-04-20 02:37:47';
