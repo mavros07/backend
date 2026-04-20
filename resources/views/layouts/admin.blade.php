@@ -27,6 +27,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>[x-cloak]{display:none!important}</style>
+    {{-- Sidebar SVG icons: enforce size even if utility CSS fails to load --}}
+    <style>
+      .admin-sidebar svg.admin-nav-icon { width: 1.25rem; height: 1.25rem; max-width: 1.25rem; max-height: 1.25rem; flex-shrink: 0; display: block; }
+    </style>
     @include('partials.vite-assets')
   </head>
   <body
@@ -54,144 +58,142 @@
       aria-hidden="true"
     ></div>
 
-    {{-- Fixed sidebar: full viewport height, no internal scroll --}}
-    <aside
-      class="fixed inset-y-0 left-0 z-[100] flex h-[100dvh] w-[min(18rem,calc(100vw-2.5rem))] flex-col overflow-hidden border-r border-white/10 bg-[#0a0d12] shadow-xl transition-[transform,width] duration-300 ease-out"
-      :class="[
-        drawerOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-        railMode ? 'lg:w-[4.5rem]' : 'lg:w-64',
-      ]"
-    >
-      <div class="flex h-16 shrink-0 items-center gap-2 border-b border-white/10 px-4">
-        <a href="{{ route('admin.dashboard') }}" class="flex min-w-0 flex-1 items-center gap-3" @click="closeDrawer()">
-          @if (!empty($logoPath))
-            <img src="{{ \App\Support\VehicleImageUrl::url($logoPath) }}" alt="" class="h-9 w-9 shrink-0 rounded-lg object-contain ring-1 ring-white/10" />
-          @else
-            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-amber-500/40 bg-amber-500/10 text-sm font-bold text-amber-400">{{ strtoupper(\Illuminate\Support\Str::substr($brandName, 0, 1)) }}</span>
-          @endif
-          <div class="min-w-0" x-show="!railMode" x-cloak>
-            <div class="truncate text-sm font-semibold tracking-tight text-white">{{ $brandName }}</div>
-            <div class="truncate text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">{{ __('Console') }}</div>
-          </div>
-        </a>
-        <button
-          type="button"
-          class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-white/5 hover:text-white lg:flex"
-          @click="toggleRail()"
-          title="{{ __('Toggle menu width') }}"
-        >
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
-        </button>
-        <button type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:bg-white/5 hover:text-white lg:hidden" @click="closeDrawer()" aria-label="{{ __('Close') }}">
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <nav class="flex shrink-0 flex-col gap-0.5 overflow-hidden px-3 py-4" aria-label="{{ __('Admin') }}">
-        @foreach ($navItems as $item)
-          @php $active = request()->routeIs($item['match']); @endphp
-          <a
-            href="{{ route($item['route']) }}"
-            @click="closeDrawer()"
-            title="{{ $item['label'] }}"
-            class="flex items-center gap-3 rounded-lg border-l-2 py-2.5 pl-2.5 pr-2 text-[13px] font-medium transition-colors {{ $active ? 'border-amber-400 bg-white/[0.07] text-amber-300' : 'border-transparent text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200' }}"
-            :class="railMode ? 'justify-center' : ''"
+    {{-- Flex row on lg+: sidebar in document flow (no content hidden under fixed rail). Mobile: sidebar fixed drawer. --}}
+    <div class="flex min-h-[100dvh] w-full min-w-0 flex-col lg:flex-row">
+      <aside
+        class="fixed inset-y-0 left-0 z-[100] flex h-[100dvh] w-[min(18rem,calc(100vw-2.5rem))] flex-col overflow-hidden border-r border-white/10 bg-[#0a0d12] shadow-xl transition-[transform,width] duration-300 ease-out lg:relative lg:inset-auto lg:z-10 lg:h-auto lg:min-h-[100dvh] lg:w-64 lg:max-w-none lg:shrink-0 lg:shadow-none"
+        :class="[
+          drawerOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+          railMode ? 'lg:!w-[4.5rem]' : '',
+        ]"
+      >
+        <div class="flex h-16 shrink-0 items-center gap-2 border-b border-white/10 px-4">
+          <a href="{{ route('admin.dashboard') }}" class="flex min-w-0 flex-1 items-center gap-3" @click="closeDrawer()">
+            @if (!empty($logoPath))
+              <img src="{{ \App\Support\VehicleImageUrl::url($logoPath) }}" alt="" class="h-9 w-9 shrink-0 rounded-lg object-contain ring-1 ring-white/10" />
+            @else
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-amber-500/40 bg-amber-500/10 text-sm font-bold text-amber-400">{{ strtoupper(\Illuminate\Support\Str::substr($brandName, 0, 1)) }}</span>
+            @endif
+            <div class="min-w-0" x-show="!railMode" x-cloak>
+              <div class="truncate text-sm font-semibold tracking-tight text-white">{{ $brandName }}</div>
+              <div class="truncate text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">{{ __('Console') }}</div>
+            </div>
+          </a>
+          <button
+            type="button"
+            class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-white/5 hover:text-white lg:flex"
+            @click="toggleRail()"
+            title="{{ __('Toggle menu width') }}"
           >
-            <svg class="h-[22px] w-[22px] shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
+            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+          </button>
+          <button type="button" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:bg-white/5 hover:text-white lg:hidden" @click="closeDrawer()" aria-label="{{ __('Close') }}">
+            <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <nav class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overflow-x-hidden px-3 py-4" aria-label="{{ __('Admin') }}">
+          @foreach ($navItems as $item)
+            @php $active = request()->routeIs($item['match']); @endphp
+            <a
+              href="{{ route($item['route']) }}"
+              @click="closeDrawer()"
+              title="{{ $item['label'] }}"
+              class="flex items-center gap-3 rounded-lg border-l-2 py-2.5 pl-2.5 pr-2 text-[13px] font-medium transition-colors {{ $active ? 'border-amber-400 bg-white/[0.07] text-amber-300' : 'border-transparent text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200' }}"
+              :class="railMode ? 'justify-center px-2' : ''"
+            >
+              <svg class="admin-nav-icon text-current" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
+              </svg>
+              <span class="min-w-0 flex-1 truncate" x-show="!railMode">{{ $item['label'] }}</span>
+            </a>
+          @endforeach
+
+          <div class="my-3 shrink-0 border-t border-white/10"></div>
+
+          <a
+            href="{{ route('inventory.index') }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            @click="closeDrawer()"
+            class="flex items-center gap-3 rounded-lg py-2.5 pl-2.5 pr-2 text-[13px] font-medium text-zinc-500 transition hover:bg-white/[0.05] hover:text-zinc-200"
+            :class="railMode ? 'justify-center px-2' : ''"
+            title="{{ __('Public inventory') }}"
+          >
+            <svg class="admin-nav-icon text-current" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
             </svg>
-            <span class="min-w-0 flex-1 truncate" x-show="!railMode">{{ $item['label'] }}</span>
+            <span class="truncate" x-show="!railMode">{{ __('Inventory') }}</span>
           </a>
-        @endforeach
+        </nav>
 
-        <div class="my-3 border-t border-white/10"></div>
-
-        <a
-          href="{{ route('inventory.index') }}"
-          target="_blank"
-          rel="noopener noreferrer"
-          @click="closeDrawer()"
-          class="flex items-center gap-3 rounded-lg py-2.5 pl-2.5 pr-2 text-[13px] font-medium text-zinc-500 transition hover:bg-white/[0.05] hover:text-zinc-200"
-          :class="railMode ? 'justify-center' : ''"
-          title="{{ __('Public inventory') }}"
-        >
-          <svg class="h-[22px] w-[22px] shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-          </svg>
-          <span class="truncate" x-show="!railMode">{{ __('Inventory') }}</span>
-        </a>
-      </nav>
-
-      <div class="mt-auto shrink-0 border-t border-white/10 bg-black/25 p-4">
-        <div class="flex items-center gap-3" :class="railMode ? 'flex-col' : ''">
-          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-800/80 text-[10px] font-bold uppercase tracking-wide text-amber-400/90">
-            {{ $initials }}
+        <div class="mt-auto shrink-0 border-t border-white/10 bg-black/25 p-4">
+          <div class="flex items-center gap-3" :class="railMode ? 'flex-col' : ''">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-zinc-800/80 text-[10px] font-bold uppercase tracking-wide text-amber-400/90">
+              {{ $initials }}
+            </div>
+            <div class="min-w-0 flex-1" x-show="!railMode" x-cloak>
+              <p class="truncate text-sm font-medium text-white">{{ $user->name }}</p>
+              <p class="truncate text-xs text-zinc-500">{{ $user->email }}</p>
+            </div>
           </div>
-          <div class="min-w-0 flex-1" x-show="!railMode" x-cloak>
-            <p class="truncate text-sm font-medium text-white">{{ $user->name }}</p>
-            <p class="truncate text-xs text-zinc-500">{{ $user->email }}</p>
+          <div class="mt-3 grid grid-cols-2 gap-2" x-show="!railMode" x-cloak>
+            <a href="{{ route('profile.edit') }}" @click="closeDrawer()" class="rounded-md border border-white/10 bg-white/5 py-2 text-center text-xs font-semibold text-white transition hover:bg-white/10">{{ __('Profile') }}</a>
+            <form method="POST" action="{{ route('logout') }}" class="contents">
+              @csrf
+              <button type="submit" class="rounded-md border border-red-400/30 bg-red-500/10 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-500/20">{{ __('Log out') }}</button>
+            </form>
+          </div>
+          <div class="mt-2 flex flex-col gap-1" x-show="railMode" x-cloak>
+            <a href="{{ route('profile.edit') }}" class="flex justify-center rounded-md py-2 text-zinc-400 hover:text-white" title="{{ __('Profile') }}">
+              <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+            </a>
+            <form method="POST" action="{{ route('logout') }}">
+              @csrf
+              <button type="submit" class="flex w-full justify-center rounded-md py-2 text-red-400 hover:text-red-300" title="{{ __('Log out') }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+              </button>
+            </form>
           </div>
         </div>
-        <div class="mt-3 grid grid-cols-2 gap-2" x-show="!railMode" x-cloak>
-          <a href="{{ route('profile.edit') }}" @click="closeDrawer()" class="rounded-md border border-white/10 bg-white/5 py-2 text-center text-xs font-semibold text-white transition hover:bg-white/10">{{ __('Profile') }}</a>
-          <form method="POST" action="{{ route('logout') }}" class="contents">
-            @csrf
-            <button type="submit" class="rounded-md border border-red-400/30 bg-red-500/10 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-500/20">{{ __('Log out') }}</button>
-          </form>
-        </div>
-        <div class="mt-2 flex flex-col gap-1" x-show="railMode" x-cloak>
-          <a href="{{ route('profile.edit') }}" class="flex justify-center rounded-md py-2 text-zinc-400 hover:text-white" title="{{ __('Profile') }}">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+      </aside>
+
+      <div class="flex min-h-[100dvh] min-w-0 flex-1 flex-col">
+        <header class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-4 border-b border-zinc-200/90 bg-white/95 px-4 shadow-sm backdrop-blur-md sm:px-6 lg:px-8">
+          <button
+            type="button"
+            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-700 shadow-sm lg:hidden"
+            @click="openDrawer()"
+            aria-label="{{ __('Menu') }}"
+          >
+            <svg class="h-6 w-6 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 6.75h16.5"/></svg>
+          </button>
+          <div class="min-w-0 flex-1">
+            @isset($header)
+              <div class="text-zinc-900">{{ $header }}</div>
+            @else
+              <p class="truncate text-lg font-semibold tracking-tight text-zinc-900">{{ $brandName }}</p>
+            @endif
+          </div>
+          <a
+            href="{{ route('home') }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
+          >
+            <svg class="h-4 w-4 shrink-0 text-zinc-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+            </svg>
+            {{ __('View site') }}
           </a>
-          <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="flex w-full justify-center rounded-md py-2 text-red-400 hover:text-red-300" title="{{ __('Log out') }}">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
-            </button>
-          </form>
-        </div>
+        </header>
+
+        <main class="min-w-0 flex-1 bg-gradient-to-b from-zinc-100 to-zinc-50">
+          <div class="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-10">
+            {{ $slot }}
+          </div>
+        </main>
       </div>
-    </aside>
-
-    {{-- Main: offset by sidebar width on lg+ so content never sits under the rail --}}
-    <div
-      class="flex min-h-[100dvh] min-w-0 flex-col transition-[padding] duration-300 ease-out"
-      :class="railMode ? 'lg:pl-[4.5rem]' : 'lg:pl-64'"
-    >
-      <header class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-4 border-b border-zinc-200/90 bg-white/95 px-4 shadow-sm backdrop-blur-md sm:px-6 lg:px-8">
-        <button
-          type="button"
-          class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-700 shadow-sm lg:hidden"
-          @click="openDrawer()"
-          aria-label="{{ __('Menu') }}"
-        >
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 6.75h16.5"/></svg>
-        </button>
-        <div class="min-w-0 flex-1">
-          @isset($header)
-            <div class="text-zinc-900">{{ $header }}</div>
-          @else
-            <p class="truncate text-lg font-semibold tracking-tight text-zinc-900">{{ $brandName }}</p>
-          @endif
-        </div>
-        <a
-          href="{{ route('home') }}"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50"
-        >
-          <svg class="h-4 w-4 text-zinc-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
-          </svg>
-          {{ __('View site') }}
-        </a>
-      </header>
-
-      <main class="flex-1 bg-gradient-to-b from-zinc-100 to-zinc-50">
-        <div class="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-10">
-          {{ $slot }}
-        </div>
-      </main>
     </div>
   </body>
 </html>

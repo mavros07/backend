@@ -55,7 +55,8 @@
 
   <body class="bg-page_bg font-body text-on_surface selection:bg-brand_blue/20 {{ $bodyClass ?? '' }}">
     @include('partials.header')
-    <main id="main" class="pt-16">
+    {{-- Header is sticky (dealer-style top strip + nav); no artificial pt-* needed — avoids hero/content hiding under a fixed bar --}}
+    <main id="main">
       @yield('content')
     </main>
     @include('partials.footer')
