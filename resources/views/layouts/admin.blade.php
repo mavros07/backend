@@ -60,8 +60,9 @@
 
     {{-- Flex row on lg+: sidebar in document flow (no content hidden under fixed rail). Mobile: sidebar fixed drawer. --}}
     <div class="flex min-h-[100dvh] w-full min-w-0 flex-col lg:flex-row">
+      {{-- Sidebar: viewport height column; nav scrolls, profile block stays pinned at bottom (no whole-sidebar scroll). --}}
       <aside
-        class="fixed inset-y-0 left-0 z-[100] flex h-[100dvh] w-[min(18rem,calc(100vw-2.5rem))] flex-col overflow-hidden border-r border-white/10 bg-[#0a0d12] shadow-xl transition-[transform,width] duration-300 ease-out lg:relative lg:inset-auto lg:z-10 lg:h-auto lg:min-h-[100dvh] lg:w-64 lg:max-w-none lg:shrink-0 lg:shadow-none"
+        class="fixed inset-y-0 left-0 z-[100] flex h-[100dvh] max-h-[100dvh] w-[min(18rem,calc(100vw-2.5rem))] min-h-0 flex-col overflow-hidden border-r border-white/10 bg-[#0a0d12] shadow-xl transition-[transform,width] duration-300 ease-out lg:relative lg:inset-auto lg:z-10 lg:h-[100dvh] lg:max-h-[100dvh] lg:w-64 lg:max-w-none lg:shrink-0 lg:overflow-hidden lg:shadow-none"
         :class="[
           drawerOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           railMode ? 'lg:!w-[4.5rem]' : '',

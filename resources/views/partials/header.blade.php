@@ -14,33 +14,33 @@
   $compareCount = \App\Support\Compare::count();
 @endphp
 
-{{-- Mirrors dealer-style layouts (e.g. Motors listing header): top strip + main white bar, centered like page content. No WordPress runtime. --}}
-<header class="sticky top-0 z-50">
-  {{-- Top bar --}}
-  <div class="border-b border-white/10 bg-[#35475A] text-[11px] font-semibold uppercase tracking-wide text-white/90">
-    <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
+{{-- Layout aligned with Motors dealer header pattern (top strip + primary bar): https://motors.stylemixthemes.com/elementor-dealer-two/ --}}
+<header class="sticky top-0 z-50 shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+  {{-- Top bar — dark strip (#232628 matches Motors --mvl-third-color) --}}
+  <div class="border-b border-white/5 bg-[#232628] text-[11px] font-semibold uppercase tracking-wide text-white/90">
+    <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6 lg:px-8">
       <div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-5 gap-y-1 text-white/85">
         @if ($hoursSnippet !== '')
           <span class="inline-flex items-center gap-1.5 shrink-0">
-            <span class="material-symbols-outlined text-[16px] text-white/70" aria-hidden="true">schedule</span>
+            <span class="material-symbols-outlined text-[16px] text-[#cc6119]" aria-hidden="true">schedule</span>
             <span class="hidden sm:inline">{{ $hoursLabel }}</span>
             <span class="sm:hidden">{{ \Illuminate\Support\Str::limit($hoursSnippet, 22) }}</span>
-            <span class="hidden md:inline text-white/60 normal-case tracking-normal">· {{ $hoursSnippet }}</span>
+            <span class="hidden md:inline text-white/55 normal-case tracking-normal">· {{ $hoursSnippet }}</span>
           </span>
         @endif
         <span class="hidden min-w-0 lg:inline-flex items-start gap-1.5 text-white/80 normal-case tracking-normal">
-          <span class="material-symbols-outlined mt-0.5 shrink-0 text-[16px] text-white/60" aria-hidden="true">location_on</span>
+          <span class="material-symbols-outlined mt-0.5 shrink-0 text-[16px] text-white/45" aria-hidden="true">location_on</span>
           <span class="truncate">{{ $address }}</span>
         </span>
-        <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone) }}" class="inline-flex items-center gap-1.5 text-white hover:text-primary transition-colors shrink-0 normal-case tracking-normal">
-          <span class="material-symbols-outlined text-[16px] text-white/70" aria-hidden="true">call</span>
+        <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone) }}" class="inline-flex items-center gap-1.5 text-white hover:text-[#cc6119] transition-colors shrink-0 normal-case tracking-normal">
+          <span class="material-symbols-outlined text-[16px] text-white/55" aria-hidden="true">call</span>
           {{ $phone }}
         </a>
       </div>
       <div class="flex shrink-0 items-center gap-2">
         @foreach (['facebook' => $socialFacebook, 'instagram' => $socialInstagram, 'linkedin' => $socialLinkedin, 'youtube' => $socialYoutube] as $net => $url)
           @if (!empty($url) && $url !== '#')
-            <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="flex h-8 w-8 items-center justify-center rounded border border-white/15 text-white/80 transition hover:border-white/40 hover:bg-white/10 hover:text-white" aria-label="{{ ucfirst($net) }}">
+            <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="flex h-8 w-8 items-center justify-center rounded border border-white/10 text-white/75 transition hover:border-white/30 hover:bg-white/10 hover:text-white" aria-label="{{ ucfirst($net) }}">
               @if ($net === 'facebook')
                 <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
               @elseif ($net === 'instagram')
@@ -57,49 +57,51 @@
     </div>
   </div>
 
-  {{-- Primary nav (listing-style white bar) --}}
-  <div class="border-b border-slate-200/90 bg-white shadow-sm">
-    <div class="mx-auto flex h-[4.75rem] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-      <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2">
-        @if (!empty($logoPath))
-          <img src="{{ \App\Support\VehicleImageUrl::url($logoPath) }}" alt="{{ $brandName }}" class="h-10 w-auto max-w-[140px] object-contain sm:h-11" />
-        @else
-          <span class="font-headline text-xl font-black italic tracking-tighter text-[#232628] sm:text-2xl">{{ strtolower($brandName) }}</span>
-        @endif
-      </a>
-
-      <nav class="hidden items-center gap-1 lg:flex" aria-label="{{ __('Primary') }}">
-        @foreach ([
-          ['route' => 'home', 'label' => __('Home')],
-          ['route' => 'inventory.index', 'label' => __('Inventory')],
-          ['route' => 'about', 'label' => __('About')],
-          ['route' => 'faq', 'label' => __('FAQ')],
-          ['route' => 'contact', 'label' => __('Contact')],
-        ] as $item)
-          @php
-            $r = $item['route'];
-            $active = match ($r) {
-              'home' => request()->routeIs('home'),
-              'inventory.index' => request()->routeIs('inventory.*'),
-              default => request()->routeIs($r),
-            };
-          @endphp
-          <a
-            href="{{ route($r) }}"
-            class="rounded-md px-3 py-2 text-[12px] font-bold uppercase tracking-wider transition-colors {{ $active ? 'text-brand_blue' : 'text-[#35475A] hover:text-brand_blue' }}"
-          >{{ $item['label'] }}</a>
-        @endforeach
-      </nav>
-
-      <div class="flex items-center gap-2 sm:gap-3">
-        <a href="{{ route('compare') }}" class="{{ request()->routeIs('compare') ? 'border-brand_blue bg-brand_blue/5' : '' }} hidden items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-[#35475A] transition hover:border-brand_blue/40 hover:bg-slate-50 lg:inline-flex" title="{{ __('Compare vehicles') }}">
-          <span class="material-symbols-outlined text-[18px] text-brand_blue" aria-hidden="true">compare_arrows</span>
-          {{ __('Compare') }}
-          @if ($compareCount > 0)
-            <span class="rounded-full bg-brand_blue px-1.5 py-0.5 text-[10px] font-bold text-white">{{ $compareCount }}</span>
+  {{-- Primary bar: logo + inline menu (Motors listing-header style), compare on the right --}}
+  <div class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex min-h-[5rem] max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+      <div class="flex min-w-0 flex-1 items-center gap-6 lg:gap-10">
+        <a href="{{ route('home') }}" class="flex shrink-0 items-center">
+          @if (!empty($logoPath))
+            <img src="{{ \App\Support\VehicleImageUrl::url($logoPath) }}" alt="{{ $brandName }}" class="h-10 w-auto max-w-[150px] object-contain sm:h-[52px]" />
+          @else
+            <span class="font-headline text-xl font-black italic tracking-tighter text-[#232628] sm:text-2xl">{{ strtolower($brandName) }}</span>
           @endif
         </a>
-        <button class="inline-flex h-11 w-11 items-center justify-center rounded-md border border-slate-200 text-[#35475A] hover:bg-slate-50 lg:hidden" type="button" data-mobile-menu-toggle aria-label="{{ __('Menu') }}">
+
+        <nav class="hidden min-w-0 flex-1 items-center justify-start gap-0.5 lg:flex xl:gap-1" aria-label="{{ __('Primary') }}">
+          @foreach ([
+            ['route' => 'home', 'label' => __('Home')],
+            ['route' => 'inventory.index', 'label' => __('Inventory')],
+            ['route' => 'about', 'label' => __('About')],
+            ['route' => 'faq', 'label' => __('FAQ')],
+            ['route' => 'contact', 'label' => __('Contact')],
+          ] as $item)
+            @php
+              $r = $item['route'];
+              $active = match ($r) {
+                'home' => request()->routeIs('home'),
+                'inventory.index' => request()->routeIs('inventory.*'),
+                default => request()->routeIs($r),
+              };
+            @endphp
+            <a
+              href="{{ route($r) }}"
+              class="whitespace-nowrap rounded-sm px-2.5 py-2 font-headline text-[13px] font-semibold uppercase tracking-wide transition-colors {{ $active ? 'text-[#1280DF]' : 'text-[#232628] hover:text-[#1280DF]' }}"
+            >{{ $item['label'] }}</a>
+          @endforeach
+        </nav>
+      </div>
+
+      <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+        <a href="{{ route('compare') }}" class="{{ request()->routeIs('compare') ? 'border-[#1280DF] bg-[#1280DF]/5' : '' }} hidden items-center gap-2 rounded border border-slate-200 px-3 py-2 font-headline text-[11px] font-bold uppercase tracking-wider text-[#232628] transition hover:border-[#1280DF]/40 hover:bg-slate-50 lg:inline-flex" title="{{ __('Compare vehicles') }}">
+          <span class="material-symbols-outlined text-[20px] text-[#1280DF]" aria-hidden="true">compare_arrows</span>
+          <span>{{ __('Compare') }}</span>
+          @if ($compareCount > 0)
+            <span class="rounded-full bg-[#1280DF] px-1.5 py-0.5 text-[10px] font-bold text-white">{{ $compareCount }}</span>
+          @endif
+        </a>
+        <button class="inline-flex h-11 w-11 items-center justify-center rounded border border-slate-200 text-[#232628] hover:bg-slate-50 lg:hidden" type="button" data-mobile-menu-toggle aria-label="{{ __('Menu') }}">
           <span class="material-symbols-outlined text-2xl">menu</span>
         </button>
       </div>
@@ -109,7 +111,7 @@
 
 <div class="fixed inset-0 z-[55] hidden bg-black/50 lg:hidden" data-mobile-menu-overlay aria-hidden="true"></div>
 <div class="fixed right-0 top-0 z-[60] flex h-full w-[min(20rem,calc(100vw-2rem))] translate-x-full flex-col border-l border-slate-200 bg-white shadow-2xl transition-transform duration-200 ease-out lg:hidden" data-mobile-menu-panel id="site-mobile-nav">
-  <div class="flex h-[4.75rem] shrink-0 items-center justify-between border-b border-slate-200 px-4">
+  <div class="flex min-h-[5rem] shrink-0 items-center justify-between border-b border-slate-200 px-4">
     <span class="font-headline text-lg font-black italic text-[#232628]">{{ strtolower($brandName) }}</span>
     <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100" data-mobile-menu-close aria-label="{{ __('Close') }}">
       <span class="material-symbols-outlined text-2xl">close</span>
@@ -124,16 +126,16 @@
       ['route' => 'compare', 'label' => __('Compare')],
       ['route' => 'contact', 'label' => __('Contact')],
     ] as $item)
-      <a href="{{ route($item['route']) }}" class="rounded-lg px-3 py-3 text-sm font-bold uppercase tracking-wide text-[#35475A] hover:bg-slate-100">{{ $item['label'] }}</a>
+      <a href="{{ route($item['route']) }}" class="rounded-lg px-3 py-3 font-headline text-sm font-semibold uppercase tracking-wide text-[#232628] hover:bg-slate-100">{{ $item['label'] }}</a>
     @endforeach
-    <a href="{{ route('compare') }}" class="mt-2 inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-3 text-sm font-bold uppercase tracking-wide text-[#35475A]">
-      <span class="material-symbols-outlined text-brand_blue">compare_arrows</span>
+    <a href="{{ route('compare') }}" class="mt-2 inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-3 font-headline text-sm font-semibold uppercase tracking-wide text-[#232628]">
+      <span class="material-symbols-outlined text-[#1280DF]">compare_arrows</span>
       {{ __('Compare') }}
       @if ($compareCount > 0)
-        <span class="ml-auto rounded-full bg-brand_blue px-2 py-0.5 text-xs font-bold text-white">{{ $compareCount }}</span>
+        <span class="ml-auto rounded-full bg-[#1280DF] px-2 py-0.5 text-xs font-bold text-white">{{ $compareCount }}</span>
       @endif
     </a>
     <p class="mt-6 border-t border-slate-100 pt-4 text-[11px] leading-relaxed text-slate-500">{{ \Illuminate\Support\Str::limit($address, 80) }}</p>
-    <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone) }}" class="mt-2 text-sm font-semibold text-brand_blue">{{ $phone }}</a>
+    <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone) }}" class="mt-2 text-sm font-semibold text-[#1280DF]">{{ $phone }}</a>
   </nav>
 </div>
