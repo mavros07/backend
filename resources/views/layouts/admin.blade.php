@@ -34,7 +34,7 @@
     @include('partials.vite-assets')
   </head>
   <body
-    class="min-h-full antialiased bg-zinc-100 text-zinc-900"
+    class="h-full max-h-[100dvh] overflow-hidden antialiased bg-zinc-100 text-zinc-900"
     style="font-family:Inter,system-ui,sans-serif"
     x-data="{
       drawerOpen: false,
@@ -189,7 +189,7 @@
           </a>
         </header>
 
-        <main class="min-w-0 flex-1 bg-gradient-to-b from-zinc-100 to-zinc-50">
+        <main class="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-gradient-to-b from-zinc-100 to-zinc-50">
           <div class="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-10">
             {{ $slot }}
           </div>
