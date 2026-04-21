@@ -27,9 +27,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>[x-cloak]{display:none!important}</style>
-    {{-- Sidebar SVG icons: enforce size even if utility CSS fails to load --}}
+    {{-- Sidebar SVG icons + StayEazi-style scroll shell (fixed rail + ml offset + flex column scroll pane) --}}
     <style>
       .admin-sidebar svg.admin-nav-icon { width: 1.25rem; height: 1.25rem; max-width: 1.25rem; max-height: 1.25rem; flex-shrink: 0; display: block; }
+      /* Same idea as StayEazi .main-content-area > .content-area: flex:1; min-height:0; overflow-y:auto */
+      .admin-main-shell { display: flex; flex-direction: column; height: 100dvh; max-height: 100dvh; min-height: 0; overflow: hidden; width: 100%; }
+      .admin-content-scroll { flex: 1 1 0%; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
     </style>
     @include('partials.vite-assets')
   </head>
@@ -58,11 +61,9 @@
       aria-hidden="true"
     ></div>
 
-    {{-- Flex row on lg+: sidebar in document flow (no content hidden under fixed rail). Mobile: sidebar fixed drawer. --}}
-    <div class="flex min-h-[100dvh] w-full min-w-0 flex-col lg:flex-row">
-      {{-- Sidebar: viewport height column; nav scrolls, profile block stays pinned at bottom (no whole-sidebar scroll). --}}
+    {{-- StayEazi-style: sidebar position:fixed (out of flow), main offset with margin-left; only .admin-content-scroll scrolls. --}}
       <aside
-        class="fixed inset-y-0 left-0 z-[100] flex h-[100dvh] max-h-[100dvh] w-[min(18rem,calc(100vw-2.5rem))] min-h-0 flex-col overflow-hidden border-r border-white/10 bg-[#0a0d12] shadow-xl transition-[transform,width] duration-300 ease-out lg:relative lg:inset-auto lg:z-10 lg:h-[100dvh] lg:max-h-[100dvh] lg:w-64 lg:max-w-none lg:shrink-0 lg:overflow-hidden lg:shadow-none"
+        class="admin-sidebar fixed inset-y-0 left-0 z-[100] flex h-[100dvh] w-[min(18rem,calc(100vw-2.5rem))] flex-col overflow-hidden border-r border-white/10 bg-[#0a0d12] shadow-xl transition-[transform,width] duration-300 ease-out lg:w-64"
         :class="[
           drawerOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           railMode ? 'lg:!w-[4.5rem]' : '',
@@ -159,8 +160,11 @@
         </div>
       </aside>
 
-      <div class="flex min-h-[100dvh] min-w-0 flex-1 flex-col">
-        <header class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-4 border-b border-zinc-200/90 bg-white/95 px-4 shadow-sm backdrop-blur-md sm:px-6 lg:px-8">
+      <div
+        class="admin-main-shell min-w-0 pt-0 transition-[margin] duration-300 ease-out lg:ml-64"
+        :class="railMode ? 'lg:!ml-[4.5rem]' : ''"
+      >
+        <header class="z-40 flex h-16 shrink-0 items-center gap-4 border-b border-zinc-200/90 bg-white/95 px-4 shadow-sm backdrop-blur-md sm:px-6 lg:px-8">
           <button
             type="button"
             class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-700 shadow-sm lg:hidden"
@@ -189,12 +193,11 @@
           </a>
         </header>
 
-        <main class="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-gradient-to-b from-zinc-100 to-zinc-50">
+        <main class="admin-content-scroll min-w-0 bg-gradient-to-b from-zinc-100 to-zinc-50 overscroll-contain">
           <div class="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-10">
             {{ $slot }}
           </div>
         </main>
       </div>
-    </div>
   </body>
 </html>
