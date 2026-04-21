@@ -79,9 +79,8 @@
     @resize.window="if (window.innerWidth >= 1024) closeDrawer()"
   >
     <div
-      class="fixed inset-0 z-[90] bg-black/60 backdrop-blur-[2px] transition-opacity lg:hidden"
-      x-show="drawerOpen"
-      x-cloak
+      class="fixed inset-0 z-[90] hidden bg-black/60 backdrop-blur-[2px] transition-opacity lg:hidden"
+      :class="drawerOpen ? 'block' : 'hidden'"
       x-transition.opacity.duration.200ms
       @click="closeDrawer()"
       aria-hidden="true"
