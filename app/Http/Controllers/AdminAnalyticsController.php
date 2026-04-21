@@ -102,6 +102,9 @@ class AdminAnalyticsController extends Controller
 
         $dailyTrend = $this->buildDailyTrend($start, $end, $trendRows);
         $lineChart = $this->buildLineChart($dailyTrend);
+        $trendBars = $this->buildTrendBarHeights($dailyTrend);
+        $kpiDeltas = $this->buildHalfRangeDeltas($dailyTrend);
+        $trendXLabels = $this->buildTrendXLabels($start, $end);
         $deviceBreakdown = $this->buildDeviceBreakdown(clone $baseQuery);
 
         $topPages = (clone $baseQuery)
@@ -154,7 +157,10 @@ class AdminAnalyticsController extends Controller
                 'bounce_rate' => round($bounceRate, 1),
                 'avg_views_per_session' => round((float) $avgViewsPerSession, 2),
             ],
+            'kpiDeltas' => $kpiDeltas,
             'dailyTrend' => $dailyTrend,
+            'trendBars' => $trendBars,
+            'trendXLabels' => $trendXLabels,
             'lineChart' => $lineChart,
             'deviceBreakdown' => $deviceBreakdown,
             'topPages' => $topPages,
@@ -243,6 +249,102 @@ class AdminAnalyticsController extends Controller
             'session_path' => $sessionPath,
             'labels' => Arr::only($dailyTrend, [0, (int) floor(($count - 1) / 3), (int) floor((($count - 1) * 2) / 3), $count - 1]),
         ];
+    }
+
+    /**
+     * Compare first vs second half of the range for headline trend badges.
+     *
+     * @param  array<int, array{date:string,label:string,views:int,sessions:int}>  $dailyTrend
+     * @return array{views:?float,sessions:?float,pages:?float}
+     */
+    protected function buildHalfRangeDeltas(array $dailyTrend): array
+    {
+        $n = count($dailyTrend);
+        if ($n < 4) {
+            return ['views' => null, 'sessions' => null, 'pages' => null];
+        }
+
+        $mid = (int) floor($n / 2);
+        $first = array_slice($dailyTrend, 0, $mid);
+        $second = array_slice($dailyTrend, $mid);
+        $sumV1 = array_sum(array_column($first, 'views'));
+        $sumV2 = array_sum(array_column($second, 'views'));
+        $sumS1 = array_sum(array_column($first, 'sessions'));
+        $sumS2 = array_sum(array_column($second, 'sessions'));
+
+        $delta = function (float $a, float $b): ?float {
+            if ($a <= 0.0 && $b <= 0.0) {
+                return null;
+            }
+            if ($a <= 0.0) {
+                return $b > 0 ? 100.0 : null;
+            }
+
+            return round((($b - $a) / $a) * 100, 1);
+        };
+
+        return [
+            'views' => $delta((float) $sumV1, (float) $sumV2),
+            'sessions' => $delta((float) $sumS1, (float) $sumS2),
+            'pages' => null,
+        ];
+    }
+
+    /**
+     * Resample daily trend to 12 column heights (5–100) for the traffic bar strip.
+     *
+     * @param  array<int, array{date:string,label:string,views:int,sessions:int}>  $dailyTrend
+     * @return array<int, array{h:int,highlight:bool}>
+     */
+    protected function buildTrendBarHeights(array $dailyTrend): array
+    {
+        $demo = [60, 45, 80, 65, 50, 95, 75, 60, 40, 85, 70, 55];
+        $n = count($dailyTrend);
+        if ($n === 0) {
+            return array_map(fn (int $h, int $i) => ['h' => $h, 'highlight' => $i === 5], $demo, array_keys($demo));
+        }
+
+        $barCount = 12;
+        $heights = [];
+        for ($i = 0; $i < $barCount; $i++) {
+            $idx = $n === 1 ? 0 : (int) round($i * ($n - 1) / ($barCount - 1));
+            $heights[] = (int) ($dailyTrend[$idx]['views'] ?? 0);
+        }
+        $maxV = max(1, ...$heights);
+        $out = [];
+        $maxIdx = 0;
+        foreach ($heights as $i => $v) {
+            $pct = (int) round(5 + ($v / $maxV) * 95);
+            $out[] = ['h' => max(5, min(100, $pct)), 'highlight' => false];
+            if ($v > ($heights[$maxIdx] ?? 0)) {
+                $maxIdx = $i;
+            }
+        }
+        foreach ($out as $i => &$row) {
+            $row['highlight'] = $i === $maxIdx;
+        }
+        unset($row);
+
+        return $out;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function buildTrendXLabels(Carbon $start, Carbon $end): array
+    {
+        $totalDays = (int) $start->diffInDays($end) + 1;
+        $count = 7;
+        if ($totalDays <= 1) {
+            return [$start->format('M d')];
+        }
+        $labels = [];
+        for ($i = 0; $i < $count; $i++) {
+            $d = $start->copy()->addDays((int) round($i * ($totalDays - 1) / max(1, $count - 1)));
+            $labels[] = $d->format('M d');
+        }
+
+        return $labels;
     }
 
     /**
