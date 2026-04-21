@@ -29,7 +29,7 @@
                             class="h-20 w-20 rounded-lg object-contain"
                         />
                     @else
-                        <span class="inline-flex h-20 min-w-20 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-center text-sm font-semibold text-gray-700">
+                        <span class="inline-flex items-center justify-center text-center text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">
                             {{ $brandName }}
                         </span>
                     @endif

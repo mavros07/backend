@@ -1,28 +1,6 @@
-﻿-- =============================================================================
--- Auto Torque Ltd — manual MySQL / MariaDB patches (phpMyAdmin or CLI)
--- =============================================================================
--- Primary path: `php artisan migrate` (Laravel migrations in `database/migrations/` are canonical).
--- Use this file only when migrations cannot be run on the server, or for one-off operational fixes.
---
--- Schema and data baseline: prefer Laravel migrations + seeders directly.
--- Site content (CMS HTML, settings, demo listings): use `php artisan db:seed`.
---
--- Fallback + hotfix SQL only (not routine deploys).
---
--- DEMO INVENTORY: six approved listings from `DemoData` / `VehiclesSeeder`, each with six gallery rows.
--- `vehicle_images.path` values are web paths under `public/` (e.g. asset/images/media/01-6-1-1.jpg), same as
--- the seeder — resolved in PHP via `asset()` / VehicleImageUrl (not filesystem paths like public/...). Safe to re-run.
--- =============================================================================
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+﻿SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 SET NAMES utf8mb4;
-
--- -----------------------------------------------------------------------------
--- Repair: `migrations` table empty after manual SQL import (Laravel needs rows here)
--- Run only if your schema already matches `database/migrations/*.php`.
--- Backup first. If duplicates exist, run: TRUNCATE TABLE `migrations`;
--- -----------------------------------------------------------------------------
 /*
 INSERT INTO `migrations` (`migration`, `batch`) VALUES
   ('0001_01_01_000000_create_users_table', 1),
@@ -38,11 +16,6 @@ INSERT INTO `migrations` (`migration`, `batch`) VALUES
   ('2026_04_18_100000_create_cms_pages_table', 1);
 */
 
--- -----------------------------------------------------------------------------
--- Example: ensure sessions table exists (SESSION_DRIVER=database)
--- Duplicate safe with IF NOT EXISTS if you patch an old DB.
--- -----------------------------------------------------------------------------
-
 CREATE TABLE IF NOT EXISTS `sessions` (
   `id` varchar(255) NOT NULL,
   `user_id` bigint unsigned DEFAULT NULL,
@@ -54,14 +27,6 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   KEY `sessions_user_id_index` (`user_id`),
   KEY `sessions_last_activity_index` (`last_activity`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- =============================================================================
--- Demo approved inventory (keep in sync with database/seeders/DemoData.php)
--- =============================================================================
--- Prerequisite tables: `users`, `roles`, `model_has_roles`, `vehicles`, `vehicle_images`
--- Password hash below matches Laravel demo login from seeders (`password`).
--- Image paths: `asset/images/media/*.jpg` (bundled under `public/asset/`), kept in sync with `DemoData::localDemoPool()`.
--- =============================================================================
 
 SET @demo_ts = '2026-04-20 02:37:47';
 
@@ -84,7 +49,6 @@ FROM `roles` r
 JOIN `users` u ON (r.name = 'admin' AND u.email = 'admin@example.com')
    OR (r.name = 'user' AND u.email = 'demo@example.com');
 
--- Drop legacy 3-car demo slugs (replaced by six-vehicle grid)
 DELETE vi FROM `vehicle_images` vi
 JOIN `vehicles` v ON v.id = vi.vehicle_id
 WHERE v.slug IN (
@@ -97,7 +61,6 @@ DELETE FROM `vehicles` WHERE `slug` IN (
   '2019-nissan-altima-25-sv',
   '2021-tesla-roadster'
 );
--- Demo approved inventory mapped to the demo user
 INSERT INTO `vehicles` (`user_id`, `title`, `slug`, `status`, `year`, `make`, `model`, `price`, `mileage`, `transmission`, `fuel_type`, `drive`, `body_type`, `condition`, `engine_size`, `location`, `features`, `exterior_color`, `interior_color`, `description`, `submitted_at`, `approved_at`, `approved_by`, `created_at`, `updated_at`)
 SELECT u.id, '2021 BMW M4 Competition', '2021-bmw-m4-competition', 'approved', 2021, 'BMW', 'M4', 89900, 12500, 'Automatic', 'Petrol', 'RWD', 'Coupe', 'used', '3.0L I6 twin-turbo', 'Miami, FL', '["M Sport package","Carbon roof","Live Cockpit Professional","Harman Kardon","Head-up display"]', 'Isle of Man Green', 'Silverstone', 'Demo listing: high-performance M4 Competition with adaptive M suspension and M Sport brakes. Includes six local media images.', @demo_ts, @demo_ts, approver.id, @demo_ts, @demo_ts
 FROM `users` u
@@ -302,7 +265,6 @@ SELECT v.id, 'asset/images/media/01-10-1.jpg', 5, @demo_ts, @demo_ts
 FROM `vehicles` v
 WHERE v.slug = '2023-lamborghini-urus';
 
--- Ensure demo rows stay public if a DB had been partially edited
 UPDATE `vehicles` v
 JOIN `users` a ON a.email = 'admin@example.com'
 SET
@@ -320,22 +282,6 @@ WHERE v.`slug` IN (
   '2023-lamborghini-urus'
 );
 
--- -----------------------------------------------------------------------------
--- Add future one-off patches below (ALTER TABLE, indexes, data backfills).
--- Document each change with a date and the matching Laravel migration name if any.
--- -----------------------------------------------------------------------------
-
--- Example (commented):
--- -- 2026-04-20: example index — see migrations/2026_xx_xx_xxxx_example.php
--- ALTER TABLE `vehicles` ADD INDEX `vehicles_example_index` (`some_column`);
-
--- 2026-04-20: align staging schema with latest Laravel migrations
--- Migration refs:
--- - 2026_04_20_220000_add_is_active_to_cms_pages_table.php
--- - 2026_04_20_220100_create_page_sections_table.php
--- - 2026_04_20_220200_create_media_table.php
-
--- cms_pages.is_active (used by PageController WHERE clause)
 SET @has_is_active := (
   SELECT COUNT(*)
   FROM information_schema.COLUMNS
@@ -350,7 +296,6 @@ SET @sql := IF(
 );
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
--- page_sections table for page-editor section fields
 CREATE TABLE IF NOT EXISTS `page_sections` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `page` VARCHAR(255) NOT NULL,
@@ -364,7 +309,6 @@ CREATE TABLE IF NOT EXISTS `page_sections` (
   KEY `page_sections_page_index` (`page`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- media table for admin media library + modal picker
 CREATE TABLE IF NOT EXISTS `media` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `filename` VARCHAR(255) NOT NULL,
@@ -382,7 +326,6 @@ CREATE TABLE IF NOT EXISTS `media` (
     FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 2026-04-21: remove legacy WordPress/Elementor HTML from home `content_html` (homepage layout is Blade + `page_sections`).
 UPDATE `cms_pages`
 SET `content_html` = ''
 WHERE `slug` = 'home'
@@ -393,10 +336,6 @@ WHERE `slug` = 'home'
     OR `content_html` LIKE '%wp-%'
   );
 
--- Optional: drop old per-section keys in `site_settings` so `page_sections` + defaults win (uncomment if hero still shows old copy).
--- DELETE FROM `site_settings` WHERE `key` LIKE 'page_home_%';
-
--- 2026-04-21: Ensure CMS rows exist and stay active so public routes never 404 on `firstOrFail`-style CMS checks (imports often omit `listing-detail`).
 INSERT INTO `cms_pages` (`slug`, `title`, `meta_description`, `content_html`, `is_active`, `created_at`, `updated_at`)
 VALUES
 ('listing-detail', 'Vehicle Detail', 'Lorem ipsum dolor sit amet.', '', 1, NOW(), NOW()),
@@ -406,11 +345,6 @@ ON DUPLICATE KEY UPDATE
   `is_active` = 1,
   `updated_at` = VALUES(`updated_at`);
 
--- -----------------------------------------------------------------------------
--- 2026-04-21: Seed `page_sections` (same data as `Database\Seeders\PageSectionsSeeder`).
--- Run after `CREATE TABLE IF NOT EXISTS page_sections` above. No Artisan required.
--- Idempotent: upserts on unique (`page`, `section_key`).
--- -----------------------------------------------------------------------------
 INSERT INTO `page_sections` (`page`, `section_key`, `content_type`, `content`, `created_at`, `updated_at`) VALUES
 ('home', 'hero_title', 'text', 'Lorem ipsum dolor sit amet', NOW(), NOW()),
 ('home', 'hero_subtitle', 'text', 'Consectetur adipiscing elit, sed do eiusmod tempor incididunt', NOW(), NOW()),
@@ -452,3 +386,29 @@ ON DUPLICATE KEY UPDATE
   `content_type` = VALUES(`content_type`),
   `content` = VALUES(`content`),
   `updated_at` = VALUES(`updated_at`);
+
+CREATE TABLE IF NOT EXISTS `site_traffic_events` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `path` VARCHAR(1024) NOT NULL,
+  `route_name` VARCHAR(255) NULL,
+  `url` TEXT NULL,
+  `method` VARCHAR(10) NOT NULL DEFAULT 'GET',
+  `referrer_host` VARCHAR(255) NULL,
+  `referrer_url` TEXT NULL,
+  `user_agent` VARCHAR(255) NULL,
+  `ip_hash` VARCHAR(64) NULL,
+  `session_id` VARCHAR(120) NULL,
+  `vehicle_id` BIGINT UNSIGNED NULL,
+  `vehicle_slug` VARCHAR(255) NULL,
+  `viewed_at` TIMESTAMP NOT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `site_traffic_events_viewed_at_path_index` (`viewed_at`, `path`(191)),
+  KEY `site_traffic_events_viewed_at_route_name_index` (`viewed_at`, `route_name`),
+  KEY `site_traffic_events_viewed_at_vehicle_id_index` (`viewed_at`, `vehicle_id`),
+  KEY `site_traffic_events_viewed_at_session_id_index` (`viewed_at`, `session_id`),
+  KEY `site_traffic_events_vehicle_id_foreign` (`vehicle_id`),
+  CONSTRAINT `site_traffic_events_vehicle_id_foreign`
+    FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
