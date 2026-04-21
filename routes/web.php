@@ -121,6 +121,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     })->name('admin.dashboard');
 
     Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('admin.analytics.index');
+    Route::get('/analytics/data', [AdminAnalyticsController::class, 'data'])->name('admin.analytics.data');
 
     Route::redirect('/vehicles', '/dashboard/vehicles')->name('admin.vehicles.index');
     Route::get('/vehicles/{vehicle}/edit', fn (Vehicle $vehicle) => redirect()->route('dashboard.vehicles.edit', $vehicle))->name('admin.vehicles.edit');

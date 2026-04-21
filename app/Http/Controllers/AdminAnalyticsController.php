@@ -6,6 +6,7 @@ use App\Models\SiteTrafficEvent;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
@@ -16,13 +17,75 @@ class AdminAnalyticsController extends Controller
 {
     public function index(Request $request): View|Response
     {
-        $days = (int) $request->integer('range', 90);
-        if (! in_array($days, [7, 30, 90], true)) {
-            $days = 90;
-        }
-        $end = now();
-        $start = now()->subDays($days - 1)->startOfDay();
+        [$start, $end, $days] = $this->resolveDateRange($request);
+        $data = $this->buildAnalyticsPayload($start, $end, $days);
 
+        if ($request->query('export') === 'csv') {
+            return $this->csvExport($data['dailyTrend'], $days);
+        }
+
+        return view('admin.analytics.index', $data);
+    }
+
+    public function data(Request $request): JsonResponse
+    {
+        [$start, $end, $days] = $this->resolveDateRange($request);
+
+        return response()->json($this->buildAnalyticsPayload($start, $end, $days));
+    }
+
+    /**
+     * @param  array<int, array{date:string,label:string,views:int,sessions:int}>  $dailyTrend
+     */
+    protected function csvExport(array $dailyTrend, int $days): Response
+    {
+        $lines = ['date,views,sessions'];
+        foreach ($dailyTrend as $row) {
+            $lines[] = implode(',', [$row['date'], $row['views'], $row['sessions']]);
+        }
+
+        return response(implode("\n", $lines), 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="analytics-'.$days.'d.csv"',
+        ]);
+    }
+
+    /**
+     * @return array{0:Carbon,1:Carbon,2:int}
+     */
+    protected function resolveDateRange(Request $request): array
+    {
+        $presetDays = (int) $request->integer('range', 90);
+        if (! in_array($presetDays, [7, 30, 90], true)) {
+            $presetDays = 90;
+        }
+
+        $startInput = trim((string) $request->query('start_date', ''));
+        $endInput = trim((string) $request->query('end_date', ''));
+        if ($startInput !== '' && $endInput !== '') {
+            try {
+                $start = Carbon::parse($startInput)->startOfDay();
+                $end = Carbon::parse($endInput)->endOfDay();
+                if ($start->lte($end)) {
+                    $days = (int) $start->diffInDays($end) + 1;
+                    return [$start, $end, max(1, $days)];
+                }
+            } catch (\Throwable) {
+                // Fall back to preset range.
+            }
+        }
+
+        $end = now();
+        $start = now()->subDays($presetDays - 1)->startOfDay();
+
+        return [$start, $end, $presetDays];
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    protected function buildAnalyticsPayload(Carbon $start, Carbon $end, int $days): array
+    {
         $baseQuery = SiteTrafficEvent::query()->betweenDates($start, $end);
 
         $totalViews = (clone $baseQuery)->count();
@@ -39,7 +102,6 @@ class AdminAnalyticsController extends Controller
 
         $dailyTrend = $this->buildDailyTrend($start, $end, $trendRows);
         $lineChart = $this->buildLineChart($dailyTrend);
-
         $deviceBreakdown = $this->buildDeviceBreakdown(clone $baseQuery);
 
         $topPages = (clone $baseQuery)
@@ -47,7 +109,11 @@ class AdminAnalyticsController extends Controller
             ->groupBy('path')
             ->orderByDesc('views')
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(function ($row) {
+                $row->label = $this->friendlyPathLabel((string) $row->path);
+                return $row;
+            });
 
         $topListings = (clone $baseQuery)
             ->whereNotNull('vehicle_slug')
@@ -75,12 +141,10 @@ class AdminAnalyticsController extends Controller
         $bounceRate = $sessionDepthRows->isEmpty() ? 0.0 : ($bounceSessions / $sessionDepthRows->count()) * 100;
         $avgViewsPerSession = $sessionDepthRows->isEmpty() ? 0.0 : $sessionDepthRows->avg('views');
 
-        if ($request->query('export') === 'csv') {
-            return $this->csvExport($dailyTrend, $days);
-        }
-
-        return view('admin.analytics.index', [
+        return [
             'rangeDays' => $days,
+            'startDate' => $start->toDateString(),
+            'endDate' => $end->toDateString(),
             'summary' => [
                 'total_views' => $totalViews,
                 'unique_sessions' => $uniqueSessions,
@@ -96,23 +160,26 @@ class AdminAnalyticsController extends Controller
             'topPages' => $topPages,
             'topListings' => $topListings,
             'topReferrers' => $topReferrers,
-        ]);
+        ];
     }
 
-    /**
-     * @param  array<int, array{date:string,label:string,views:int,sessions:int}>  $dailyTrend
-     */
-    protected function csvExport(array $dailyTrend, int $days): Response
+    protected function friendlyPathLabel(string $path): string
     {
-        $lines = ['date,views,sessions'];
-        foreach ($dailyTrend as $row) {
-            $lines[] = implode(',', [$row['date'], $row['views'], $row['sessions']]);
+        $normalized = trim($path);
+        if ($normalized === '' || $normalized === '/') {
+            return 'Home';
+        }
+        if (str_starts_with($normalized, 'inventory/')) {
+            return 'Listing: '.str_replace('-', ' ', substr($normalized, 10));
+        }
+        if ($normalized === 'inventory') {
+            return 'Inventory';
+        }
+        if ($normalized === 'compare') {
+            return 'Compare';
         }
 
-        return response(implode("\n", $lines), 200, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="analytics-'.$days.'d.csv"',
-        ]);
+        return ucfirst(str_replace(['/', '-'], [' / ', ' '], $normalized));
     }
 
     /**
