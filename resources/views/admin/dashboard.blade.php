@@ -7,13 +7,6 @@
   </x-slot>
 
   <div class="space-y-10">
-    <div class="relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-8 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.15)] ring-1 ring-black/[0.03]">
-      <div class="pointer-events-none absolute -right-16 -top-24 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl"></div>
-      <p class="relative max-w-2xl text-base leading-relaxed text-zinc-600">
-        {{ __('Summary of vehicles and team access for your site. Use the shortcuts below to manage inventory, user accounts, pages, and media—or open the live site from the header anytime.') }}
-      </p>
-    </div>
-
     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
       <div class="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm ring-1 ring-black/[0.02] transition hover:shadow-md">
         <div class="flex items-start justify-between gap-3">

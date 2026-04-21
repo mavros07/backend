@@ -30,14 +30,39 @@
     {{-- Sidebar SVG icons + StayEazi-style scroll shell (fixed rail + ml offset + flex column scroll pane) --}}
     <style>
       .admin-sidebar svg.admin-nav-icon { width: 1.25rem; height: 1.25rem; max-width: 1.25rem; max-height: 1.25rem; flex-shrink: 0; display: block; }
-      /* Same idea as StayEazi .main-content-area > .content-area: flex:1; min-height:0; overflow-y:auto */
-      .admin-main-shell { display: flex; flex-direction: column; height: 100dvh; max-height: 100dvh; min-height: 0; overflow: hidden; width: 100%; }
+      /*
+        StayEazi pattern: fixed sidebar + main has margin-left AND width calc (not width:100% + margin, which overflows).
+        See .main-content-area { width: calc(100% - 70px); margin-left: 70px; } in admin-design.css
+      */
+      .admin-main-shell {
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+        max-height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+      }
+      @media (min-width: 1024px) {
+        .admin-main-shell {
+          margin-left: 16rem;
+          width: calc(100% - 16rem);
+          max-width: calc(100% - 16rem);
+        }
+        .admin-main-shell.admin-main-shell--rail {
+          margin-left: 4.5rem;
+          width: calc(100% - 4.5rem);
+          max-width: calc(100% - 4.5rem);
+        }
+      }
       .admin-content-scroll { flex: 1 1 0%; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
     </style>
     @include('partials.vite-assets')
   </head>
   <body
-    class="h-full max-h-[100dvh] overflow-hidden antialiased bg-zinc-100 text-zinc-900"
+    class="h-full max-h-[100dvh] overflow-hidden overflow-x-hidden antialiased bg-zinc-100 text-zinc-900"
     style="font-family:Inter,system-ui,sans-serif"
     x-data="{
       drawerOpen: false,
@@ -161,8 +186,8 @@
       </aside>
 
       <div
-        class="admin-main-shell min-w-0 pt-0 transition-[margin] duration-300 ease-out lg:ml-64"
-        :class="railMode ? 'lg:!ml-[4.5rem]' : ''"
+        class="admin-main-shell min-w-0 pt-0 transition-[margin,width,max-width] duration-300 ease-out"
+        :class="{ 'admin-main-shell--rail': railMode }"
       >
         <header class="z-40 flex h-16 shrink-0 items-center gap-4 border-b border-zinc-200/90 bg-white/95 px-4 shadow-sm backdrop-blur-md sm:px-6 lg:px-8">
           <button
