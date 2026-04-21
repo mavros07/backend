@@ -46,6 +46,32 @@
       </div>
     </div>
 
+    <div class="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm ring-1 ring-black/[0.02]">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="text-sm font-bold uppercase tracking-[0.15em] text-zinc-500">{{ __('Traffic summary') }}</h2>
+        <a href="{{ route('admin.analytics.index') }}" class="inline-flex items-center rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50">{{ __('Open analytics') }}</a>
+      </div>
+      @php $traffic = $analyticsSummary ?? []; @endphp
+      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Views (:days days)', ['days' => $traffic['range_days'] ?? 90]) }}</div>
+          <div class="mt-1 text-2xl font-bold tracking-tight text-zinc-900">{{ number_format((int) ($traffic['total_views'] ?? 0)) }}</div>
+        </div>
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Unique sessions') }}</div>
+          <div class="mt-1 text-2xl font-bold tracking-tight text-zinc-900">{{ number_format((int) ($traffic['unique_sessions'] ?? 0)) }}</div>
+        </div>
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Top page') }}</div>
+          <div class="mt-1 truncate text-sm font-semibold text-zinc-800">{{ $traffic['top_page']->path ?? __('No data yet') }}</div>
+        </div>
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Top listing') }}</div>
+          <div class="mt-1 truncate text-sm font-semibold text-zinc-800">{{ $traffic['top_listing']->vehicle_slug ?? __('No data yet') }}</div>
+        </div>
+      </div>
+    </div>
+
     <div>
       <h2 class="text-sm font-bold uppercase tracking-[0.15em] text-zinc-500">{{ __('Shortcuts') }}</h2>
       <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

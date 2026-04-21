@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: env('TRUSTED_PROXIES', '*'));
+        $middleware->web(append: [
+            \App\Http\Middleware\TrackPublicTraffic::class,
+        ]);
 
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,

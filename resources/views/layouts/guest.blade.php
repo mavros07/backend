@@ -1,3 +1,7 @@
+@php
+    $brandName = trim((string) ($site['site_name'] ?? config('app.name', 'Laravel')));
+    $logoPath = $site['logo_path'] ?? $site['logo_url'] ?? null;
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -18,7 +22,17 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
                 <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                    @if (!empty($logoPath))
+                        <img
+                            src="{{ \App\Support\VehicleImageUrl::url($logoPath) }}"
+                            alt="{{ $brandName }}"
+                            class="h-20 w-20 rounded-lg object-contain"
+                        />
+                    @else
+                        <span class="inline-flex h-20 min-w-20 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-center text-sm font-semibold text-gray-700">
+                            {{ $brandName }}
+                        </span>
+                    @endif
                 </a>
             </div>
 

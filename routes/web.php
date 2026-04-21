@@ -12,6 +12,8 @@ use App\Http\Controllers\VehicleInquiryController;
 use App\Http\Controllers\TemporaryAdminController;
 use App\Http\Controllers\AdminPageController;
 use App\Http\Controllers\AdminMediaController;
+use App\Http\Controllers\AdminAnalyticsController;
+use App\Models\SiteTrafficEvent;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
@@ -97,6 +99,10 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/', function () {
+        $analyticsStart = now()->subDays(89)->startOfDay();
+        $analyticsEnd = now();
+        $analyticsBase = SiteTrafficEvent::query()->betweenDates($analyticsStart, $analyticsEnd);
+
         return view('admin.dashboard', [
             'stats' => [
                 'total_listings' => Vehicle::query()->count(),
@@ -104,8 +110,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
                 'approved_listings' => Vehicle::query()->where('status', 'approved')->count(),
                 'users_count' => User::query()->count(),
             ],
+            'analyticsSummary' => [
+                'range_days' => 90,
+                'total_views' => (clone $analyticsBase)->count(),
+                'unique_sessions' => (clone $analyticsBase)->whereNotNull('session_id')->distinct('session_id')->count('session_id'),
+                'top_page' => (clone $analyticsBase)->selectRaw('path, COUNT(*) as views')->groupBy('path')->orderByDesc('views')->first(),
+                'top_listing' => (clone $analyticsBase)->whereNotNull('vehicle_slug')->selectRaw('vehicle_slug, COUNT(*) as views')->groupBy('vehicle_slug')->orderByDesc('views')->first(),
+            ],
         ]);
     })->name('admin.dashboard');
+
+    Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('admin.analytics.index');
 
     Route::redirect('/vehicles', '/dashboard/vehicles')->name('admin.vehicles.index');
     Route::get('/vehicles/{vehicle}/edit', fn (Vehicle $vehicle) => redirect()->route('dashboard.vehicles.edit', $vehicle))->name('admin.vehicles.edit');
