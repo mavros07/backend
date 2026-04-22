@@ -54,7 +54,7 @@
   </x-slot>
 
   <div
-    class="anx-canvas text-on-surface relative mx-auto min-h-screen w-full max-w-7xl px-6 py-12 antialiased md:px-10"
+    class="anx-canvas text-on-surface relative w-full min-h-0 antialiased"
     style="font-family: Inter, system-ui, sans-serif"
     x-data="analyticsPage({
       trafficSubTemplate: @js(__('User engagement and volume over the last :count days', ['count' => '__N__'])),

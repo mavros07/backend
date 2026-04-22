@@ -15,8 +15,7 @@
     </div>
   </x-slot>
 
-  <div class="p-4 sm:p-6 lg:p-8">
-    <div class="mx-auto max-w-3xl space-y-6">
+  <div class="w-full space-y-6">
       @if($isAdminEdit)
         @php $u = $vehicle->user; @endphp
         <div class="rounded-xl border border-indigo-200 bg-indigo-50/80 p-4 text-sm text-indigo-950 shadow-sm ring-1 ring-indigo-100">
@@ -250,7 +249,6 @@
           </form>
         </div>
       </div>
-    </div>
   </div>
 </x-app-layout>
 

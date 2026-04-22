@@ -11,7 +11,7 @@ use Illuminate\View\View;
 class AdminPageController extends Controller
 {
     /**
-     * @return array<string, array{label: string, default_title: string, default_description: string, fields: array<int, array{name: string, label: string, type: string, default: string}>}>
+     * @return array<string, array{label: string, default_title: string, default_description: string, fields: array<int, array{name: string, label: string, type: string, default: string, group?: string}>}>
      */
     protected function editablePages(): array
     {
@@ -21,31 +21,31 @@ class AdminPageController extends Controller
                 'default_title' => 'Home',
                 'default_description' => 'Lorem ipsum homepage SEO and section copy (white-label defaults, like reference CMS).',
                 'fields' => [
-                    ['name' => 'hero_title', 'label' => 'Hero Title', 'type' => 'text', 'default' => 'Lorem ipsum dolor sit amet'],
-                    ['name' => 'hero_subtitle', 'label' => 'Hero Subtitle', 'type' => 'text', 'default' => 'Consectetur adipiscing elit, sed do eiusmod tempor incididunt'],
-                    ['name' => 'hero_cta_text', 'label' => 'Hero CTA Button Text', 'type' => 'text', 'default' => 'Lorem CTA'],
-                    ['name' => 'hero_cta_href', 'label' => 'Hero CTA Link (path or URL)', 'type' => 'text', 'default' => '/inventory'],
-                    ['name' => 'home_search_label', 'label' => 'Search Bar Label', 'type' => 'text', 'default' => 'Lorem ipsum — search inventory'],
-                    ['name' => 'recent_title', 'label' => 'Featured Listings Title', 'type' => 'text', 'default' => 'Lorem dolor sit amet'],
-                    ['name' => 'recent_subtitle', 'label' => 'Featured Listings Intro', 'type' => 'textarea', 'default' => 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Cards below are live listings.'],
-                    ['name' => 'hero_image', 'label' => 'Hero Background Image Path', 'type' => 'image', 'default' => 'asset/images/media/home-hero-main.jpg'],
-                    ['name' => 'cta_left_image', 'label' => 'CTA Left Image Path', 'type' => 'image', 'default' => 'asset/images/media/home-cta-left.jpg'],
-                    ['name' => 'cta_right_image', 'label' => 'CTA Right Image Path', 'type' => 'image', 'default' => 'asset/images/media/home-cta-right.jpg'],
-                    ['name' => 'cta_left_title', 'label' => 'CTA Left Title', 'type' => 'text', 'default' => 'Lorem ipsum dolor'],
-                    ['name' => 'cta_left_body', 'label' => 'CTA Left Body', 'type' => 'textarea', 'default' => 'Sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'],
-                    ['name' => 'cta_right_title', 'label' => 'CTA Right Title', 'type' => 'text', 'default' => 'Consectetur adipiscing'],
-                    ['name' => 'cta_right_body', 'label' => 'CTA Right Body', 'type' => 'textarea', 'default' => 'Elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.'],
-                    ['name' => 'feat1_title', 'label' => 'Feature 1 Title', 'type' => 'text', 'default' => 'Lorem ipsum'],
-                    ['name' => 'feat1_body', 'label' => 'Feature 1 Body', 'type' => 'textarea', 'default' => 'Dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.'],
-                    ['name' => 'feat2_title', 'label' => 'Feature 2 Title', 'type' => 'text', 'default' => 'Dolor sit amet'],
-                    ['name' => 'feat2_body', 'label' => 'Feature 2 Body', 'type' => 'textarea', 'default' => 'Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet.'],
-                    ['name' => 'feat3_title', 'label' => 'Feature 3 Title', 'type' => 'text', 'default' => 'Consectetur elit'],
-                    ['name' => 'feat3_body', 'label' => 'Feature 3 Body', 'type' => 'textarea', 'default' => 'Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.'],
-                    ['name' => 'welcome_title', 'label' => 'Welcome Block Title', 'type' => 'text', 'default' => 'Lorem ipsum welcome block'],
-                    ['name' => 'welcome_body', 'label' => 'Welcome Block Body', 'type' => 'textarea', 'default' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.'],
-                    ['name' => 'testimonial_name', 'label' => 'Testimonial Name', 'type' => 'text', 'default' => 'Lorem Ipsum'],
-                    ['name' => 'testimonial_role', 'label' => 'Testimonial Role', 'type' => 'text', 'default' => 'Lorem role'],
-                    ['name' => 'testimonial_quote', 'label' => 'Testimonial Quote', 'type' => 'textarea', 'default' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla, velit id laoreet hendrerit, sapien nisl varius dolor, eu consequat erat augue in eros.'],
+                    ['name' => 'hero_title', 'label' => 'Hero Title', 'type' => 'text', 'default' => 'Lorem ipsum dolor sit amet', 'group' => 'Hero & search'],
+                    ['name' => 'hero_subtitle', 'label' => 'Hero Subtitle', 'type' => 'text', 'default' => 'Consectetur adipiscing elit, sed do eiusmod tempor incididunt', 'group' => 'Hero & search'],
+                    ['name' => 'hero_cta_text', 'label' => 'Hero CTA Button Text', 'type' => 'text', 'default' => 'Lorem CTA', 'group' => 'Hero & search'],
+                    ['name' => 'hero_cta_href', 'label' => 'Hero CTA Link (path or URL)', 'type' => 'text', 'default' => '/inventory', 'group' => 'Hero & search'],
+                    ['name' => 'home_search_label', 'label' => 'Search Bar Label', 'type' => 'text', 'default' => 'Lorem ipsum — search inventory', 'group' => 'Hero & search'],
+                    ['name' => 'hero_image', 'label' => 'Hero Background Image', 'type' => 'image', 'default' => 'asset/images/media/home-hero-main.jpg', 'group' => 'Hero & search'],
+                    ['name' => 'recent_title', 'label' => 'Featured Listings Title', 'type' => 'text', 'default' => 'Lorem dolor sit amet', 'group' => 'Featured listings'],
+                    ['name' => 'recent_subtitle', 'label' => 'Featured Listings Intro', 'type' => 'textarea', 'default' => 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Cards below are live listings.', 'group' => 'Featured listings'],
+                    ['name' => 'cta_left_image', 'label' => 'Left Column Image', 'type' => 'image', 'default' => 'asset/images/media/home-cta-left.jpg', 'group' => 'Two-column promo'],
+                    ['name' => 'cta_right_image', 'label' => 'Right Column Image', 'type' => 'image', 'default' => 'asset/images/media/home-cta-right.jpg', 'group' => 'Two-column promo'],
+                    ['name' => 'cta_left_title', 'label' => 'Left Column Title', 'type' => 'text', 'default' => 'Lorem ipsum dolor', 'group' => 'Two-column promo'],
+                    ['name' => 'cta_left_body', 'label' => 'Left Column Body', 'type' => 'textarea', 'default' => 'Sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', 'group' => 'Two-column promo'],
+                    ['name' => 'cta_right_title', 'label' => 'Right Column Title', 'type' => 'text', 'default' => 'Consectetur adipiscing', 'group' => 'Two-column promo'],
+                    ['name' => 'cta_right_body', 'label' => 'Right Column Body', 'type' => 'textarea', 'default' => 'Elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.', 'group' => 'Two-column promo'],
+                    ['name' => 'feat1_title', 'label' => 'Feature 1 Title', 'type' => 'text', 'default' => 'Lorem ipsum', 'group' => 'Feature highlights'],
+                    ['name' => 'feat1_body', 'label' => 'Feature 1 Body', 'type' => 'textarea', 'default' => 'Dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.', 'group' => 'Feature highlights'],
+                    ['name' => 'feat2_title', 'label' => 'Feature 2 Title', 'type' => 'text', 'default' => 'Dolor sit amet', 'group' => 'Feature highlights'],
+                    ['name' => 'feat2_body', 'label' => 'Feature 2 Body', 'type' => 'textarea', 'default' => 'Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet.', 'group' => 'Feature highlights'],
+                    ['name' => 'feat3_title', 'label' => 'Feature 3 Title', 'type' => 'text', 'default' => 'Consectetur elit', 'group' => 'Feature highlights'],
+                    ['name' => 'feat3_body', 'label' => 'Feature 3 Body', 'type' => 'textarea', 'default' => 'Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.', 'group' => 'Feature highlights'],
+                    ['name' => 'welcome_title', 'label' => 'Welcome Block Title', 'type' => 'text', 'default' => 'Lorem ipsum welcome block', 'group' => 'Welcome block'],
+                    ['name' => 'welcome_body', 'label' => 'Welcome Block Body', 'type' => 'textarea', 'default' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.', 'group' => 'Welcome block'],
+                    ['name' => 'testimonial_name', 'label' => 'Testimonial Name', 'type' => 'text', 'default' => 'Lorem Ipsum', 'group' => 'Testimonial'],
+                    ['name' => 'testimonial_role', 'label' => 'Testimonial Role', 'type' => 'text', 'default' => 'Lorem role', 'group' => 'Testimonial'],
+                    ['name' => 'testimonial_quote', 'label' => 'Testimonial Quote', 'type' => 'textarea', 'default' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla, velit id laoreet hendrerit, sapien nisl varius dolor, eu consequat erat augue in eros.', 'group' => 'Testimonial'],
                 ],
             ],
             'inventory' => [
@@ -53,9 +53,9 @@ class AdminPageController extends Controller
                 'default_title' => 'Inventory',
                 'default_description' => 'Inventory page heading and intro copy.',
                 'fields' => [
-                    ['name' => 'heading', 'label' => 'Inventory Heading', 'type' => 'text', 'default' => 'Vehicles For Sale'],
-                    ['name' => 'intro', 'label' => 'Inventory Intro', 'type' => 'textarea', 'default' => 'Browse approved listings. Vehicle cards are dynamic and come from the listings module.'],
-                    ['name' => 'fallback_image', 'label' => 'Listing Fallback Image Path', 'type' => 'image', 'default' => 'asset/images/media/inventory-listing-fallback.jpg'],
+                    ['name' => 'heading', 'label' => 'Inventory Heading', 'type' => 'text', 'default' => 'Vehicles For Sale', 'group' => 'Page intro'],
+                    ['name' => 'intro', 'label' => 'Inventory Intro', 'type' => 'textarea', 'default' => 'Browse approved listings. Vehicle cards are dynamic and come from the listings module.', 'group' => 'Page intro'],
+                    ['name' => 'fallback_image', 'label' => 'Listing Card Fallback Image', 'type' => 'image', 'default' => 'asset/images/media/inventory-listing-fallback.jpg', 'group' => 'Media'],
                 ],
             ],
             'contact' => [
@@ -63,31 +63,41 @@ class AdminPageController extends Controller
                 'default_title' => 'Contact Us',
                 'default_description' => 'Contact page title and intro copy.',
                 'fields' => [
-                    ['name' => 'heading', 'label' => 'Contact Heading', 'type' => 'text', 'default' => 'Contact Us'],
-                    ['name' => 'intro', 'label' => 'Contact Intro', 'type' => 'textarea', 'default' => 'Reach our team using the form below.'],
-                    ['name' => 'hero_image', 'label' => 'Contact Hero Image Path', 'type' => 'image', 'default' => 'asset/images/media/contact-hero-bg.jpg'],
-                    ['name' => 'map_image', 'label' => 'Contact Map Image Path', 'type' => 'image', 'default' => 'asset/images/media/contact-map.jpg'],
+                    ['name' => 'heading', 'label' => 'Contact Heading', 'type' => 'text', 'default' => 'Contact Us', 'group' => 'Page intro'],
+                    ['name' => 'intro', 'label' => 'Contact Intro', 'type' => 'textarea', 'default' => 'Reach our team using the form below.', 'group' => 'Page intro'],
+                    ['name' => 'hero_image', 'label' => 'Hero / Header Image', 'type' => 'image', 'default' => 'asset/images/media/contact-hero-bg.jpg', 'group' => 'Media'],
+                    ['name' => 'map_image', 'label' => 'Map Image', 'type' => 'image', 'default' => 'asset/images/media/contact-map.jpg', 'group' => 'Media'],
                 ],
             ],
             'about' => [
                 'label' => 'About',
                 'default_title' => 'About Us',
                 'default_description' => 'About page copy and SEO metadata.',
-                'fields' => [],
+                'fields' => [
+                    ['name' => 'kicker', 'label' => 'Header Kicker', 'type' => 'text', 'default' => 'Our Story', 'group' => 'Page hero'],
+                    ['name' => 'heading', 'label' => 'Header Title', 'type' => 'text', 'default' => 'About Us', 'group' => 'Page hero'],
+                    ['name' => 'intro', 'label' => 'Header Intro', 'type' => 'textarea', 'default' => 'Learn more about our team and story.', 'group' => 'Page hero'],
+                    ['name' => 'hero_image', 'label' => 'Hero Background Image', 'type' => 'image', 'default' => 'asset/images/media/about-hero-bg.jpg', 'group' => 'Media'],
+                ],
             ],
             'faq' => [
                 'label' => 'FAQ',
                 'default_title' => 'Frequently Asked Questions',
                 'default_description' => 'FAQ page copy and SEO metadata.',
-                'fields' => [],
+                'fields' => [
+                    ['name' => 'kicker', 'label' => 'Header Kicker', 'type' => 'text', 'default' => 'Need Help?', 'group' => 'Page hero'],
+                    ['name' => 'heading', 'label' => 'Header Title', 'type' => 'text', 'default' => 'Frequently Asked Questions', 'group' => 'Page hero'],
+                    ['name' => 'intro', 'label' => 'Header Intro', 'type' => 'textarea', 'default' => 'Answers to common questions.', 'group' => 'Page hero'],
+                    ['name' => 'hero_image', 'label' => 'Hero Background Image', 'type' => 'image', 'default' => 'asset/images/media/faq-hero-bg.jpg', 'group' => 'Media'],
+                ],
             ],
             'compare' => [
                 'label' => 'Compare',
                 'default_title' => 'Compare Vehicles',
                 'default_description' => 'Compare page heading and intro copy.',
                 'fields' => [
-                    ['name' => 'heading', 'label' => 'Compare Heading', 'type' => 'text', 'default' => 'Compare Vehicles'],
-                    ['name' => 'intro', 'label' => 'Compare Intro', 'type' => 'textarea', 'default' => 'Compare list is dynamic and comes from visitor selections.'],
+                    ['name' => 'heading', 'label' => 'Compare Heading', 'type' => 'text', 'default' => 'Compare Vehicles', 'group' => 'Page intro'],
+                    ['name' => 'intro', 'label' => 'Compare Intro', 'type' => 'textarea', 'default' => 'Compare list is dynamic and comes from visitor selections.', 'group' => 'Page intro'],
                 ],
             ],
             'listing-detail' => [
@@ -95,15 +105,15 @@ class AdminPageController extends Controller
                 'default_title' => 'Vehicle Detail',
                 'default_description' => 'Listing detail page heading and intro copy.',
                 'fields' => [
-                    ['name' => 'heading', 'label' => 'Listing Detail Heading', 'type' => 'text', 'default' => 'Vehicle Detail'],
-                    ['name' => 'intro', 'label' => 'Listing Detail Intro', 'type' => 'textarea', 'default' => 'Vehicle details and gallery are dynamic from listing data.'],
+                    ['name' => 'heading', 'label' => 'Listing Detail Heading', 'type' => 'text', 'default' => 'Vehicle Detail', 'group' => 'Page intro'],
+                    ['name' => 'intro', 'label' => 'Listing Detail Intro', 'type' => 'textarea', 'default' => 'Vehicle details and gallery are dynamic from listing data.', 'group' => 'Page intro'],
                 ],
             ],
         ];
     }
 
     /**
-     * @param  array<int, array{name: string, label: string, type: string, default: string}>  $fields
+     * @param  array<int, array{name: string, label: string, type: string, default: string, group?: string}>  $fields
      * @return array<string, string>
      */
     protected function sectionValues(string $slug, array $fields): array

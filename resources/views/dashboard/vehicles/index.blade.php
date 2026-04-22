@@ -18,28 +18,42 @@
   </x-slot>
 
   <div
-    class="p-4 sm:p-6 lg:p-8"
+    class="w-full"
     x-data="{
       openMenuId: null,
       rejectExpandedId: null,
-      toggleMenu(id) {
+      menuStyle: '',
+      toggleMenu(id, evt) {
         if (this.openMenuId === id) {
           this.openMenuId = null;
           this.rejectExpandedId = null;
-        } else {
-          this.openMenuId = id;
-          this.rejectExpandedId = null;
+          this.menuStyle = '';
+          return;
         }
+        const el = evt?.currentTarget;
+        if (el && typeof el.getBoundingClientRect === 'function') {
+          const r = el.getBoundingClientRect();
+          const w = 208;
+          const left = Math.min(Math.max(8, r.right - w), window.innerWidth - w - 8);
+          const top = r.bottom + 4;
+          this.menuStyle = `top:${Math.round(top)}px;left:${Math.round(left)}px;width:${w}px`;
+        } else {
+          this.menuStyle = '';
+        }
+        this.openMenuId = id;
+        this.rejectExpandedId = null;
       },
       closeMenus() {
         this.openMenuId = null;
         this.rejectExpandedId = null;
+        this.menuStyle = '';
       },
       toggleReject(id) {
         this.rejectExpandedId = this.rejectExpandedId === id ? null : id;
       },
     }"
     @keydown.escape.window="closeMenus()"
+    @scroll.window="openMenuId != null && closeMenus()"
   >
     @if($isAdminList && $stats)
       <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -66,7 +80,7 @@
       </div>
     @endif
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
       <div class="p-4 sm:p-6">
         @if(session('status'))
           <div class="mb-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800 ring-1 ring-emerald-100">
@@ -84,7 +98,6 @@
                   <th class="whitespace-nowrap px-4 py-3">{{ __('Listing') }}</th>
                   @if($isAdminList)
                     <th class="whitespace-nowrap px-4 py-3">{{ __('Posted by') }}</th>
-                    <th class="whitespace-nowrap px-4 py-3">{{ __('Submitted') }}</th>
                   @endif
                   <th class="whitespace-nowrap px-4 py-3">{{ __('Status') }}</th>
                   <th class="whitespace-nowrap px-4 py-3 text-right">{{ __('Actions') }}</th>
@@ -99,11 +112,18 @@
                     $canApprove = $isAdminList && in_array($vehicle->status, ['pending', 'draft', 'rejected'], true);
                     $canReject = $isAdminList && $vehicle->status !== 'rejected';
                     $rejectReasonDefault = old('rejection_reason', $vehicle->rejection_reason ?? '');
+                    $listingWhen = $vehicle->submitted_at ?? $vehicle->created_at;
                   @endphp
                   <tr class="align-top">
-                    <td class="px-4 py-3">
-                      <div class="font-semibold text-slate-900">{{ $vehicle->title }}</div>
-                      <div class="text-slate-500">{{ $vehicle->year }} {{ $vehicle->make }} {{ $vehicle->model }}</div>
+                    <td class="min-w-0 max-w-xs px-4 py-3 sm:max-w-md">
+                      <div class="truncate font-semibold text-slate-900" title="{{ $vehicle->title }}">{{ $vehicle->title }}</div>
+                      <div class="mt-0.5 text-[11px] leading-snug text-slate-500">
+                        @if($listingWhen)
+                          {{ __('Submitted') }} {{ $listingWhen->format('M j, Y') }} · {{ $listingWhen->format('g:i a') }}
+                        @else
+                          —
+                        @endif
+                      </div>
                     </td>
                     @if($isAdminList)
                       <td class="px-4 py-3 text-slate-700">
@@ -117,7 +137,6 @@
                           @endif
                         </div>
                       </td>
-                      <td class="whitespace-nowrap px-4 py-3 text-slate-600">{{ $vehicle->submitted_at?->format('M j, Y g:i a') ?? '—' }}</td>
                     @endif
                     <td class="px-4 py-3">
                       <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold
@@ -133,7 +152,7 @@
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                         title="{{ __('Actions') }}"
-                        @click.stop="toggleMenu({{ $vehicle->id }})"
+                        @click.stop="toggleMenu({{ $vehicle->id }}, $event)"
                         :aria-expanded="openMenuId === {{ $vehicle->id }} ? 'true' : 'false'"
                         aria-label="{{ __('Actions') }}"
                       >
@@ -147,7 +166,8 @@
                         x-transition:enter-start="opacity-0 scale-95"
                         x-transition:enter-end="opacity-100 scale-100"
                         @click.outside="closeMenus()"
-                        class="absolute right-4 top-full z-[200] mt-1 w-52 min-w-[13rem] max-h-[min(70vh,22rem)] overflow-y-auto overflow-x-hidden rounded-lg border border-slate-200 bg-white py-1 text-left shadow-lg ring-1 ring-black/5 sm:right-0"
+                        x-bind:style="openMenuId === {{ $vehicle->id }} ? menuStyle : ''"
+                        class="fixed z-[300] max-h-[min(70vh,22rem)] overflow-y-auto overflow-x-hidden rounded-lg border border-slate-200 bg-white py-1 text-left shadow-lg ring-1 ring-black/5"
                         role="menu"
                       >
                         @if($viewUrl)
@@ -177,7 +197,7 @@
                           </div>
                         @endif
 
-                        <form method="post" action="{{ route('dashboard.vehicles.destroy', $vehicle) }}" class="border-t border-slate-100" onsubmit="return confirm({{ json_encode(__('Delete this listing permanently?')) }});">
+                        <form method="post" action="{{ route('dashboard.vehicles.destroy', $vehicle) }}" class="border-t border-slate-100" onsubmit="return confirm('Delete this listing permanently?');">
                           @csrf
                           @method('DELETE')
                           <button type="submit" class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium text-rose-900 hover:bg-rose-50" role="menuitem">{{ __('Delete') }}</button>

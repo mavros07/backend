@@ -226,5 +226,6 @@
           </div>
         </main>
       </div>
+    @stack('body-end')
   </body>
 </html>

@@ -1,11 +1,15 @@
 @extends('layouts.site')
 
 @section('content')
-  <section class="bg-gradient-to-r from-[#111] to-[#1f2329] py-20">
-    <div class="max-w-6xl mx-auto px-6 text-white">
-      <p class="text-primary font-bold text-xs tracking-[0.2em] uppercase">Need Help?</p>
-      <h1 class="font-headline text-5xl font-black mt-3 uppercase">Frequently Asked Questions</h1>
-      <p class="max-w-3xl mt-6 text-slate-300">{{ $page->meta_description }}</p>
+  <section class="relative overflow-hidden py-20">
+    <img src="{{ \App\Support\PlaceholderMedia::url($sections['hero_image'] ?? 'asset/images/media/faq-hero-bg.jpg') }}" alt="" class="absolute inset-0 h-full w-full object-cover" />
+    <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/55"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-6 text-white">
+      <p class="text-primary font-bold text-xs tracking-[0.2em] uppercase">{{ $sections['kicker'] ?? 'Need Help?' }}</p>
+      <h1 class="font-headline text-5xl font-black mt-3 uppercase">{{ $sections['heading'] ?? ($page->title ?? 'Frequently Asked Questions') }}</h1>
+      @if (!empty($sections['intro']) || !empty($page->meta_description))
+        <p class="max-w-3xl mt-6 text-slate-300">{{ $sections['intro'] ?? $page->meta_description }}</p>
+      @endif
     </div>
   </section>
 

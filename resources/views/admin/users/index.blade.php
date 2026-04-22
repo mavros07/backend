@@ -13,7 +13,7 @@
   </x-slot>
 
   <div
-    class="mx-auto max-w-5xl space-y-8"
+    class="w-full space-y-8"
     x-data="{ inviteOpen: {{ $errors->any() ? 'true' : 'false' }} }"
     @open-invite-modal.window="inviteOpen = true"
     @keydown.escape.window="inviteOpen = false"

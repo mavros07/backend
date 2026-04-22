@@ -5,8 +5,7 @@
     </h2>
   </x-slot>
 
-  <div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+  <div class="w-full">
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
         <p class="text-sm text-gray-600 mb-6">
           Edit the public pages one by one. This mirrors the page-editor pattern from your reference platform.
@@ -37,7 +36,6 @@
           @endforeach
         </div>
       </div>
-    </div>
   </div>
 </x-app-layout>
 

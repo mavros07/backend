@@ -5,8 +5,7 @@
     </h2>
   </x-slot>
 
-  <div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+  <div class="w-full space-y-6">
       @if (session('status'))
         <div class="rounded border border-green-200 bg-green-50 px-4 py-3 text-green-700 text-sm">
           {{ session('status') }}
@@ -42,7 +41,6 @@
           @endforelse
         </div>
       </div>
-    </div>
   </div>
 </x-app-layout>
 

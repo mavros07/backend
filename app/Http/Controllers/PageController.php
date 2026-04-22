@@ -99,6 +99,12 @@ class PageController extends Controller
     {
         $page = CmsPage::query()->where('slug', 'about')->where('is_active', true)->firstOrFail();
         $siteName = config('app.name');
+        $sections = $this->pageSections('about', [
+            'kicker' => 'Our Story',
+            'heading' => 'About Us',
+            'intro' => $page->meta_description ?: 'Learn more about our team and story.',
+            'hero_image' => 'asset/images/media/about-hero-bg.jpg',
+        ]);
 
         return view('pages.about', [
             'title' => $page->title . ' | ' . $siteName,
@@ -108,6 +114,7 @@ class PageController extends Controller
             'ogDescription' => $page->meta_description,
             'ogUrl' => route('about', [], true),
             'page' => $page,
+            'sections' => $sections,
         ]);
     }
 
@@ -137,6 +144,12 @@ class PageController extends Controller
     {
         $page = CmsPage::query()->where('slug', 'faq')->where('is_active', true)->firstOrFail();
         $siteName = config('app.name');
+        $sections = $this->pageSections('faq', [
+            'kicker' => 'Need Help?',
+            'heading' => 'Frequently Asked Questions',
+            'intro' => $page->meta_description ?: 'Answers to common questions.',
+            'hero_image' => 'asset/images/media/faq-hero-bg.jpg',
+        ]);
 
         return view('pages.faq', [
             'title' => $page->title . ' | ' . $siteName,
@@ -146,6 +159,7 @@ class PageController extends Controller
             'ogDescription' => $page->meta_description,
             'ogUrl' => route('faq', [], true),
             'page' => $page,
+            'sections' => $sections,
         ]);
     }
 
