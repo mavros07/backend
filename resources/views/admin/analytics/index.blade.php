@@ -11,9 +11,9 @@
     <h1 class="truncate text-lg font-bold tracking-tight text-zinc-900">{{ __('Analytics') }}</h1>
   </x-slot>
 
-  {{-- Content only: matches reference main canvas — bg-surface, token classes, same gaps/padding as comp --}}
+  {{-- Content-only canvas: luxury analytics panel inside default admin main (does not alter sidebar/header) --}}
   <div
-    class="anx-canvas text-on-surface relative -mx-4 -mb-8 -mt-2 w-full min-h-[calc(100dvh-5rem)] bg-surface px-4 py-1 pb-12 antialiased sm:-mx-6 sm:px-6 lg:mx-auto lg:max-w-[1600px] lg:px-10"
+    class="anx-canvas text-on-surface relative w-full max-w-none rounded-2xl border border-outline-variant/25 bg-surface p-6 antialiased shadow-[0px_24px_48px_-12px_rgba(11,31,58,0.08)] sm:p-8 lg:p-10"
     style="font-family: Inter, system-ui, sans-serif"
     x-data="analyticsPage({
       trafficSubTemplate: @js(__('User engagement and volume over the last :count days', ['count' => '__N__'])),
@@ -34,8 +34,8 @@
       ]),
     })"
   >
-    {{-- Range controls (not in comp main — kept in content; glass panel) --}}
-    <div class="anx-glass ring-outline-variant/20 mb-8 rounded-2xl p-4 ring-1">
+    {{-- Range controls — sample-style toolbar row --}}
+    <div class="anx-glass ring-outline-variant/25 mb-10 rounded-2xl p-4 ring-1 sm:p-5">
       <div class="flex flex-wrap items-end gap-3">
         <div class="flex items-center gap-2">
           <label class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">{{ __('Start') }}</label>
