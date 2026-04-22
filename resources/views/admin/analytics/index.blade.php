@@ -2,7 +2,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <style>
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    .anx-glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); }
+    .anx-glass-card { background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(20px); }
   </style>
 @endpush
 
@@ -11,9 +11,9 @@
     <h1 class="truncate text-lg font-bold tracking-tight text-zinc-900">{{ __('Analytics') }}</h1>
   </x-slot>
 
-  {{-- Content-only canvas: luxury analytics panel inside default admin main (does not alter sidebar/header) --}}
+  {{-- Matches sample main canvas: max-w-7xl, surface bg, section cards with border + shadow-sm --}}
   <div
-    class="anx-canvas text-on-surface relative w-full max-w-none rounded-2xl border border-outline-variant/25 bg-surface p-6 antialiased shadow-[0px_24px_48px_-12px_rgba(11,31,58,0.08)] sm:p-8 lg:p-10"
+    class="anx-canvas text-on-surface relative mx-auto w-full max-w-7xl bg-surface px-4 pb-12 antialiased md:px-10"
     style="font-family: Inter, system-ui, sans-serif"
     x-data="analyticsPage({
       trafficSubTemplate: @js(__('User engagement and volume over the last :count days', ['count' => '__N__'])),
@@ -26,6 +26,7 @@
         'summary' => $summary,
         'kpiDeltas' => $kpiDeltas,
         'dailyTrend' => $dailyTrend,
+        'trendBars' => $trendBars,
         'trendXLabels' => $trendXLabels,
         'topPages' => $topPages,
         'topListings' => $topListings,
@@ -34,40 +35,46 @@
       ]),
     })"
   >
-    {{-- Range controls — sample-style toolbar row --}}
-    <div class="anx-glass ring-outline-variant/25 mb-10 rounded-2xl p-4 ring-1 sm:p-5">
-      <div class="flex flex-wrap items-end gap-3">
-        <div class="flex items-center gap-2">
-          <label class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">{{ __('Start') }}</label>
-          <input type="date" x-model="startDate" class="border-outline-variant text-on-surface rounded-lg border bg-white px-2 py-1.5 text-sm">
+    {{-- Dashboard header (sample): title row + date range cluster + export --}}
+    <div class="mb-10 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+      <div>
+        <h2 class="text-3xl font-black tracking-tight text-[#0B1F3A]">{{ __('Analytics overview') }}</h2>
+        <p class="mt-1 text-on-surface-variant">{{ __('Global luxury automotive market performance') }}</p>
+      </div>
+      <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
+        <div class="anx-glass-card flex flex-wrap items-center gap-2 rounded-xl border border-surface-container px-3 py-2 shadow-sm ring-1 ring-black/[0.03] sm:gap-3 sm:px-4">
+          <span class="material-symbols-outlined text-on-surface text-base">filter_list</span>
+          <span class="text-on-surface font-semibold text-sm">{{ __('Date range') }}</span>
+          <input type="date" x-model="startDate" class="border-outline-variant/80 text-on-surface max-w-[11rem] rounded-lg border bg-white px-2 py-1 text-xs sm:text-sm">
+          <span class="text-on-surface-variant text-xs">{{ __('to') }}</span>
+          <input type="date" x-model="endDate" class="border-outline-variant/80 text-on-surface max-w-[11rem] rounded-lg border bg-white px-2 py-1 text-xs sm:text-sm">
+          <div class="flex flex-wrap gap-1">
+            <template x-for="opt in [7,30,90]" :key="opt">
+              <button
+                type="button"
+                @click="applyPreset(opt)"
+                class="rounded-lg border px-2 py-1 text-[11px] font-bold tracking-wide sm:px-3 sm:text-xs"
+                :class="range === opt ? 'border-primary-container bg-primary-container text-white' : 'border-surface-container-low bg-surface-container-lowest text-on-surface-variant'"
+              >
+                <span x-text="opt + 'd'"></span>
+              </button>
+            </template>
+          </div>
+          <button type="button" @click="load()" class="bg-primary-container hover:opacity-90 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-opacity sm:text-sm">{{ __('Apply') }}</button>
         </div>
-        <div class="flex items-center gap-2">
-          <label class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">{{ __('End') }}</label>
-          <input type="date" x-model="endDate" class="border-outline-variant text-on-surface rounded-lg border bg-white px-2 py-1.5 text-sm">
-        </div>
-        <div class="flex items-center gap-1.5">
-          <template x-for="opt in [7,30,90]" :key="opt">
-            <button
-              type="button"
-              @click="applyPreset(opt)"
-              class="rounded-lg border px-3 py-1.5 text-xs font-bold tracking-wide"
-              :class="range === opt ? 'border-primary-container bg-primary-container text-white' : 'text-on-surface-variant border-surface-container-low bg-surface-container-lowest'"
-            >
-              <span x-text="opt + 'D'"></span>
-            </button>
-          </template>
-        </div>
-        <button type="button" @click="load()" class="bg-primary-container hover:opacity-90 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity">{{ __('Apply') }}</button>
         <a
           :href="`{{ route('admin.analytics.index') }}?range=${range}&export=csv&start_date=${startDate}&end_date=${endDate}`"
-          class="bg-primary-container hover:opacity-90 ml-auto inline-flex items-center gap-1 rounded-xl px-6 py-2 text-sm font-semibold text-white transition-opacity"
-        >{{ __('Export data') }}</a>
+          class="bg-primary-container hover:opacity-90 inline-flex items-center justify-center gap-2 rounded-xl px-6 py-2 text-sm font-semibold text-white transition-opacity"
+        >
+          <span class="material-symbols-outlined text-base">download</span>
+          <span>{{ __('Export data') }}</span>
+        </a>
       </div>
     </div>
 
-    {{-- Section 1: KPI — grid ... gap-6 mb-10; cards bg-surface-container-lowest p-6 rounded-2xl --}}
+    {{-- Section 1: KPI cards (sample: shadow-sm border border-surface-container) --}}
     <div class="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <div class="bg-surface-container-lowest rounded-2xl p-6">
+      <div class="rounded-2xl border border-surface-container bg-surface-container-lowest p-6 shadow-sm">
         <div class="mb-4 flex items-start justify-between">
           <span class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">{{ __('Total page views') }}</span>
           <span class="rounded-full px-2 py-1 text-[10px] font-bold" :class="kpiPillClass(state.kpiDeltas?.views)" x-text="formatKpiDelta(state.kpiDeltas?.views)"></span>
@@ -77,7 +84,7 @@
           <div class="h-full bg-primary-container transition-all" :style="`width:${kpiBarWidth(1)}%`"></div>
         </div>
       </div>
-      <div class="bg-surface-container-lowest rounded-2xl p-6">
+      <div class="rounded-2xl border border-surface-container bg-surface-container-lowest p-6 shadow-sm">
         <div class="mb-4 flex items-start justify-between">
           <span class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">{{ __('Unique sessions') }}</span>
           <span class="rounded-full px-2 py-1 text-[10px] font-bold" :class="kpiPillClass(state.kpiDeltas?.sessions)" x-text="formatKpiDelta(state.kpiDeltas?.sessions)"></span>
@@ -87,7 +94,7 @@
           <div class="bg-on-tertiary-container h-full transition-all" :style="`width:${kpiBarWidth(2)}%`"></div>
         </div>
       </div>
-      <div class="bg-surface-container-lowest rounded-2xl p-6">
+      <div class="rounded-2xl border border-surface-container bg-surface-container-lowest p-6 shadow-sm">
         <div class="mb-4 flex items-start justify-between">
           <span class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">{{ __('Unique pages visited') }}</span>
           <span class="rounded-full px-2 py-1 text-[10px] font-bold" :class="kpiPillClass(state.kpiDeltas?.pages)" x-text="formatKpiDelta(state.kpiDeltas?.pages)"></span>
@@ -97,7 +104,7 @@
           <div class="h-full bg-error transition-all" :style="`width:${kpiBarWidth(3)}%`"></div>
         </div>
       </div>
-      <div class="bg-surface-container-lowest rounded-2xl p-6">
+      <div class="rounded-2xl border border-surface-container bg-surface-container-lowest p-6 shadow-sm">
         <div class="mb-4 flex items-start justify-between">
           <span class="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">{{ __('Top listing') }}</span>
           <span class="text-on-tertiary-container rounded-full bg-on-tertiary-container/10 px-2 py-1 text-[10px] font-bold">{{ __('Hot') }}</span>
@@ -111,60 +118,54 @@
       </div>
     </div>
 
-    {{-- Section 2: traffic — p-8, shadow, header mb-10 flex justify-between items-center --}}
+    {{-- Section 2: Traffic trend (sample: hero shadow card, responsive title row) --}}
     <div class="mb-10">
-      <div class="bg-surface-container-lowest rounded-2xl p-8 shadow-[0px_24px_48px_-12px_rgba(11,31,58,0.08)]">
-        <div class="mb-10 flex items-center justify-between">
+      <div class="rounded-2xl bg-surface-container-lowest p-8 shadow-[0px_24px_48px_-12px_rgba(11,31,58,0.08)]">
+        <div class="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <h3 class="text-m3-ink text-lg font-bold tracking-tight">{{ __('Traffic analytics') }}</h3>
-            <p class="text-on-surface-variant text-sm" x-text="subTraffic()"></p>
+            <h3 class="text-lg font-bold tracking-tight text-m3-ink">{{ __('Traffic analytics') }}</h3>
+            <p class="text-sm text-on-surface-variant" x-text="subTraffic()"></p>
           </div>
-          <div class="flex flex-shrink-0 gap-4">
+          <div class="flex flex-wrap gap-4">
             <div class="flex items-center gap-2">
-              <span class="bg-primary-container h-3 w-3 rounded-full"></span>
-              <span class="text-on-surface-variant text-xs font-semibold uppercase tracking-wider">{{ __('Views') }}</span>
+              <span class="h-3 w-3 rounded-full bg-primary-container"></span>
+              <span class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Views') }}</span>
             </div>
             <div class="flex items-center gap-2">
               <span class="h-3 w-3 rounded-full bg-on-tertiary-container"></span>
-              <span class="text-on-surface-variant text-xs font-semibold uppercase tracking-wider">{{ __('Sessions') }}</span>
+              <span class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{{ __('Sessions') }}</span>
             </div>
           </div>
         </div>
-        {{-- 12 columns: exact h/hover pairs from design reference (static classes so JIT always emits them) --}}
         <div class="relative flex h-[300px] w-full items-end gap-2">
           <svg class="absolute inset-0 h-full w-full opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <path class="text-primary-container" d="M0 80 Q 25 20, 50 50 T 100 10" fill="none" stroke="currentColor" stroke-width="2"></path>
           </svg>
-          <div class="bg-surface-container-low relative z-10 h-[60%] flex-1 rounded-t-lg transition-all hover:h-[70%]"></div>
-          <div class="bg-surface-container-low relative z-10 h-[45%] flex-1 rounded-t-lg transition-all hover:h-[55%]"></div>
-          <div class="bg-surface-container-low relative z-10 h-[80%] flex-1 rounded-t-lg transition-all hover:h-[90%]"></div>
-          <div class="bg-surface-container-low relative z-10 h-[65%] flex-1 rounded-t-lg transition-all hover:h-[75%]"></div>
-          <div class="bg-surface-container-low relative z-10 h-[50%] flex-1 rounded-t-lg transition-all hover:h-[60%]"></div>
-          <div class="bg-primary-container relative z-10 h-[95%] flex-1 rounded-t-lg transition-all hover:h-[100%]"></div>
-          <div class="bg-surface-container-low relative z-10 h-[75%] flex-1 rounded-t-lg transition-all hover:h-[85%]"></div>
-          <div class="bg-surface-container-low relative z-10 h-[60%] flex-1 rounded-t-lg transition-all hover:h-[70%]"></div>
-          <div class="bg-surface-container-low relative z-10 h-[40%] flex-1 rounded-t-lg transition-all hover:h-[50%]"></div>
-          <div class="bg-surface-container-low relative z-10 h-[85%] flex-1 rounded-t-lg transition-all hover:h-[95%]"></div>
-          <div class="bg-surface-container-low relative z-10 h-[70%] flex-1 rounded-t-lg transition-all hover:h-[80%]"></div>
-          <div class="bg-surface-container-low relative z-10 h-[55%] flex-1 rounded-t-lg transition-all hover:h-[65%]"></div>
+          <template x-for="(bar, bi) in trendBarsList()" :key="bi">
+            <div
+              class="relative z-10 min-h-[8%] flex-1 rounded-t-lg transition-all hover:brightness-[0.97]"
+              :class="bar.highlight ? 'bg-primary-container' : 'bg-surface-container-low'"
+              :style="'height:' + (bar.h || 20) + '%'"
+            ></div>
+          </template>
         </div>
-        <div class="text-outline mt-4 flex justify-between text-[10px] font-bold uppercase tracking-widest">
+        <div class="mt-4 flex justify-between overflow-x-auto text-[10px] font-bold uppercase tracking-widest text-outline">
           <template x-for="(lab, i) in (state.trendXLabels || sevenTickLabels())" :key="i">
-            <span x-text="lab" class="min-w-0 flex-1 text-center first:text-left last:text-right"></span>
+            <span x-text="lab" class="min-w-0 shrink-0 px-0.5 text-center first:text-left last:text-right"></span>
           </template>
         </div>
       </div>
     </div>
 
-    {{-- Sections 3 & 4: gap-6 mb-10 --}}
+    {{-- Sections 3 & 4 --}}
     <div class="mb-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <div class="bg-surface-container-lowest rounded-2xl p-8">
-        <h3 class="text-on-surface-variant mb-8 text-sm font-bold uppercase tracking-widest">{{ __('Traffic distribution') }}</h3>
-        <div class="flex items-center gap-10">
+      <div class="rounded-2xl border border-surface-container bg-surface-container-lowest p-8 shadow-sm">
+        <h3 class="mb-8 text-sm font-bold uppercase tracking-widest text-on-surface-variant">{{ __('Traffic distribution') }}</h3>
+        <div class="flex flex-col items-center gap-10 sm:flex-row">
           <div class="relative h-40 w-40 shrink-0">
             <div class="h-full w-full rounded-full" :style="donutStyle()"></div>
             <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span class="text-m3-ink text-2xl font-bold" x-text="deviceTotalPct() + '%'"></span>
+              <span class="text-2xl font-bold text-m3-ink" x-text="deviceTotalPct() + '%'"></span>
               <span class="text-on-surface-variant text-[8px] font-bold uppercase tracking-widest">{{ __('Global') }}</span>
             </div>
           </div>
@@ -182,8 +183,8 @@
         </div>
       </div>
 
-      <div class="bg-surface-container-lowest rounded-2xl p-8">
-        <h3 class="text-on-surface-variant mb-8 text-sm font-bold uppercase tracking-widest">{{ __('Referrer performance') }}</h3>
+      <div class="rounded-2xl border border-surface-container bg-surface-container-lowest p-8 shadow-sm">
+        <h3 class="mb-8 text-sm font-bold uppercase tracking-widest text-on-surface-variant">{{ __('Referrer performance') }}</h3>
         <div class="space-y-6" x-show="state.topReferrers && state.topReferrers.length" x-cloak>
           <template x-for="(row, ri) in state.topReferrers" :key="row.referrer_host || ri">
             <div class="space-y-2">
@@ -221,21 +222,21 @@
     </div>
 
     {{-- Section 5: table --}}
-    <div class="bg-surface-container-lowest mb-10 overflow-hidden rounded-2xl">
+    <div class="mb-10 overflow-hidden rounded-2xl border border-surface-container bg-surface-container-lowest shadow-sm">
       <div class="flex items-end justify-between p-8 pb-0">
         <div>
-          <h3 class="text-m3-ink text-lg font-bold tracking-tight">{{ __('Most Visited Pages') }}</h3>
-          <p class="text-on-surface-variant text-sm">{{ __('Listing performance and viewer conversion') }}</p>
+          <h3 class="text-lg font-bold tracking-tight text-m3-ink">{{ __('Most visited pages') }}</h3>
+          <p class="text-sm text-on-surface-variant">{{ __('Listing performance and viewer conversion') }}</p>
         </div>
-        <a href="{{ route('admin.analytics.index') }}" class="text-primary-container flex items-center gap-1 self-start text-xs font-bold uppercase tracking-widest sm:self-auto">
+        <a href="{{ route('admin.analytics.index') }}" class="text-primary-container flex items-center gap-1 self-start text-xs font-bold uppercase tracking-widest hover:opacity-90 sm:self-auto">
           {{ __('Full view') }} <span class="material-symbols-outlined text-sm">arrow_forward</span>
         </a>
       </div>
       <div class="p-4">
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse text-left">
+          <table class="w-full min-w-[600px] border-collapse text-left">
             <thead>
-              <tr class="text-on-surface-variant border-b border-surface-container-low text-[10px] font-bold uppercase tracking-widest">
+              <tr class="border-b border-surface-container-low text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
                 <th class="px-6 py-4">{{ __('Page title') }}</th>
                 <th class="px-6 py-4">{{ __('Views') }}</th>
                 <th class="px-6 py-4">{{ __('Avg. time') }}</th>
@@ -243,13 +244,13 @@
                 <th class="px-6 py-4">{{ __('Performance') }}</th>
               </tr>
             </thead>
-            <tbody class="divide-surface-container-low/30 divide-y">
+            <tbody class="divide-y divide-surface-container-low/30">
               <template x-for="row in (state.topPages || [])" :key="row.path">
-                <tr class="hover:bg-surface-container-low/50 transition-colors">
-                  <td class="text-on-surface px-6 py-5 text-sm font-medium" x-text="pathTitle(row)"></td>
-                  <td class="text-on-surface px-6 py-5 text-sm" x-text="num(row.views)"></td>
-                  <td class="text-on-surface-variant px-6 py-5 text-sm">—</td>
-                  <td class="text-on-surface px-6 py-5 text-sm" x-text="bounceProxy(row) + '%'"></td>
+                <tr class="transition-colors hover:bg-surface-container-low/50">
+                  <td class="px-6 py-5 text-sm font-medium text-on-surface" x-text="pathTitle(row)"></td>
+                  <td class="px-6 py-5 text-sm text-on-surface" x-text="num(row.views)"></td>
+                  <td class="px-6 py-5 text-sm text-on-surface-variant">—</td>
+                  <td class="px-6 py-5 text-sm text-on-surface" x-text="bounceProxy(row) + '%'"></td>
                   <td class="px-6 py-5">
                     <div class="flex min-w-[10rem] items-center gap-2 sm:min-w-0">
                       <div class="bg-surface-container-low h-1.5 w-24 overflow-hidden rounded-full">
@@ -269,8 +270,8 @@
 
     {{-- Sections 6 & 7 --}}
     <div class="mb-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <div class="bg-surface-container-lowest rounded-2xl p-8">
-        <h3 class="text-on-surface-variant mb-10 text-sm font-bold uppercase tracking-widest">{{ __('Top car listings') }}</h3>
+      <div class="rounded-2xl border border-surface-container bg-surface-container-lowest p-8 shadow-sm">
+        <h3 class="mb-10 text-sm font-bold uppercase tracking-widest text-on-surface-variant">{{ __('Top car listings') }}</h3>
         <div class="flex h-48 items-end justify-between gap-4 px-4">
           <template x-for="(row, li) in listingSlots()" :key="li">
             <div class="flex min-w-0 flex-1 flex-col items-center gap-3">
@@ -289,8 +290,8 @@
         </div>
       </div>
 
-      <div class="bg-surface-container-lowest flex flex-col items-center rounded-2xl p-8 text-center">
-        <h3 class="text-on-surface-variant mb-6 w-full text-left text-sm font-bold uppercase tracking-widest">{{ __('User engagement ratio') }}</h3>
+      <div class="flex flex-col items-center rounded-2xl border border-surface-container bg-surface-container-lowest p-8 text-center shadow-sm">
+        <h3 class="mb-6 w-full text-left text-sm font-bold uppercase tracking-widest text-on-surface-variant">{{ __('User engagement ratio') }}</h3>
         <div class="relative flex h-48 w-48 shrink-0 items-center justify-center">
           <svg class="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 192 192">
             <circle
@@ -319,8 +320,8 @@
             />
           </svg>
           <div class="z-10">
-            <div class="text-m3-ink text-4xl font-black tracking-tighter" x-text="engagementRatio().toFixed(1) + '%'"></div>
-            <div class="text-outline text-[10px] font-bold uppercase tracking-widest">{{ __('Efficiency') }}</div>
+            <div class="text-4xl font-black tracking-tighter text-m3-ink" x-text="engagementRatio().toFixed(1) + '%'"></div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-outline">{{ __('Efficiency') }}</div>
           </div>
         </div>
         <p class="text-on-surface-variant mt-4 max-w-xs text-xs leading-relaxed">
@@ -330,21 +331,21 @@
     </div>
 
     {{-- Section 8 --}}
-    <div class="bg-surface-container-lowest mb-10 rounded-2xl p-8 shadow-sm">
-      <div class="mb-10 flex items-center justify-between">
-        <h3 class="text-m3-ink text-lg font-bold tracking-tight">{{ __('Daily Activity: Views vs Sessions') }}</h3>
+    <div class="mb-10 rounded-2xl border border-surface-container bg-surface-container-lowest p-8 shadow-sm">
+      <div class="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+        <h3 class="text-lg font-bold tracking-tight text-m3-ink">{{ __('Daily activity: views vs sessions') }}</h3>
         <div class="flex gap-4">
           <div class="flex items-center gap-2">
-            <div class="bg-primary-container h-3 w-3 rounded-sm"></div>
-            <span class="text-on-surface-variant text-xs font-medium">{{ __('Views') }}</span>
+            <div class="h-3 w-3 rounded-sm bg-primary-container"></div>
+            <span class="text-xs font-medium text-on-surface-variant">{{ __('Views') }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <div class="bg-on-tertiary-container/30 h-3 w-3 rounded-sm"></div>
-            <span class="text-on-surface-variant text-xs font-medium">{{ __('Sessions') }}</span>
+            <div class="h-3 w-3 rounded-sm bg-on-tertiary-container/30"></div>
+            <span class="text-xs font-medium text-on-surface-variant">{{ __('Sessions') }}</span>
           </div>
         </div>
       </div>
-      <div class="flex h-64 items-end gap-3">
+      <div class="flex h-64 items-end gap-3 px-2">
         <template x-for="(day, wi) in weeklyBars()" :key="wi">
           <div class="flex h-full min-w-0 flex-1 flex-col justify-end gap-1">
             <div class="w-full rounded-sm bg-on-tertiary-container/30" :style="`height: ${day.sH}%`"></div>
@@ -372,6 +373,14 @@
         sevenTickLabels() {
           const t = (this.state.trendXLabels || []).length ? this.state.trendXLabels : ['—', '—', '—', '—', '—', '—', '—'];
           return t.slice(0, 7);
+        },
+        trendBarsList() {
+          const b = this.state?.trendBars;
+          if (b && b.length) {
+            return b;
+          }
+          const demo = [60, 45, 80, 65, 50, 95, 75, 60, 40, 85, 70, 55];
+          return demo.map((h, i) => ({ h, highlight: i === 5 }));
         },
         formatKpiDelta(v) {
           if (v === null || v === undefined) {
