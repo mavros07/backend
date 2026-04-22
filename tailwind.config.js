@@ -14,8 +14,28 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            /** Design reference: luxury analytics (Material) — use only in admin analytics content */
+            colors: {
+                surface: '#f7f9fc',
+                'on-surface': '#191c1e',
+                'on-surface-variant': '#44474d',
+                'surface-container-lowest': '#ffffff',
+                'surface-container-low': '#f2f4f7',
+                'surface-container-high': '#e6e8eb',
+                'surface-container': '#eceef1',
+                'primary-container': '#0b1f3a',
+                'on-tertiary-container': '#a87e59',
+                outline: '#75777e',
+                'outline-variant': '#c4c6ce',
+                error: '#ba1a1a',
+                /** M3 "primary" text (#000615) — named m3-ink to avoid clashing with other uses of "primary" */
+                'm3-ink': '#000615',
+            },
         },
     },
+    safelist: [
+        { pattern: /^(h|hover:h)-\[(\d{2}|100)%\]$/ },
+    ],
 
     plugins: [forms],
 };
