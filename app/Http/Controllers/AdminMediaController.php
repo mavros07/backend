@@ -40,7 +40,7 @@ class AdminMediaController extends Controller
     }
 
     /**
-     * @return array<int, array{name: string, path: string, url: string, size: int, modified_at: int}>
+     * @return array<int, array{id: int, name: string, path: string, url: string, size: int, modified_at: int}>
      */
     protected function mediaItems(): array
     {
@@ -51,6 +51,7 @@ class AdminMediaController extends Controller
             ->get()
             ->map(static function (Media $item): array {
                 return [
+                    'id' => (int) $item->id,
                     'name' => $item->filename,
                     'path' => $item->file_path,
                     'url' => asset($item->file_path),
@@ -129,6 +130,43 @@ class AdminMediaController extends Controller
         return redirect()
             ->route('admin.media.index')
             ->with('status', 'Media uploaded successfully.');
+    }
+
+    public function destroy(Request $request, Media $media): RedirectResponse|JsonResponse
+    {
+        $fullPath = public_path($media->file_path);
+        if (is_file($fullPath)) {
+            @unlink($fullPath);
+        }
+        $media->delete();
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Media deleted successfully.',
+            ]);
+        }
+
+        return redirect()->route('admin.media.index')->with('status', 'Media deleted successfully.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $items = Media::query()->whereIn('id', $data['ids'])->get();
+        foreach ($items as $item) {
+            $fullPath = public_path($item->file_path);
+            if (is_file($fullPath)) {
+                @unlink($fullPath);
+            }
+            $item->delete();
+        }
+
+        return redirect()->route('admin.media.index')->with('status', 'Selected media deleted successfully.');
     }
 }
 

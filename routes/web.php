@@ -138,6 +138,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::put('/pages/{slug}', [AdminPageController::class, 'update'])->name('admin.pages.update');
     Route::get('/media', [AdminMediaController::class, 'index'])->name('admin.media.index');
     Route::post('/media', [AdminMediaController::class, 'upload'])->name('admin.media.upload');
+    Route::delete('/media/{media}', [AdminMediaController::class, 'destroy'])->name('admin.media.destroy');
+    Route::post('/media/bulk-delete', [AdminMediaController::class, 'bulkDestroy'])->name('admin.media.bulk-destroy');
     Route::get('/api/media', [AdminMediaController::class, 'list'])->name('admin.media.list');
 });
 

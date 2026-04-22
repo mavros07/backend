@@ -22,34 +22,33 @@
     x-data="{
       openMenuId: null,
       rejectExpandedId: null,
-      menuStyle: '',
-      toggleMenu(id, evt) {
+      selectedStatus: @js((string) $statusFilter),
+      pageStatuses: @js($vehicles->pluck('status')->values()->all()),
+      toggleMenu(id) {
         if (this.openMenuId === id) {
           this.openMenuId = null;
           this.rejectExpandedId = null;
-          this.menuStyle = '';
-          return;
-        }
-        const el = evt?.currentTarget;
-        if (el && typeof el.getBoundingClientRect === 'function') {
-          const r = el.getBoundingClientRect();
-          const w = 208;
-          const left = Math.min(Math.max(8, r.right - w), window.innerWidth - w - 8);
-          const top = r.bottom + 4;
-          this.menuStyle = `top:${Math.round(top)}px;left:${Math.round(left)}px;width:${w}px`;
         } else {
-          this.menuStyle = '';
+          this.openMenuId = id;
+          this.rejectExpandedId = null;
         }
-        this.openMenuId = id;
-        this.rejectExpandedId = null;
       },
       closeMenus() {
         this.openMenuId = null;
         this.rejectExpandedId = null;
-        this.menuStyle = '';
       },
       toggleReject(id) {
         this.rejectExpandedId = this.rejectExpandedId === id ? null : id;
+      },
+      matchesStatus(status) {
+        return this.selectedStatus === '' || this.selectedStatus === status;
+      },
+      countFor(status) {
+        if (status === '') return this.pageStatuses.length;
+        return this.pageStatuses.filter((s) => s === status).length;
+      },
+      filteredCount() {
+        return this.countFor(this.selectedStatus);
       },
     }"
     @keydown.escape.window="closeMenus()"
@@ -73,10 +72,11 @@
 
       <div class="mb-4 flex flex-wrap gap-2">
         <span class="self-center text-sm font-medium text-slate-600">{{ __('Filter') }}:</span>
-        <a href="{{ route('dashboard.vehicles.index') }}" class="rounded-full px-3 py-1 text-sm font-medium {{ $statusFilter === '' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50' }}">{{ __('All') }}</a>
+        <button type="button" @click="selectedStatus = ''" :class="selectedStatus === '' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50'" class="rounded-full px-3 py-1 text-sm font-medium">{{ __('All') }} (<span x-text="countFor('')"></span>)</button>
         @foreach (['pending' => __('Pending'), 'approved' => __('Approved'), 'draft' => __('Draft'), 'rejected' => __('Rejected')] as $st => $label)
-          <a href="{{ route('dashboard.vehicles.index', ['status' => $st]) }}" class="rounded-full px-3 py-1 text-sm font-medium {{ $statusFilter === $st ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50' }}">{{ $label }}</a>
+          <button type="button" @click="selectedStatus = '{{ $st }}'" :class="selectedStatus === '{{ $st }}' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50'" class="rounded-full px-3 py-1 text-sm font-medium">{{ $label }} (<span x-text="countFor('{{ $st }}')"></span>)</button>
         @endforeach
+        <span class="self-center text-xs text-slate-500">{{ __('Showing') }} <span x-text="filteredCount()"></span> {{ __('on this page') }}</span>
       </div>
     @endif
 
@@ -114,15 +114,25 @@
                     $rejectReasonDefault = old('rejection_reason', $vehicle->rejection_reason ?? '');
                     $listingWhen = $vehicle->submitted_at ?? $vehicle->created_at;
                   @endphp
-                  <tr class="align-top">
+                  @php
+                    $coverImage = $vehicle->images->first();
+                    $thumbUrl = $coverImage ? \App\Support\VehicleImageUrl::url($coverImage->path) : \App\Support\PlaceholderMedia::url('asset/images/media/inventory-listing-fallback.jpg');
+                  @endphp
+                  <tr class="align-top" x-show="matchesStatus('{{ $vehicle->status }}')">
                     <td class="min-w-0 max-w-xs px-4 py-3 sm:max-w-md">
-                      <div class="truncate font-semibold text-slate-900" title="{{ $vehicle->title }}">{{ $vehicle->title }}</div>
-                      <div class="mt-0.5 text-[11px] leading-snug text-slate-500">
+                      <div class="flex items-start gap-3">
+                        <img src="{{ $thumbUrl }}" alt="" class="h-12 w-16 shrink-0 rounded-md border border-slate-200 object-cover" loading="lazy" />
+                        <div class="min-w-0">
+                          <div class="truncate font-semibold text-slate-900" title="{{ $vehicle->title }}">{{ $vehicle->title }}</div>
+                          <div class="text-xs text-slate-500">{{ $vehicle->year }} {{ $vehicle->make }} {{ $vehicle->model }}</div>
+                          <div class="mt-0.5 text-[11px] leading-snug text-slate-500">
                         @if($listingWhen)
                           {{ __('Submitted') }} {{ $listingWhen->format('M j, Y') }} · {{ $listingWhen->format('g:i a') }}
                         @else
                           —
                         @endif
+                          </div>
+                        </div>
                       </div>
                     </td>
                     @if($isAdminList)
@@ -152,7 +162,7 @@
                         type="button"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                         title="{{ __('Actions') }}"
-                        @click.stop="toggleMenu({{ $vehicle->id }}, $event)"
+                        @click.stop="toggleMenu({{ $vehicle->id }})"
                         :aria-expanded="openMenuId === {{ $vehicle->id }} ? 'true' : 'false'"
                         aria-label="{{ __('Actions') }}"
                       >
@@ -166,8 +176,7 @@
                         x-transition:enter-start="opacity-0 scale-95"
                         x-transition:enter-end="opacity-100 scale-100"
                         @click.outside="closeMenus()"
-                        x-bind:style="openMenuId === {{ $vehicle->id }} ? menuStyle : ''"
-                        class="fixed z-[300] max-h-[min(70vh,22rem)] overflow-y-auto overflow-x-hidden rounded-lg border border-slate-200 bg-white py-1 text-left shadow-lg ring-1 ring-black/5"
+                        class="absolute right-4 top-full z-[300] mt-1 w-52 max-h-[min(70vh,22rem)] overflow-y-auto overflow-x-hidden rounded-lg border border-slate-200 bg-white py-1 text-left shadow-lg ring-1 ring-black/5"
                         role="menu"
                       >
                         @if($viewUrl)
