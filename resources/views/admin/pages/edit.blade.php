@@ -2,7 +2,7 @@
   <input type="hidden" id="page-editor-app-url" value="{{ rtrim(url('/'), '/') }}" />
 
   <div id="media-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-black/70 p-4">
-    <div class="mx-auto flex h-full max-h-[90vh] w-full max-w-[min(72rem,92vw)] flex-col overflow-hidden rounded-lg bg-white shadow-2xl">
+    <div id="media-modal-panel" class="mx-auto flex h-full max-h-[90vh] w-full max-w-[min(72rem,92vw)] flex-col overflow-hidden rounded-lg bg-white shadow-2xl">
       <div class="flex shrink-0 items-center justify-between border-b border-gray-200 px-4 py-3">
         <h3 class="text-sm font-semibold text-gray-900">Select Media</h3>
         <button type="button" class="js-media-modal-close text-gray-500 hover:text-gray-900" aria-label="Close">✕</button>
@@ -83,17 +83,29 @@
       let mediaItems = [];
       function updateMediaModalSizing() {
         const modal = document.getElementById('media-modal');
-        const panel = modal?.querySelector(':scope > div');
+        const panel = document.getElementById('media-modal-panel');
         if (!modal || !panel) return;
-        const desktop = window.matchMedia('(min-width: 1024px)').matches;
-        if (!desktop) {
-          panel.style.maxWidth = 'min(72rem, 92vw)';
-          return;
+        const shell = document.querySelector('.admin-main-shell');
+        const shellRect = shell?.getBoundingClientRect();
+        const hasShellRect = !!(shellRect && shellRect.width > 0 && shellRect.height > 0);
+
+        if (hasShellRect) {
+          modal.style.top = `${Math.round(shellRect.top)}px`;
+          modal.style.left = `${Math.round(shellRect.left)}px`;
+          modal.style.width = `${Math.round(shellRect.width)}px`;
+          modal.style.height = `${Math.round(shellRect.height)}px`;
+        } else {
+          modal.style.top = '0';
+          modal.style.left = '0';
+          modal.style.width = '100vw';
+          modal.style.height = '100vh';
         }
-        const sidebar = document.querySelector('.admin-sidebar');
-        const sidebarWidth = sidebar ? Math.max(0, Math.round(sidebar.getBoundingClientRect().width || 0)) : 0;
-        const usable = Math.max(480, window.innerWidth - sidebarWidth - 24);
-        panel.style.maxWidth = `min(72rem, ${usable}px)`;
+
+        const horizontalGap = 16;
+        modal.style.paddingLeft = `${horizontalGap}px`;
+        modal.style.paddingRight = `${horizontalGap}px`;
+        const usable = Math.max(480, (hasShellRect ? shellRect.width : window.innerWidth) - (horizontalGap * 2));
+        panel.style.maxWidth = `min(72rem, ${Math.round(usable)}px)`;
       }
       function closeMediaModal() {
         const modal = document.getElementById('media-modal');
@@ -129,6 +141,9 @@
         mediaTargetInputId = targetInputId;
         const modal = document.getElementById('media-modal');
         if (!modal) return;
+        modal.style.position = 'fixed';
+        modal.style.inset = 'auto';
+        modal.style.zIndex = '220';
         updateMediaModalSizing();
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -160,6 +175,14 @@
         const modal = document.getElementById('media-modal');
         if (modal && !modal.classList.contains('hidden')) updateMediaModalSizing();
       });
+      const shell = document.querySelector('.admin-main-shell');
+      if (shell && typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(() => {
+          const modal = document.getElementById('media-modal');
+          if (modal && !modal.classList.contains('hidden')) updateMediaModalSizing();
+        });
+        ro.observe(shell);
+      }
 
       document.querySelectorAll('.js-media-path-input').forEach((input) => {
         input.addEventListener('input', () => syncMediaPathInput(input));
