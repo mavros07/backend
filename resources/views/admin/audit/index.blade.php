@@ -1,0 +1,74 @@
+<x-app-layout>
+  <x-slot name="header">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h2 class="text-xl font-semibold text-zinc-800">{{ __('Audit trail') }}</h2>
+      <a href="{{ route('admin.dashboard') }}" class="rounded border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">{{ __('Back to overview') }}</a>
+    </div>
+  </x-slot>
+
+  <div class="w-full space-y-6">
+    <div class="rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-sm ring-1 ring-black/[0.02]">
+      <form method="get" action="{{ route('admin.audit.index') }}" class="grid grid-cols-1 gap-3 md:grid-cols-6">
+        <input type="search" name="q" value="{{ $search }}" class="md:col-span-2 rounded border-zinc-300" placeholder="Path, route, IP..." />
+        <select name="method" class="rounded border-zinc-300">
+          <option value="">{{ __('All methods') }}</option>
+          @foreach (['POST', 'PUT', 'PATCH', 'DELETE'] as $m)
+            <option value="{{ $m }}" @selected($method === $m)>{{ $m }}</option>
+          @endforeach
+        </select>
+        <select name="user_id" class="rounded border-zinc-300">
+          <option value="">{{ __('All admins') }}</option>
+          @foreach ($admins as $admin)
+            <option value="{{ $admin->id }}" @selected($userId === (int) $admin->id)>{{ $admin->name }} ({{ $admin->email }})</option>
+          @endforeach
+        </select>
+        <input type="date" name="from" value="{{ $from }}" class="rounded border-zinc-300" />
+        <input type="date" name="to" value="{{ $to }}" class="rounded border-zinc-300" />
+        <div class="md:col-span-6 flex items-center gap-2">
+          <button type="submit" class="rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">{{ __('Apply filters') }}</button>
+          <a href="{{ route('admin.audit.index') }}" class="rounded border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50">{{ __('Clear') }}</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm ring-1 ring-black/[0.02]">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-zinc-200 text-sm">
+          <thead class="bg-zinc-50 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+            <tr>
+              <th class="px-3 py-2">{{ __('When') }}</th>
+              <th class="px-3 py-2">{{ __('Admin') }}</th>
+              <th class="px-3 py-2">{{ __('Method') }}</th>
+              <th class="px-3 py-2">{{ __('Route') }}</th>
+              <th class="px-3 py-2">{{ __('Path') }}</th>
+              <th class="px-3 py-2">{{ __('Status') }}</th>
+              <th class="px-3 py-2">{{ __('IP') }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-100 bg-white">
+            @forelse ($entries as $entry)
+              <tr>
+                <td class="whitespace-nowrap px-3 py-2 text-zinc-700">{{ optional($entry->created_at)->format('M j, Y g:i a') }}</td>
+                <td class="px-3 py-2 text-zinc-700">{{ $entry->user?->name ?? __('Unknown') }}</td>
+                <td class="px-3 py-2"><span class="inline-flex rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700">{{ $entry->method }}</span></td>
+                <td class="px-3 py-2 text-zinc-600">{{ $entry->route_name ?? '—' }}</td>
+                <td class="max-w-md truncate px-3 py-2 text-zinc-600" title="{{ $entry->path }}">{{ $entry->path }}</td>
+                <td class="px-3 py-2 text-zinc-700">{{ $entry->status_code ?? '—' }}</td>
+                <td class="px-3 py-2 text-zinc-600">{{ $entry->ip_address ?? '—' }}</td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="7" class="px-3 py-5 text-center text-zinc-500">{{ __('No audit records found.') }}</td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+
+      <div class="border-t border-zinc-200 px-4 py-3">
+        {{ $entries->links() }}
+      </div>
+    </div>
+  </div>
+</x-app-layout>
+

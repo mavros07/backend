@@ -63,12 +63,71 @@
         </div>
         <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
           <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Top page') }}</div>
-          <div class="mt-1 truncate text-sm font-semibold text-zinc-800">{{ $traffic['top_page']->path ?? __('No data yet') }}</div>
+          <div class="mt-1 truncate text-sm font-semibold text-zinc-800">{{ $traffic['top_page_label'] ?? __('No data yet') }}</div>
         </div>
         <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
           <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Top listing') }}</div>
           <div class="mt-1 truncate text-sm font-semibold text-zinc-800">{{ $traffic['top_listing']->vehicle_slug ?? __('No data yet') }}</div>
         </div>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm ring-1 ring-black/[0.02]">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="text-sm font-bold uppercase tracking-[0.15em] text-zinc-500">{{ __('Audit trail') }}</h2>
+        @php $audit = $auditSummary ?? []; @endphp
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-semibold text-zinc-500">{{ __('Last :days days', ['days' => $audit['range_days'] ?? 30]) }}</span>
+          <a href="{{ route('admin.audit.index') }}" class="inline-flex items-center rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50">{{ __('Open full log') }}</a>
+        </div>
+      </div>
+      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Total actions') }}</div>
+          <div class="mt-1 text-2xl font-bold tracking-tight text-zinc-900">{{ number_format((int) ($audit['total_actions'] ?? 0)) }}</div>
+        </div>
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Create (POST)') }}</div>
+          <div class="mt-1 text-2xl font-bold tracking-tight text-zinc-900">{{ number_format((int) ($audit['create_actions'] ?? 0)) }}</div>
+        </div>
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Update (PUT/PATCH)') }}</div>
+          <div class="mt-1 text-2xl font-bold tracking-tight text-zinc-900">{{ number_format((int) ($audit['update_actions'] ?? 0)) }}</div>
+        </div>
+        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Delete (DELETE)') }}</div>
+          <div class="mt-1 text-2xl font-bold tracking-tight text-zinc-900">{{ number_format((int) ($audit['delete_actions'] ?? 0)) }}</div>
+        </div>
+      </div>
+      <div class="mt-4 overflow-hidden rounded-xl border border-zinc-200">
+        <table class="min-w-full divide-y divide-zinc-200 text-sm">
+          <thead class="bg-zinc-50 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+            <tr>
+              <th class="px-3 py-2">{{ __('When') }}</th>
+              <th class="px-3 py-2">{{ __('Admin') }}</th>
+              <th class="px-3 py-2">{{ __('Method') }}</th>
+              <th class="px-3 py-2">{{ __('Route') }}</th>
+              <th class="px-3 py-2">{{ __('Path') }}</th>
+              <th class="px-3 py-2">{{ __('Status') }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-100 bg-white">
+            @forelse (($audit['recent'] ?? []) as $entry)
+              <tr>
+                <td class="px-3 py-2 text-zinc-700">{{ optional($entry->created_at)->format('M j, Y g:i a') }}</td>
+                <td class="px-3 py-2 text-zinc-700">{{ $entry->user?->name ?? __('Unknown') }}</td>
+                <td class="px-3 py-2"><span class="inline-flex rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700">{{ $entry->method }}</span></td>
+                <td class="px-3 py-2 text-zinc-600">{{ $entry->route_name ?? '—' }}</td>
+                <td class="max-w-xs truncate px-3 py-2 text-zinc-600" title="{{ $entry->path }}">{{ $entry->path }}</td>
+                <td class="px-3 py-2 text-zinc-700">{{ $entry->status_code ?? '—' }}</td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="6" class="px-3 py-4 text-center text-zinc-500">{{ __('No audit actions yet.') }}</td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -89,6 +148,11 @@
           <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Content') }}</span>
           <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Page editors') }}</span>
           <span class="mt-4 inline-flex items-center text-sm font-semibold text-sky-600 group-hover:text-sky-700">{{ __('Open →') }}</span>
+        </a>
+        <a href="{{ route('admin.audit.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-indigo-300/80 hover:shadow-lg">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Governance') }}</span>
+          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Audit trail log') }}</span>
+          <span class="mt-4 inline-flex items-center text-sm font-semibold text-indigo-600 group-hover:text-indigo-700">{{ __('Open →') }}</span>
         </a>
         <a href="{{ route('admin.media.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-zinc-400 hover:shadow-lg">
           <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Assets') }}</span>

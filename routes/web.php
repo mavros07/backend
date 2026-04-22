@@ -13,6 +13,7 @@ use App\Http\Controllers\TemporaryAdminController;
 use App\Http\Controllers\AdminPageController;
 use App\Http\Controllers\AdminMediaController;
 use App\Http\Controllers\AdminAnalyticsController;
+use App\Models\AdminAuditTrail;
 use App\Models\SiteTrafficEvent;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -97,11 +98,27 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'role:admin', 'admin.audit'])->prefix('admin')->group(function () {
     Route::get('/', function () {
         $analyticsStart = now()->subDays(89)->startOfDay();
         $analyticsEnd = now();
         $analyticsBase = SiteTrafficEvent::query()->betweenDates($analyticsStart, $analyticsEnd);
+        $topPage = (clone $analyticsBase)->selectRaw('path, COUNT(*) as views')->groupBy('path')->orderByDesc('views')->first();
+        $topPagePath = trim((string) ($topPage->path ?? ''));
+        $topPageLabel = 'No data yet';
+        if ($topPagePath !== '') {
+            if ($topPagePath === '/') {
+                $topPageLabel = 'Homepage';
+            } elseif (str_starts_with($topPagePath, '/inventory/')) {
+                $topPageLabel = 'Listing detail';
+            } else {
+                $clean = trim(str_replace(['-', '_', '/'], ' ', $topPagePath));
+                $topPageLabel = ucwords($clean !== '' ? $clean : $topPagePath);
+            }
+        }
+
+        $auditStart = now()->subDays(30)->startOfDay();
+        $auditBase = AdminAuditTrail::query()->where('created_at', '>=', $auditStart);
 
         return view('admin.dashboard', [
             'stats' => [
@@ -114,14 +131,73 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
                 'range_days' => 90,
                 'total_views' => (clone $analyticsBase)->count(),
                 'unique_sessions' => (clone $analyticsBase)->whereNotNull('session_id')->distinct('session_id')->count('session_id'),
-                'top_page' => (clone $analyticsBase)->selectRaw('path, COUNT(*) as views')->groupBy('path')->orderByDesc('views')->first(),
+                'top_page' => $topPage,
+                'top_page_label' => $topPageLabel,
                 'top_listing' => (clone $analyticsBase)->whereNotNull('vehicle_slug')->selectRaw('vehicle_slug, COUNT(*) as views')->groupBy('vehicle_slug')->orderByDesc('views')->first(),
+            ],
+            'auditSummary' => [
+                'range_days' => 30,
+                'total_actions' => (clone $auditBase)->count(),
+                'create_actions' => (clone $auditBase)->whereIn('method', ['POST'])->count(),
+                'update_actions' => (clone $auditBase)->whereIn('method', ['PUT', 'PATCH'])->count(),
+                'delete_actions' => (clone $auditBase)->where('method', 'DELETE')->count(),
+                'recent' => (clone $auditBase)->with('user:id,name,email')->latest()->take(8)->get(),
             ],
         ]);
     })->name('admin.dashboard');
 
     Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('admin.analytics.index');
     Route::get('/analytics/data', [AdminAnalyticsController::class, 'data'])->name('admin.analytics.data');
+    Route::get('/audit', function (Request $request) {
+        $filters = $request->validate([
+            'method' => ['nullable', 'string', 'max:10'],
+            'user_id' => ['nullable', 'integer', 'min:1'],
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
+            'q' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $query = AdminAuditTrail::query()->with('user:id,name,email')->latest();
+
+        $method = strtoupper(trim((string) ($filters['method'] ?? '')));
+        if (in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+            $query->where('method', $method);
+        } else {
+            $method = '';
+        }
+
+        $userId = (int) ($filters['user_id'] ?? 0);
+        if ($userId > 0) {
+            $query->where('user_id', $userId);
+        }
+
+        if (! empty($filters['from'])) {
+            $query->where('created_at', '>=', \Illuminate\Support\Carbon::parse($filters['from'])->startOfDay());
+        }
+        if (! empty($filters['to'])) {
+            $query->where('created_at', '<=', \Illuminate\Support\Carbon::parse($filters['to'])->endOfDay());
+        }
+
+        $search = trim((string) ($filters['q'] ?? ''));
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search): void {
+                $builder
+                    ->where('path', 'like', '%'.$search.'%')
+                    ->orWhere('route_name', 'like', '%'.$search.'%')
+                    ->orWhere('ip_address', 'like', '%'.$search.'%');
+            });
+        }
+
+        return view('admin.audit.index', [
+            'entries' => $query->paginate(30)->withQueryString(),
+            'method' => $method,
+            'userId' => $userId,
+            'from' => (string) ($filters['from'] ?? ''),
+            'to' => (string) ($filters['to'] ?? ''),
+            'search' => $search,
+            'admins' => User::query()->role('admin')->orderBy('name')->get(['id', 'name', 'email']),
+        ]);
+    })->name('admin.audit.index');
 
     Route::redirect('/vehicles', '/dashboard/vehicles')->name('admin.vehicles.index');
     Route::get('/vehicles/{vehicle}/edit', fn (Vehicle $vehicle) => redirect()->route('dashboard.vehicles.edit', $vehicle))->name('admin.vehicles.edit');
