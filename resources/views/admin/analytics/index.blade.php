@@ -79,9 +79,9 @@
       </div>
     </div>
 
-    {{-- Section 1: KPI --}}
+    {{-- Section 1: KPI (sample: surface-container-lowest, no card shadow) --}}
     <div class="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-      <div class="rounded-2xl bg-white p-6 shadow-sm">
+      <div class="rounded-2xl bg-white p-6">
         <div class="mb-4 flex items-start justify-between">
           <span class="text-[10px] font-bold uppercase tracking-widest text-[#44474d]">{{ __('Total Page Views') }}</span>
           <span
@@ -95,7 +95,7 @@
           <div class="h-full rounded-full bg-[#0B1F3A] transition-all" :style="`width:${kpiBarWidth(1)}%`"></div>
         </div>
       </div>
-      <div class="rounded-2xl bg-white p-6 shadow-sm">
+      <div class="rounded-2xl bg-white p-6">
         <div class="mb-4 flex items-start justify-between">
           <span class="text-[10px] font-bold uppercase tracking-widest text-[#44474d]">{{ __('Unique Sessions') }}</span>
           <span
@@ -109,7 +109,7 @@
           <div class="h-full rounded-full bg-[#a87e59] transition-all" :style="`width:${kpiBarWidth(2)}%`"></div>
         </div>
       </div>
-      <div class="rounded-2xl bg-white p-6 shadow-sm">
+      <div class="rounded-2xl bg-white p-6">
         <div class="mb-4 flex items-start justify-between">
           <span class="text-[10px] font-bold uppercase tracking-widest text-[#44474d]">{{ __('Unique Pages Visited') }}</span>
           <span
@@ -123,7 +123,7 @@
           <div class="h-full rounded-full bg-[#ba1a1a] transition-all" :style="`width:${kpiBarWidth(3)}%`"></div>
         </div>
       </div>
-      <div class="rounded-2xl bg-white p-6 shadow-sm">
+      <div class="rounded-2xl bg-white p-6">
         <div class="mb-4 flex items-start justify-between">
           <span class="text-[10px] font-bold uppercase tracking-widest text-[#44474d]">{{ __('Top listing') }}</span>
           <span class="rounded-full bg-[#a87e59]/10 px-2 py-1 text-[10px] font-bold text-[#a87e59]">{{ __('Hot') }}</span>
@@ -154,10 +154,25 @@
             </div>
           </div>
         </div>
+        {{-- Sample: 100×100 mock curve at opacity-20, then live area/line chart, then 12 flex bars (gap-2, hover) --}}
         <div class="relative h-[300px] w-full">
           <svg
+            class="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-20"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path
+              class="text-[#0B1F3A]"
+              d="M0 80 Q 25 20, 50 50 T 100 10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            ></path>
+          </svg>
+          <svg
             :viewBox="`0 0 ${state.lineChart?.width || 1200} ${state.lineChart?.height || 320}`"
-            class="pointer-events-none absolute inset-0 h-full w-full"
+            class="pointer-events-none absolute inset-0 z-[1] h-full w-full"
             preserveAspectRatio="xMidYMid meet"
           >
             <defs>
@@ -167,13 +182,6 @@
               </linearGradient>
             </defs>
             <path :d="state.lineChart?.view_area_path" fill="url(#anViewsFill)"></path>
-            <path
-              d="M 24 260 Q 200 60 500 200 T 1100 100"
-              fill="none"
-              stroke="#0b1f3a"
-              stroke-width="1.5"
-              opacity="0.2"
-            ></path>
             <path :d="state.lineChart?.view_path" fill="none" stroke="#0b1f3a" stroke-width="3"></path>
             <path
               :d="state.lineChart?.session_path"
@@ -183,12 +191,15 @@
               stroke-dasharray="8 5"
             ></path>
           </svg>
-          <div class="relative z-[1] flex h-[240px] w-full items-end gap-1.5 sm:gap-2">
+          <div class="absolute inset-0 z-[2] flex items-end gap-2">
             <template x-for="(bar, idx) in (state.trendBars || defaultTrendBars())" :key="idx">
               <div
-                class="min-w-0 flex-1 rounded-t-lg transition-all duration-200 hover:opacity-90"
-                :class="bar?.highlight ? 'bg-[#0B1F3A]' : 'bg-[#f2f4f7]'"
-                :style="`height: ${bar?.h || 50}%`"
+                class="min-w-0 flex-1 origin-bottom rounded-t-lg transition-all duration-200 ease-out hover:brightness-95"
+                :class="[
+                  bar?.highlight ? 'bg-[#0B1F3A]' : 'bg-[#f2f4f7]',
+                  'origin-bottom hover:scale-y-105',
+                ]"
+                :style="`height: ${bar?.h || 50}%;`"
               ></div>
             </template>
           </div>
@@ -213,7 +224,7 @@
             ></div>
             <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
               <span class="text-2xl font-bold text-[#000615]" x-text="deviceTotalPct() + '%'"></span>
-              <span class="text-[8px] font-bold uppercase tracking-widest text-[#44474d]">{{ __('Traffic') }}</span>
+              <span class="text-[8px] font-bold uppercase tracking-widest text-[#44474d]">{{ __('Global') }}</span>
             </div>
           </div>
           <div class="w-full min-w-0 flex-1 space-y-4">
@@ -272,7 +283,8 @@
       <div class="flex flex-col justify-between gap-4 p-8 pb-0 sm:flex-row sm:items-end">
         <div>
           <h3 class="text-lg font-bold tracking-tight text-[#000615]">{{ __('Most visited pages') }}</h3>
-          <p class="text-sm text-[#44474d]">{{ __('Listing performance and session depth (time on page not tracked yet)') }}</p>
+          <p class="text-sm text-[#44474d]">{{ __('Listing performance and viewer conversion') }}</p>
+          <p class="mt-1 text-xs text-[#44474d]/80">{{ __('Avg. time is shown when that metric is available.') }}</p>
         </div>
         <a href="{{ route('admin.analytics.index') }}" class="inline-flex items-center gap-1 self-start text-xs font-bold uppercase tracking-widest text-[#0B1F3A] hover:opacity-80 sm:self-auto">
           {{ __('Full view') }} <span class="material-symbols-outlined text-base">arrow_forward</span>
@@ -368,16 +380,16 @@
           </div>
         </div>
         <p class="mt-4 max-w-xs text-xs leading-relaxed text-[#44474d]">
-          {{ __('Bounce is') }}
-          <span class="font-bold text-[#a87e59]" x-text="Number(state.summary?.bounce_rate || 0).toFixed(1) + '%'"></span>.
-          {{ __('Engagement score treats lower bounce as higher efficiency.') }}
+          {{ __('Your platform engagement is') }}
+          <span class="font-bold text-[#a87e59]" x-text="engagementBlurb()"></span>
+          {{ __('the luxury industry average (illustrative benchmark).') }}
         </p>
       </div>
     </div>
 
     <div class="rounded-2xl bg-white p-8 shadow-sm">
       <div class="mb-8 flex flex-col justify-between gap-4 sm:mb-10 sm:flex-row sm:items-center">
-        <h3 class="text-lg font-bold tracking-tight text-[#000615]">{{ __('Daily activity: views vs sessions') }}</h3>
+        <h3 class="text-lg font-bold tracking-tight text-[#000615]">{{ __('Daily Activity: Views vs Sessions') }}</h3>
         <div class="flex flex-wrap gap-4">
           <div class="flex items-center gap-2">
             <div class="h-3 w-3 rounded-sm bg-[#0B1F3A]"></div>
@@ -389,12 +401,12 @@
           </div>
         </div>
       </div>
-      <div class="flex h-64 max-w-full items-end gap-1.5 sm:gap-3">
+      <div class="flex h-64 max-w-full items-end gap-3">
         <template x-for="(day, wi) in weeklyBars()" :key="wi">
-          <div class="flex min-w-0 flex-1 flex-col justify-end gap-1">
+          <div class="flex h-full min-w-0 flex-1 flex-col justify-end gap-1">
             <div class="w-full rounded-sm bg-[#a87e59]/30" :style="`height: ${day.sH}%`"></div>
             <div class="w-full rounded-sm bg-[#0B1F3A]" :style="`height: ${day.vH}%`"></div>
-            <span class="mt-3 text-center text-[9px] font-bold uppercase text-[#75777e]" x-text="day.label"></span>
+            <span class="mt-4 text-center text-[9px] font-bold uppercase text-[#75777e]" x-text="day.label"></span>
           </div>
         </template>
       </div>
@@ -469,7 +481,10 @@
         deviceTotalPct() {
           const rows = this.state.deviceBreakdown || [];
           const t = rows.reduce((a, b) => a + Number(b.percentage || 0), 0);
-          return Math.min(100, Math.round(t)) || 100;
+          if (t < 0.5) {
+            return 100;
+          }
+          return Math.min(100, Math.round(t));
         },
         deviceDotClass(i) {
           const c = ['bg-[#0B1F3A]', 'bg-[#a87e59]', 'bg-[#e6e8eb]'];
@@ -575,6 +590,19 @@
         engagementRatio() {
           const bounce = Number(this.state.summary?.bounce_rate || 0);
           return Math.max(0, Math.min(100, 100 - bounce));
+        },
+        engagementBlurb() {
+          const er = this.engagementRatio();
+          const industry = 66.4;
+          const d = er - industry;
+          const pct = Math.abs(Math.round(d * 10) / 10);
+          if (d >= 0.5) {
+            return `${pct}% higher than`;
+          }
+          if (d <= -0.5) {
+            return `${pct}% lower than`;
+          }
+          return 'in line with';
         },
         weeklyBars() {
           const points = (this.state.dailyTrend || []).slice(-7);
