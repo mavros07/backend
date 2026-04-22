@@ -36,6 +36,11 @@ export default {
     },
     safelist: [
         { pattern: /^(h|hover:h)-\[(\d{2}|100)%\]$/ },
+        // Admin analytics: dynamic class strings returned from Alpine (purge-safe)
+        'bg-gradient-to-r from-primary-container to-[#152a45]',
+        'bg-gradient-to-r from-on-tertiary-container to-[#8a6645]',
+        'bg-gradient-to-r from-primary-container/55 to-primary-container/35',
+        'bg-gradient-to-r from-primary-container/75 to-primary-container/55',
     ],
 
     plugins: [forms],
