@@ -74,37 +74,37 @@
     </div>
   </section>
 
-  <section class="py-24 bg-white">
-    <div class="container mx-auto px-8">
-      <div class="mb-16 text-center">
+  <section class="bg-[#f4f5f7] py-16 md:py-20">
+    <div class="container mx-auto max-w-[1240px] px-6 md:px-8">
+      <div class="mb-10 md:mb-12 text-center">
         <h2 class="font-headline font-black text-4xl tracking-tight text-on_surface uppercase inline-block section-line">
           @if($recentFirstWords !== '')
             <span class="text-on_surface">{{ $recentFirstWords }}</span>
           @endif
           <span class="text-primary">{{ $recentLastWord }}</span>
         </h2>
-        <p class="text-slate-500 mt-4 max-w-lg mx-auto">{{ $s['recent_subtitle'] ?? 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' }}</p>
+        <p class="mt-3 max-w-xl mx-auto text-sm md:text-base text-slate-500">{{ $s['recent_subtitle'] ?? 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' }}</p>
       </div>
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         @forelse ($recentVehicles as $vehicle)
           @php
             $img = $vehicle->images->first();
             $url = $img ? \App\Support\VehicleImageUrl::url($img->path) : \App\Support\PlaceholderMedia::url('asset/images/media/home-recent-fallback.jpg');
           @endphp
           <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="group block overflow-hidden rounded-sm border border-slate-500/50 bg-[#232628] shadow-md transition hover:shadow-xl">
-            <div class="relative aspect-[16/10] overflow-hidden">
+            <div class="relative aspect-[16/9] overflow-hidden">
               <img alt="{{ $vehicle->title }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" src="{{ $url }}"/>
               <div class="pointer-events-none absolute -right-8 top-3 rotate-45 bg-[#3b63d6] px-10 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">Special</div>
             </div>
-            <div class="border-t-2 border-[#3b63d6]/90 bg-[#31363c] px-4 pb-4 pt-3">
-              <div class="flex items-start justify-between gap-3">
-                <h3 class="line-clamp-1 pr-1 font-headline text-[28px] font-black leading-none text-white uppercase tracking-tight">{{ $vehicle->title }}</h3>
-                <div class="shrink-0 rounded-sm bg-[#3b63d6] px-2.5 py-1.5 text-right text-white shadow-sm">
-                  <div class="text-[8px] font-bold uppercase leading-none tracking-wide opacity-80">Buy online</div>
-                  <div class="mt-0.5 text-[30px] font-black leading-none">${{ number_format((float) $vehicle->price, 0, '.', ',') }}</div>
+            <div class="border-t-2 border-[#3b63d6]/90 bg-[#31363c] px-4 pb-3.5 pt-3">
+              <div class="flex items-start justify-between gap-2">
+                <h3 class="line-clamp-1 min-w-0 flex-1 pr-1 font-headline text-[18px] md:text-[20px] font-black leading-tight text-white uppercase tracking-tight">{{ $vehicle->title }}</h3>
+                <div class="shrink-0 rounded-sm bg-[#3b63d6] px-2 py-1 text-right text-white shadow-sm">
+                  <div class="text-[8px] font-bold uppercase leading-none tracking-wide opacity-85">Buy online</div>
+                  <div class="mt-0.5 text-[18px] font-black leading-none">${{ number_format((float) $vehicle->price, 0, '.', ',') }}</div>
                 </div>
               </div>
-              <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-slate-500/40 pt-2.5 text-[11px] font-semibold text-slate-300/95">
+              <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-slate-500/40 pt-2 text-[10px] md:text-[11px] font-semibold text-slate-300/95">
                 <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">speed</span> {{ number_format((int) ($vehicle->mileage ?? 0)) }} mi</span>
                 <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">settings_input_component</span> {{ strtoupper((string) ($vehicle->transmission ?? 'AUTO')) }}</span>
                 <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> {{ $vehicle->year ?? '—' }}</span>
