@@ -20,8 +20,10 @@
 <header class="{{ $isHome ? 'fixed inset-x-0 top-0 is-home-header' : 'sticky top-0' }} z-50 shadow-[0_6px_20px_rgba(0,0,0,0.16)]" data-site-header>
   @if ($isHome)
     <style>
+      [data-site-header].is-home-header { box-shadow: none; }
       [data-site-header].is-home-header [data-site-header-main] { background-color: transparent; border-color: transparent; }
-      [data-site-header].is-home-header.is-scrolled [data-site-header-main] { background-color: rgba(255, 255, 255, 0.88); border-color: rgba(15, 23, 42, 0.12); backdrop-filter: blur(6px); }
+      [data-site-header].is-home-header.is-scrolled { box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14); }
+      [data-site-header].is-home-header.is-scrolled [data-site-header-main] { background-color: rgba(255, 255, 255, 0.74); border-color: rgba(15, 23, 42, 0.16); backdrop-filter: blur(10px); }
       [data-site-header].is-home-header.is-scrolled [data-header-logo],
       [data-site-header].is-home-header.is-scrolled [data-header-icon],
       [data-site-header].is-home-header.is-scrolled [data-header-action-text],
@@ -104,9 +106,8 @@
                 default => request()->routeIs($r),
               };
             @endphp
-            <a href="{{ route($r) }}" data-header-nav-link class="group inline-flex items-center gap-0.5 border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors {{ $active ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">
+            <a href="{{ route($r) }}" data-header-nav-link class="group inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors {{ $active ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">
               <span>{{ $item['label'] }}</span>
-              <span data-header-icon class="material-symbols-outlined text-[13px]">keyboard_arrow_down</span>
             </a>
           @endforeach
         </nav>

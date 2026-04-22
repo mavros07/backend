@@ -22,7 +22,7 @@
 @section('content')
   {{-- Homepage does not render legacy WordPress/Elementor HTML here. Use Admin → Page Editors → Home for section copy and optional Content HTML on other pages. --}}
 
-  <section class="relative h-[85vh] flex items-center overflow-hidden">
+  <section class="relative flex min-h-[90vh] items-start overflow-hidden pt-24 md:min-h-[96vh] md:pt-32">
     <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ e($heroBg) }}');"></div>
     <div class="absolute inset-0 hero-gradient"></div>
     <div class="relative z-10 container mx-auto px-8 text-center">
