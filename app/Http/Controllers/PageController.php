@@ -38,7 +38,10 @@ class PageController extends Controller
         $recentVehicles = Vehicle::query()
             ->with('images')
             ->where('status', 'approved')
-            ->latest()
+            // Homepage "recent cars" should reflect newly approved/added inventory,
+            // not last edited listings.
+            ->orderByDesc('approved_at')
+            ->orderByDesc('id')
             ->take(6)
             ->get();
 

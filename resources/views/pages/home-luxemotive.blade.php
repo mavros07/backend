@@ -13,6 +13,10 @@
   $heroCtaHref = $s['hero_cta_href'] ?? '/inventory';
   $heroCtaUrl = \Illuminate\Support\Str::startsWith($heroCtaHref, ['http://', 'https://']) ? $heroCtaHref : url($heroCtaHref);
   $approvedCount = (int) ($approvedListingCount ?? 0);
+  $recentTitleRaw = trim((string) ($s['recent_title'] ?? 'RECENT CARS'));
+  $recentTitleParts = preg_split('/\s+/', $recentTitleRaw) ?: ['RECENT', 'CARS'];
+  $recentLastWord = array_pop($recentTitleParts) ?: 'CARS';
+  $recentFirstWords = trim(implode(' ', $recentTitleParts));
 @endphp
 
 @section('content')
@@ -31,38 +35,40 @@
   </section>
 
   <section class="container mx-auto px-8 -mt-16 relative z-20">
-    <div class="bg-[#232628] p-8 shadow-2xl rounded-lg">
-      <form method="get" action="{{ route('inventory.index') }}" class="flex flex-col md:flex-row items-center gap-4">
-        <div class="flex items-center gap-3 text-white mb-4 md:mb-0 md:mr-6">
-          <span class="material-symbols-outlined text-3xl">search_insights</span>
-          <span class="font-headline font-bold text-xl uppercase tracking-tight">{{ $s['home_search_label'] ?? 'Lorem ipsum — search inventory' }}</span>
+    <div class="rounded-lg bg-[#232628] p-7 shadow-2xl md:p-8 ring-1 ring-black/20">
+      <form method="get" action="{{ route('inventory.index') }}" class="space-y-4">
+        <div class="flex items-center gap-2.5 text-white">
+          <span class="material-symbols-outlined text-[28px] text-primary">search_insights</span>
+          <span class="font-headline text-[20px] font-black uppercase tracking-tight">{{ $s['home_search_label'] ?? 'Search inventory' }}</span>
         </div>
-        <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-          <select name="condition" class="bg-white border-none rounded font-medium text-sm py-3 px-4 focus:ring-2 focus:ring-primary appearance-none">
-            <option value="">Condition</option>
-            <option value="new" @selected(($filters['condition'] ?? '') === 'new')>New</option>
-            <option value="used" @selected(($filters['condition'] ?? '') === 'used')>Used</option>
-          </select>
-          <select name="make" class="bg-white border-none rounded font-medium text-sm py-3 px-4 focus:ring-2 focus:ring-primary appearance-none">
-            <option value="">Make</option>
-            @foreach (($filterOptions['makes'] ?? collect()) as $make)
-              <option value="{{ $make }}" @selected(($filters['make'] ?? '') === $make)>{{ $make }}</option>
-            @endforeach
-          </select>
-          <select name="model" class="bg-white border-none rounded font-medium text-sm py-3 px-4 focus:ring-2 focus:ring-primary appearance-none">
-            <option value="">Model</option>
-            @foreach (($filterOptions['models'] ?? collect()) as $model)
-              <option value="{{ $model }}" @selected(($filters['model'] ?? '') === $model)>{{ $model }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="flex gap-2 w-full md:w-auto">
-          <button class="bg-primary text-on_surface px-8 py-3 font-bold tracking-widest text-sm flex items-center justify-center hover:bg-yellow-400 transition-colors uppercase rounded w-full md:w-auto" type="submit">
-            <span class="material-symbols-outlined mr-2 text-xl">search</span> Search
-          </button>
-          <a href="{{ route('inventory.index') }}" class="bg-[#3a3f43] text-white px-4 py-3 rounded hover:bg-slate-700 transition-colors">
-            <span class="material-symbols-outlined text-xl">restart_alt</span>
-          </a>
+        <div class="flex flex-col gap-4 md:flex-row md:items-center">
+          <div class="grid flex-1 grid-cols-1 gap-4 md:grid-cols-3">
+            <select name="condition" class="appearance-none rounded border-none bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary">
+              <option value="">Condition</option>
+              <option value="new" @selected(($filters['condition'] ?? '') === 'new')>New</option>
+              <option value="used" @selected(($filters['condition'] ?? '') === 'used')>Used</option>
+            </select>
+            <select name="make" class="appearance-none rounded border-none bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary">
+              <option value="">Make</option>
+              @foreach (($filterOptions['makes'] ?? collect()) as $make)
+                <option value="{{ $make }}" @selected(($filters['make'] ?? '') === $make)>{{ $make }}</option>
+              @endforeach
+            </select>
+            <select name="model" class="appearance-none rounded border-none bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary">
+              <option value="">Model</option>
+              @foreach (($filterOptions['models'] ?? collect()) as $model)
+                <option value="{{ $model }}" @selected(($filters['model'] ?? '') === $model)>{{ $model }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="flex gap-2 w-full md:w-auto">
+            <button class="w-full rounded bg-primary px-8 py-3 text-sm font-bold uppercase tracking-widest text-on_surface transition-colors hover:bg-yellow-400 md:w-auto flex items-center justify-center" type="submit">
+              <span class="material-symbols-outlined mr-2 text-xl">search</span> Search
+            </button>
+            <a href="{{ route('inventory.index') }}" class="bg-[#3a3f43] text-white px-4 py-3 rounded hover:bg-slate-700 transition-colors">
+              <span class="material-symbols-outlined text-xl">restart_alt</span>
+            </a>
+          </div>
         </div>
       </form>
     </div>
@@ -70,30 +76,38 @@
 
   <section class="py-24 bg-white">
     <div class="container mx-auto px-8">
-      <div class="text-center mb-16">
-        <h2 class="font-headline font-black text-4xl tracking-tight text-on_surface uppercase inline-block section-line">{{ $s['recent_title'] ?? 'Lorem dolor sit amet' }}</h2>
+      <div class="mb-16 text-center">
+        <h2 class="font-headline font-black text-4xl tracking-tight text-on_surface uppercase inline-block section-line">
+          @if($recentFirstWords !== '')
+            <span class="text-on_surface">{{ $recentFirstWords }}</span>
+          @endif
+          <span class="text-primary">{{ $recentLastWord }}</span>
+        </h2>
         <p class="text-slate-500 mt-4 max-w-lg mx-auto">{{ $s['recent_subtitle'] ?? 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' }}</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         @forelse ($recentVehicles as $vehicle)
           @php
             $img = $vehicle->images->first();
             $url = $img ? \App\Support\VehicleImageUrl::url($img->path) : \App\Support\PlaceholderMedia::url('asset/images/media/home-recent-fallback.jpg');
           @endphp
-          <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="bg-[#232628] rounded-lg overflow-hidden group cursor-pointer border border-slate-800 block">
+          <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="group block overflow-hidden rounded-sm border border-slate-500/50 bg-[#232628] shadow-md transition hover:shadow-xl">
             <div class="relative aspect-[16/10] overflow-hidden">
-              <img alt="{{ $vehicle->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="{{ $url }}"/>
-              <div class="absolute bottom-0 right-0 bg-[#3b63d6] text-white px-4 py-2 font-bold flex flex-col items-end">
-                <span class="text-[10px] opacity-80 leading-none">Lorem price</span>
-                <span class="text-lg">${{ number_format((float) $vehicle->price, 0, '.', ',') }}</span>
-              </div>
+              <img alt="{{ $vehicle->title }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" src="{{ $url }}"/>
+              <div class="pointer-events-none absolute -right-8 top-3 rotate-45 bg-[#3b63d6] px-10 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">Special</div>
             </div>
-            <div class="p-6">
-              <h3 class="text-white font-headline font-bold text-lg mb-4 uppercase">{{ $vehicle->title }}</h3>
-              <div class="flex justify-between text-slate-400 text-[11px] font-bold border-t border-slate-700 pt-4">
-                <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">speed</span> {{ number_format((int) ($vehicle->mileage ?? 0)) }} mi</span>
-                <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">settings_input_component</span> {{ strtoupper((string) ($vehicle->transmission ?? 'AUTO')) }}</span>
-                <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">calendar_today</span> {{ $vehicle->year ?? '—' }}</span>
+            <div class="border-t-2 border-[#3b63d6]/90 bg-[#31363c] px-4 pb-4 pt-3">
+              <div class="flex items-start justify-between gap-3">
+                <h3 class="line-clamp-1 pr-1 font-headline text-[28px] font-black leading-none text-white uppercase tracking-tight">{{ $vehicle->title }}</h3>
+                <div class="shrink-0 rounded-sm bg-[#3b63d6] px-2.5 py-1.5 text-right text-white shadow-sm">
+                  <div class="text-[8px] font-bold uppercase leading-none tracking-wide opacity-80">Buy online</div>
+                  <div class="mt-0.5 text-[30px] font-black leading-none">${{ number_format((float) $vehicle->price, 0, '.', ',') }}</div>
+                </div>
+              </div>
+              <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-slate-500/40 pt-2.5 text-[11px] font-semibold text-slate-300/95">
+                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">speed</span> {{ number_format((int) ($vehicle->mileage ?? 0)) }} mi</span>
+                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">settings_input_component</span> {{ strtoupper((string) ($vehicle->transmission ?? 'AUTO')) }}</span>
+                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> {{ $vehicle->year ?? '—' }}</span>
               </div>
             </div>
           </a>

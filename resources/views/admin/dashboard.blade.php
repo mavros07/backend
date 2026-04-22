@@ -72,6 +72,42 @@
       </div>
     </div>
 
+    <div>
+      <h2 class="text-sm font-bold uppercase tracking-[0.15em] text-zinc-500">{{ __('Shortcuts') }}</h2>
+      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <a href="{{ route('dashboard.vehicles.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-amber-300/80 hover:shadow-lg">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Inventory') }}</span>
+          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('All vehicle listings') }}</span>
+          <span class="mt-4 inline-flex items-center text-sm font-semibold text-amber-600 group-hover:text-amber-700">{{ __('Open →') }}</span>
+        </a>
+        <a href="{{ route('admin.users.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-violet-300/80 hover:shadow-lg">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Accounts') }}</span>
+          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Users & vendors') }}</span>
+          <span class="mt-4 inline-flex items-center text-sm font-semibold text-violet-600 group-hover:text-violet-700">{{ __('Open →') }}</span>
+        </a>
+        <a href="{{ route('admin.pages.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-sky-300/80 hover:shadow-lg">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Content') }}</span>
+          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Page editors') }}</span>
+          <span class="mt-4 inline-flex items-center text-sm font-semibold text-sky-600 group-hover:text-sky-700">{{ __('Open →') }}</span>
+        </a>
+        <a href="{{ route('admin.audit.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-indigo-300/80 hover:shadow-lg">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Governance') }}</span>
+          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Audit trail log') }}</span>
+          <span class="mt-4 inline-flex items-center text-sm font-semibold text-indigo-600 group-hover:text-indigo-700">{{ __('Open →') }}</span>
+        </a>
+        <a href="{{ route('admin.media.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-zinc-400 hover:shadow-lg">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Assets') }}</span>
+          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Media library') }}</span>
+          <span class="mt-4 inline-flex items-center text-sm font-semibold text-zinc-600 group-hover:text-zinc-800">{{ __('Open →') }}</span>
+        </a>
+        <a href="{{ route('inventory.index') }}" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-emerald-300/80 hover:shadow-lg">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Public') }}</span>
+          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Live inventory') }}</span>
+          <span class="mt-4 inline-flex items-center text-sm font-semibold text-emerald-600 group-hover:text-emerald-700">{{ __('Open site →') }}</span>
+        </a>
+      </div>
+    </div>
+
     <div class="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm ring-1 ring-black/[0.02]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h2 class="text-sm font-bold uppercase tracking-[0.15em] text-zinc-500">{{ __('Audit trail') }}</h2>
@@ -128,42 +164,6 @@
             @endforelse
           </tbody>
         </table>
-      </div>
-    </div>
-
-    <div>
-      <h2 class="text-sm font-bold uppercase tracking-[0.15em] text-zinc-500">{{ __('Shortcuts') }}</h2>
-      <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <a href="{{ route('dashboard.vehicles.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-amber-300/80 hover:shadow-lg">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Inventory') }}</span>
-          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('All vehicle listings') }}</span>
-          <span class="mt-4 inline-flex items-center text-sm font-semibold text-amber-600 group-hover:text-amber-700">{{ __('Open →') }}</span>
-        </a>
-        <a href="{{ route('admin.users.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-violet-300/80 hover:shadow-lg">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Accounts') }}</span>
-          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Users & vendors') }}</span>
-          <span class="mt-4 inline-flex items-center text-sm font-semibold text-violet-600 group-hover:text-violet-700">{{ __('Open →') }}</span>
-        </a>
-        <a href="{{ route('admin.pages.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-sky-300/80 hover:shadow-lg">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Content') }}</span>
-          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Page editors') }}</span>
-          <span class="mt-4 inline-flex items-center text-sm font-semibold text-sky-600 group-hover:text-sky-700">{{ __('Open →') }}</span>
-        </a>
-        <a href="{{ route('admin.audit.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-indigo-300/80 hover:shadow-lg">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Governance') }}</span>
-          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Audit trail log') }}</span>
-          <span class="mt-4 inline-flex items-center text-sm font-semibold text-indigo-600 group-hover:text-indigo-700">{{ __('Open →') }}</span>
-        </a>
-        <a href="{{ route('admin.media.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-zinc-400 hover:shadow-lg">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Assets') }}</span>
-          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Media library') }}</span>
-          <span class="mt-4 inline-flex items-center text-sm font-semibold text-zinc-600 group-hover:text-zinc-800">{{ __('Open →') }}</span>
-        </a>
-        <a href="{{ route('inventory.index') }}" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-emerald-300/80 hover:shadow-lg">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Public') }}</span>
-          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Live inventory') }}</span>
-          <span class="mt-4 inline-flex items-center text-sm font-semibold text-emerald-600 group-hover:text-emerald-700">{{ __('Open site →') }}</span>
-        </a>
       </div>
     </div>
   </div>
