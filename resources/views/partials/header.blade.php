@@ -16,7 +16,7 @@
 @endphp
 
 {{-- Motors dealer-two inspired public header: https://motors.stylemixthemes.com/elementor-dealer-two/ --}}
-<header class="sticky top-0 z-50 shadow-[0_6px_20px_rgba(0,0,0,0.16)]">
+<header class="sticky top-0 z-50 shadow-[0_6px_20px_rgba(0,0,0,0.16)]" data-site-header>
   <div class="h-10 border-b border-white/10 bg-[#232628]">
     <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
       <button type="button" class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.05em] text-white/70 hover:text-white">
@@ -63,14 +63,14 @@
     </div>
   </div>
 
-  <div class="h-[90px] bg-[#232628]">
+  <div class="h-[90px] border-b border-transparent bg-transparent transition-all duration-300" data-site-header-main>
     <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
       <div class="flex min-w-0 flex-1 items-center gap-7 xl:gap-11">
-        <a href="{{ route('home') }}" class="flex shrink-0 items-center">
+        <a href="{{ route('home') }}" class="flex min-w-0 shrink items-center">
           @if (!empty($logoPath))
             <img src="{{ \App\Support\VehicleImageUrl::url($logoPath) }}" alt="{{ $brandName }}" class="h-9 w-auto max-w-[160px] object-contain sm:h-10" />
           @else
-            <span class="font-headline text-[36px] font-black italic leading-none tracking-tight text-white">{{ strtolower($brandName) }}</span>
+            <span class="block max-w-[min(68vw,17rem)] truncate font-headline text-[26px] font-black italic leading-none tracking-tight text-white sm:max-w-[22rem] sm:text-[32px] lg:max-w-none lg:text-[36px]">{{ strtolower($brandName) }}</span>
           @endif
         </a>
 

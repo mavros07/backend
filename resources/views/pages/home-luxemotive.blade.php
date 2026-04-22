@@ -118,25 +118,25 @@
     </div>
   </section>
 
-  <section class="flex flex-col md:flex-row h-[500px]">
-    <div class="flex-1 relative overflow-hidden group flex items-center justify-center text-center p-12">
+  <section class="flex flex-col md:flex-row md:h-[500px]">
+    <div class="relative flex min-h-[250px] flex-1 items-center justify-center overflow-hidden p-6 text-center group md:p-12">
       <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ $ctaLeftBg }}');"></div>
-      <div class="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-all duration-500"></div>
+      <div class="absolute inset-0 m-0 my-px bg-black/60 p-0 transition-all duration-500 group-hover:bg-black/40"></div>
       <div class="relative z-10 text-white">
         <span class="material-symbols-outlined text-4xl mb-4">directions_car</span>
-        <h3 class="font-headline font-black text-3xl md:text-4xl mb-6 tracking-tight uppercase">{{ $s['cta_left_title'] ?? 'Lorem ipsum dolor' }}</h3>
-        <p class="max-w-xs mx-auto mb-10 opacity-90 leading-relaxed">{{ $s['cta_left_body'] ?? 'Sit amet, consectetur adipiscing elit.' }}</p>
-        <a href="{{ route('inventory.index') }}" class="bg-[#4a69e2] text-white px-10 py-4 font-bold text-xs tracking-widest uppercase rounded shadow-xl hover:bg-blue-700 transition-all inline-block">Lorem link</a>
+        <h3 class="mb-4 font-headline text-2xl font-black tracking-tight uppercase md:mb-6 md:text-4xl">{{ $s['cta_left_title'] ?? 'Lorem ipsum dolor' }}</h3>
+        <p class="mx-auto mb-6 max-w-xs leading-relaxed opacity-90 md:mb-10">{{ $s['cta_left_body'] ?? 'Sit amet, consectetur adipiscing elit.' }}</p>
+        <a href="{{ route('inventory.index') }}" class="inline-block rounded bg-[#4a69e2] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-xl transition-all hover:bg-blue-700 md:px-10 md:py-4">Lorem link</a>
       </div>
     </div>
-    <div class="flex-1 relative overflow-hidden group flex items-center justify-center text-center p-12">
+    <div class="relative flex min-h-[250px] flex-1 items-center justify-center overflow-hidden p-6 text-center group md:p-12">
       <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ $ctaRightBg }}');"></div>
-      <div class="absolute inset-0 bg-[#ffb129]/80 group-hover:bg-[#ffb129]/70 transition-all duration-500"></div>
+      <div class="absolute inset-0 m-0 my-px bg-[#ffb129]/80 p-0 transition-all duration-500 group-hover:bg-[#ffb129]/70"></div>
       <div class="relative z-10 text-slate-900">
         <span class="material-symbols-outlined text-4xl mb-4">sell</span>
-        <h3 class="font-headline font-black text-3xl md:text-4xl mb-6 tracking-tight uppercase">{{ $s['cta_right_title'] ?? 'Consectetur adipiscing' }}</h3>
-        <p class="max-w-xs mx-auto mb-10 opacity-90 leading-relaxed">{{ $s['cta_right_body'] ?? 'Elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' }}</p>
-        <a href="{{ auth()->check() ? route('dashboard.vehicles.create') : route('register') }}" class="bg-[#4a69e2] text-white px-10 py-4 font-bold text-xs tracking-widest uppercase rounded shadow-xl hover:bg-blue-700 transition-all inline-block">Lorem action</a>
+        <h3 class="mb-4 font-headline text-2xl font-black tracking-tight uppercase md:mb-6 md:text-4xl">{{ $s['cta_right_title'] ?? 'Consectetur adipiscing' }}</h3>
+        <p class="mx-auto mb-6 max-w-xs leading-relaxed opacity-90 md:mb-10">{{ $s['cta_right_body'] ?? 'Elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' }}</p>
+        <a href="{{ auth()->check() ? route('dashboard.vehicles.create') : route('register') }}" class="inline-block rounded bg-[#4a69e2] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-xl transition-all hover:bg-blue-700 md:px-10 md:py-4">Lorem action</a>
       </div>
     </div>
   </section>
@@ -171,17 +171,19 @@
     </div>
   </section>
 
-  <section class="py-32 bg-slate-50 overflow-hidden">
-    <div class="container mx-auto px-8 max-w-6xl">
-      <div class="bg-white rounded-2xl shadow-2xl p-16 flex flex-col md:flex-row items-center justify-between relative">
-        <div class="flex flex-col gap-24 text-left z-10">
+  <section class="overflow-hidden bg-slate-50 py-16 md:py-32">
+    <div class="container mx-auto max-w-6xl px-4 sm:px-6 md:px-8">
+      <div class="relative rounded-2xl bg-white p-6 shadow-2xl md:p-16">
+        <div class="grid grid-cols-1 items-center gap-8 md:grid-cols-[1fr_auto_1fr] md:gap-10">
+          <div class="grid gap-8 text-center md:gap-16 md:text-left">
           <div><span class="font-headline font-black text-6xl text-slate-900 block leading-none">{{ max(0, $approvedCount) }}</span><span class="font-bold text-[11px] tracking-[0.2em] text-slate-400 uppercase mt-4 block">Lorem — listings</span></div>
           <div><span class="font-headline font-black text-6xl text-slate-900 block leading-none">00</span><span class="font-bold text-[11px] tracking-[0.2em] text-slate-400 uppercase mt-4 block">Lorem — metric two</span></div>
-        </div>
-        <div class="my-12 md:my-0 scale-110"><img class="w-64 md:w-80 h-auto drop-shadow-2xl" src="{{ $statsCar }}" alt=""/></div>
-        <div class="flex flex-col gap-24 text-right z-10">
+          </div>
+          <div class="mx-auto"><img class="h-auto w-52 drop-shadow-2xl sm:w-64 md:w-80" src="{{ $statsCar }}" alt=""/></div>
+          <div class="grid gap-8 text-center md:gap-16 md:text-right">
           <div><span class="font-headline font-black text-6xl text-slate-900 block leading-none">00</span><span class="font-bold text-[11px] tracking-[0.2em] text-slate-400 uppercase mt-4 block">Lorem — metric three</span></div>
           <div><span class="font-headline font-black text-6xl text-slate-900 block leading-none">00</span><span class="font-bold text-[11px] tracking-[0.2em] text-slate-400 uppercase mt-4 block">Lorem — metric four</span></div>
+          </div>
         </div>
       </div>
     </div>
@@ -195,15 +197,15 @@
     </div>
   </section>
 
-  <section class="bg-primary py-10">
-    <div class="container mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-      <div class="flex items-center gap-4 text-on_surface">
+  <section class="bg-primary py-8 md:py-10">
+    <div class="container mx-auto flex flex-col items-stretch justify-between gap-5 px-4 sm:px-6 md:flex-row md:items-center md:gap-6 md:px-8">
+      <div class="flex items-center gap-3 text-on_surface md:gap-4">
         <span class="material-symbols-outlined text-3xl">help</span>
-        <h3 class="font-headline font-bold text-xl tracking-tight uppercase">Lorem ipsum — questions?</h3>
+        <h3 class="font-headline text-lg font-bold tracking-tight uppercase md:text-xl">Lorem ipsum — questions?</h3>
       </div>
-      <div class="flex items-center gap-10">
-        <div class="flex items-center gap-3"><span class="material-symbols-outlined text-slate-800">call</span><p class="font-headline font-black text-2xl text-slate-900">{{ $dealerPhone ?? '' }}</p></div>
-        <a href="{{ route('contact') }}" class="bg-white/20 border border-slate-900/10 text-slate-900 px-8 py-3 font-bold tracking-widest text-xs uppercase hover:bg-white/40 transition-all rounded inline-flex items-center"><span class="material-symbols-outlined text-sm align-middle mr-1">mail</span> Lorem contact</a>
+      <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between md:w-auto md:gap-6">
+        <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-slate-800">call</span><p class="font-headline text-xl font-black text-slate-900 sm:text-2xl">{{ $dealerPhone ?? '' }}</p></div>
+        <a href="{{ route('contact') }}" class="inline-flex items-center justify-center rounded border border-slate-900/10 bg-white/20 px-6 py-3 text-xs font-bold uppercase tracking-widest text-slate-900 transition-all hover:bg-white/40 sm:px-8"><span class="material-symbols-outlined mr-1 text-sm align-middle">mail</span> Lorem contact</a>
       </div>
     </div>
   </section>
