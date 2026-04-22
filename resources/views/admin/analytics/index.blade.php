@@ -78,43 +78,51 @@
     })"
     x-init="initCharts()"
   >
-    <header class="mb-10 flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
-      <div>
-        <h2 class="text-3xl font-black tracking-tight text-[#061018] drop-shadow-[0_1px_0_rgba(255,255,255,0.5)]">{{ __('Analytics Overview') }}</h2>
-        <p class="mt-2 max-w-xl text-sm leading-relaxed text-on-surface-variant">{{ __('Global luxury automotive market performance') }}</p>
+    <header class="mb-10 space-y-6">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0 max-w-2xl flex-1">
+          <h2 class="text-3xl font-black tracking-tight text-[#061018] drop-shadow-[0_1px_0_rgba(255,255,255,0.5)]">{{ __('Analytics Overview') }}</h2>
+          <p class="mt-2 text-sm leading-relaxed text-on-surface-variant">{{ __('Global luxury automotive market performance') }}</p>
+        </div>
+        <a
+          :href="`{{ route('admin.analytics.index') }}?range=${range}&export=csv&start_date=${startDate}&end_date=${endDate}`"
+          class="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary-container px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#0b1f3a]/25 transition hover:brightness-110 sm:mt-0.5"
+        >
+          <span class="material-symbols-outlined text-sm">download</span>
+          <span>{{ __('Export Data') }}</span>
+        </a>
       </div>
-      <div class="flex w-full flex-col gap-4 md:w-auto md:min-w-0 md:flex-row md:items-center md:gap-4">
-        <div class="anx-glass-toolbar flex min-w-0 flex-1 flex-col gap-3 rounded-2xl border border-[#0a1628]/10 p-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2 sm:p-4">
-          <div class="flex shrink-0 items-center gap-2 rounded-lg bg-[#0b1f3a]/[0.06] px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#0b1f3a]">
-            <span class="material-symbols-outlined text-base text-primary-container">filter_list</span>
-            <span>{{ __('Date Range') }}</span>
+
+      <div class="anx-glass-toolbar w-full min-w-0 rounded-2xl border border-[#0a1628]/10 p-4">
+        <div class="mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base text-primary-container">filter_list</span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-[#0b1f3a]">{{ __('Date Range') }}</span>
+        </div>
+        <div class="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-4 lg:gap-y-3">
+          <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3">
+            <label class="sr-only" for="anx-start-date">{{ __('Start date') }}</label>
+            <input id="anx-start-date" type="date" x-model="startDate" class="w-full min-w-0 rounded-lg border border-[#0a1628]/12 bg-white/95 px-3 py-2 text-sm text-on-surface shadow-sm transition hover:border-primary-container/40 focus:border-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container/20 sm:w-auto sm:min-w-[11rem]">
+            <span class="hidden text-sm text-on-surface-variant sm:inline">{{ __('to') }}</span>
+            <label class="sr-only" for="anx-end-date">{{ __('End date') }}</label>
+            <input id="anx-end-date" type="date" x-model="endDate" class="w-full min-w-0 rounded-lg border border-[#0a1628]/12 bg-white/95 px-3 py-2 text-sm text-on-surface shadow-sm transition hover:border-primary-container/40 focus:border-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container/20 sm:w-auto sm:min-w-[11rem]">
           </div>
-          <div class="flex min-w-0 flex-wrap items-center gap-2 border-t border-[#0a1628]/5 pt-3 sm:border-t-0 sm:pt-0">
-            <input type="date" x-model="startDate" class="max-w-[10.5rem] rounded-lg border border-[#0a1628]/12 bg-white/95 px-2.5 py-2 text-xs text-on-surface shadow-sm transition hover:border-primary-container/40 focus:border-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container/20 sm:text-sm">
-            <span class="text-[11px] font-medium text-on-surface-variant">{{ __('to') }}</span>
-            <input type="date" x-model="endDate" class="max-w-[10.5rem] rounded-lg border border-[#0a1628]/12 bg-white/95 px-2.5 py-2 text-xs text-on-surface shadow-sm transition hover:border-primary-container/40 focus:border-primary-container focus:outline-none focus:ring-2 focus:ring-primary-container/20 sm:text-sm">
-          </div>
-          <div class="flex flex-wrap gap-1.5 border-t border-[#0a1628]/5 pt-3 sm:border-t-0 sm:border-l sm:pl-3 sm:pt-0">
+          <div class="flex flex-wrap items-center gap-2 border-t border-[#0a1628]/08 pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-4">
+            <span class="w-full text-[11px] font-medium uppercase tracking-wide text-on-surface-variant sm:hidden">{{ __('Presets') }}</span>
             <template x-for="opt in [7,30,90]" :key="opt">
               <button
                 type="button"
                 @click="applyPreset(opt)"
-                class="rounded-lg px-3 py-1.5 text-[11px] font-bold tracking-wide transition sm:text-xs"
+                class="rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition"
                 :class="range === opt ? 'bg-primary-container text-white shadow-md shadow-[#0b1f3a]/25' : 'border border-[#0a1628]/10 bg-white/80 text-on-surface-variant hover:border-primary-container/30 hover:bg-white'"
               >
                 <span x-text="opt + 'd'"></span>
               </button>
             </template>
           </div>
-          <button type="button" @click="load()" class="ml-auto rounded-lg bg-primary-container px-4 py-2 text-xs font-semibold text-white shadow-md shadow-[#0b1f3a]/30 transition hover:brightness-110 sm:text-sm">{{ __('Apply') }}</button>
+          <div class="flex justify-end lg:ml-auto">
+            <button type="button" @click="load()" class="w-full rounded-lg bg-primary-container px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#0b1f3a]/30 transition hover:brightness-110 sm:w-auto">{{ __('Apply') }}</button>
+          </div>
         </div>
-        <a
-          :href="`{{ route('admin.analytics.index') }}?range=${range}&export=csv&start_date=${startDate}&end_date=${endDate}`"
-          class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary-container px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#0b1f3a]/25 transition hover:brightness-110"
-        >
-          <span class="material-symbols-outlined text-sm">download</span>
-          <span>{{ __('Export Data') }}</span>
-        </a>
       </div>
     </header>
 
@@ -188,11 +196,11 @@
     <section class="mb-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
       <div class="anx-card rounded-2xl p-6 md:p-8">
         <h3 class="mb-8 text-xs font-bold uppercase tracking-[0.18em] text-on-surface-variant">{{ __('Traffic Distribution') }}</h3>
-        <div class="flex flex-col items-center gap-10 sm:flex-row sm:items-center">
-          <div class="w-full min-w-0 shrink-0 sm:w-[280px]">
+        <div class="flex flex-col items-stretch gap-8 lg:flex-row lg:items-center lg:gap-10">
+          <div class="mx-auto w-full max-w-[280px] min-w-0 shrink-0 lg:mx-0">
             <div x-ref="donutChart" class="min-h-[260px] w-full"></div>
           </div>
-          <div class="w-full flex-1 space-y-5">
+          <div class="w-full min-w-0 space-y-4 sm:space-y-5 lg:flex-1">
             <template x-for="(row, di) in (state.deviceBreakdown || [])" :key="row.label">
               <div class="flex items-center justify-between gap-3 border-b border-[#0a1628]/05 pb-4 last:border-0 last:pb-0">
                 <div class="flex min-w-0 items-center gap-3">
@@ -214,14 +222,9 @@
     </section>
 
     <section class="anx-card mb-10 overflow-hidden rounded-2xl">
-      <div class="flex flex-col gap-4 border-b border-[#0a1628]/06 bg-gradient-to-r from-[#f8fafc] to-white px-6 py-6 sm:flex-row sm:items-end sm:justify-between md:px-8">
-        <div>
-          <h3 class="text-lg font-bold tracking-tight text-[#061018]">{{ __('Most Visited Pages') }}</h3>
-          <p class="mt-1.5 text-sm text-on-surface-variant">{{ __('Listing performance and viewer conversion') }}</p>
-        </div>
-        <a href="{{ route('admin.analytics.index') }}" class="inline-flex items-center gap-1 self-start text-xs font-bold uppercase tracking-widest text-primary-container transition hover:text-[#152a45] sm:self-auto">
-          {{ __('Full View') }} <span class="material-symbols-outlined text-sm">arrow_forward</span>
-        </a>
+      <div class="border-b border-[#0a1628]/06 bg-gradient-to-r from-[#f8fafc] to-white px-6 py-6 md:px-8">
+        <h3 class="text-lg font-bold tracking-tight text-[#061018]">{{ __('Most Visited Pages') }}</h3>
+        <p class="mt-1.5 text-sm text-on-surface-variant">{{ __('Listing performance and viewer conversion') }}</p>
       </div>
       <div class="px-4 pb-6 pt-2 md:px-6">
         <div class="overflow-x-auto rounded-xl border border-[#0a1628]/06 bg-white/50">
@@ -267,11 +270,11 @@
       </div>
 
       <div class="anx-card flex flex-col rounded-2xl p-6 md:p-8">
-        <h3 class="mb-6 w-full text-left text-xs font-bold uppercase tracking-[0.18em] text-on-surface-variant">{{ __('User Engagement Ratio') }}</h3>
-        <div class="flex flex-col items-center">
-          <div x-ref="gaugeChart" class="min-h-[280px] w-full max-w-sm"></div>
+        <h3 class="mb-4 w-full text-left text-xs font-bold uppercase tracking-[0.18em] text-on-surface-variant">{{ __('User Engagement Ratio') }}</h3>
+        <div class="flex w-full flex-col items-center justify-center overflow-hidden">
+          <div x-ref="gaugeChart" class="min-h-[240px] w-full max-w-[280px]"></div>
         </div>
-        <p class="mt-4 max-w-xs text-center text-xs leading-relaxed text-on-surface-variant lg:self-center">
+        <p class="mt-6 max-w-sm text-center text-xs leading-relaxed text-on-surface-variant sm:mx-auto">
           {{ __('Your platform engagement is') }} <span class="font-semibold text-on-tertiary-container">12% {{ __('higher') }}</span> {{ __('than the luxury industry average this quarter.') }}
         </p>
       </div>

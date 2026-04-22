@@ -39,7 +39,7 @@ function baseChartOptions() {
         grid: {
             borderColor: GRID,
             strokeDashArray: 4,
-            padding: { left: 8, right: 12 },
+            padding: { left: 8, right: 12, top: 8, bottom: 4 },
         },
         dataLabels: { enabled: false },
         legend: {
@@ -96,9 +96,21 @@ function trafficOptions(state) {
             size: 0,
             hover: { size: 5 },
         },
+        grid: {
+            ...base.grid,
+            padding: { left: 4, right: 8, top: 12, bottom: 18 },
+        },
         xaxis: {
             categories,
-            labels: { style: { colors: MUTED, fontSize: '11px', fontWeight: 600 } },
+            tickPlacement: 'between',
+            labels: {
+                style: { colors: MUTED, fontSize: '10px', fontWeight: 500 },
+                rotate: -35,
+                rotateAlways: true,
+                hideOverlappingLabels: true,
+                trim: true,
+                maxHeight: 120,
+            },
             axisBorder: { show: false },
             axisTicks: { show: false },
         },
@@ -147,35 +159,24 @@ function donutOptions(state) {
         plotOptions: {
             pie: {
                 donut: {
-                    size: '72%',
+                    size: '68%',
                     labels: {
                         show: true,
-                        name: { show: true, fontSize: '11px', color: MUTED, offsetY: -6 },
+                        name: { show: true, fontSize: '11px', color: MUTED, offsetY: 4, formatter: () => 'Total' },
                         value: {
                             show: true,
-                            fontSize: '22px',
+                            fontSize: '24px',
                             fontWeight: 700,
                             color: NAVY,
+                            offsetY: -4,
                             formatter: () => `${totalPct}%`,
                         },
-                        total: {
-                            show: true,
-                            showAlways: true,
-                            label: 'Total',
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            color: MUTED,
-                            formatter: () => `${totalPct}%`,
-                        },
+                        total: { show: false },
                     },
                 },
             },
         },
-        legend: {
-            ...base.legend,
-            position: 'bottom',
-            fontSize: '12px',
-        },
+        legend: { show: false },
         dataLabels: { enabled: false },
         tooltip: {
             ...base.tooltip,
@@ -194,6 +195,14 @@ function referrerOptions(state) {
     const categories = raw.map((r) => String(r.referrer_host || '—'));
     const data = raw.map((r) => Number(r.views ?? 0));
 
+    const shortCat = (v) => {
+        const s = String(v ?? '');
+        if (s.length <= 28) {
+            return s;
+        }
+        return `${s.slice(0, 26)}…`;
+    };
+
     return {
         ...base,
         chart: {
@@ -201,23 +210,29 @@ function referrerOptions(state) {
             type: 'bar',
             height: Math.max(220, categories.length * 36 + 80),
         },
+        legend: { show: false },
         plotOptions: {
             bar: {
                 horizontal: true,
                 borderRadius: 6,
-                barHeight: '70%',
+                barHeight: '62%',
             },
         },
         colors: [NAVY],
         series: [{ name: 'Views', data: data.length ? data : [0] }],
         xaxis: {
             categories: categories.length ? categories : ['—'],
-            labels: { style: { colors: MUTED, fontSize: '11px' } },
+            labels: {
+                style: { colors: MUTED, fontSize: '10px', fontWeight: 500 },
+                trim: true,
+                maxHeight: 160,
+                formatter: shortCat,
+            },
         },
         yaxis: {
             labels: {
-                maxWidth: 180,
-                style: { colors: MUTED, fontSize: '11px', fontWeight: 500 },
+                maxWidth: 220,
+                style: { colors: MUTED, fontSize: '10px', fontWeight: 500 },
             },
         },
         tooltip: {
@@ -264,7 +279,14 @@ function listingsOptions(state) {
         series: [{ name: 'Views', data: data.length ? data : [0] }],
         xaxis: {
             categories: categories.length ? categories : ['—'],
-            labels: { style: { colors: MUTED, fontSize: '11px', fontWeight: 700 } },
+            labels: {
+                style: { colors: MUTED, fontSize: '10px', fontWeight: 700 },
+                rotate: -35,
+                rotateAlways: categories.length > 5,
+                hideOverlappingLabels: true,
+                trim: true,
+                maxHeight: 100,
+            },
         },
         yaxis: {
             labels: {
@@ -308,9 +330,21 @@ function dailyStackedOptions(state) {
             { name: 'Views', data: views.length ? views : [0] },
             { name: 'Sessions', data: sessions.length ? sessions : [0] },
         ],
+        grid: {
+            ...base.grid,
+            padding: { left: 4, right: 8, top: 8, bottom: 16 },
+        },
         xaxis: {
             categories: categories.length ? categories : ['—'],
-            labels: { style: { colors: MUTED, fontSize: '10px', fontWeight: 600 } },
+            tickPlacement: 'between',
+            labels: {
+                style: { colors: MUTED, fontSize: '10px', fontWeight: 600 },
+                rotate: -35,
+                rotateAlways: true,
+                hideOverlappingLabels: true,
+                trim: true,
+                maxHeight: 110,
+            },
         },
         yaxis: {
             labels: {
@@ -344,29 +378,22 @@ function gaugeOptions(state) {
         chart: {
             ...base.chart,
             type: 'radialBar',
-            height: 280,
+            height: 260,
             sparkline: { enabled: false },
         },
         series: [val],
         colors: [BRONZE],
         plotOptions: {
             radialBar: {
-                hollow: { size: '62%' },
+                hollow: { size: '72%' },
                 track: { background: GRID },
                 dataLabels: {
                     show: true,
-                    name: {
-                        show: true,
-                        offsetY: 12,
-                        color: MUTED,
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        formatter: () => 'Engagement',
-                    },
+                    name: { show: false },
                     value: {
                         show: true,
-                        offsetY: -8,
-                        fontSize: '28px',
+                        offsetY: 4,
+                        fontSize: '22px',
                         fontWeight: 800,
                         color: NAVY,
                         formatter: () => `${val.toFixed(1)}%`,
@@ -375,7 +402,7 @@ function gaugeOptions(state) {
             },
         },
         stroke: { lineCap: 'round' },
-        labels: ['Engagement'],
+        labels: [''],
     };
 }
 
