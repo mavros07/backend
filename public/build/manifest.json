@@ -1,11 +1,29 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-DP0iskcS.css",
+    "file": "assets/app-BOVPNVvy.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
     "names": [
       "app.css"
+    ]
+  },
+  "resources/js/admin-analytics.js": {
+    "file": "assets/admin-analytics-C6-z-ORt.js",
+    "name": "admin-analytics",
+    "src": "resources/js/admin-analytics.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/admin/analytics-charts.js"
+    ]
+  },
+  "resources/js/admin/analytics-charts.js": {
+    "file": "assets/analytics-charts-BDid5-0o.js",
+    "name": "analytics-charts",
+    "src": "resources/js/admin/analytics-charts.js",
+    "isDynamicEntry": true,
+    "css": [
+      "assets/analytics-charts-BtQEkBG2.css"
     ]
   },
   "resources/js/app.js": {
