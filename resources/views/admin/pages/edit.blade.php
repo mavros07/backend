@@ -14,11 +14,32 @@
         <form id="media-upload-form" method="post" action="{{ route('admin.media.upload') }}" enctype="multipart/form-data" class="flex flex-col gap-2 sm:flex-row sm:items-center">
           @csrf
           <input id="media-upload-input" type="file" name="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="block w-full text-sm text-gray-700" />
-          <button type="submit" class="whitespace-nowrap rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700">Upload</button>
+          <button type="submit" id="media-upload-submit" class="whitespace-nowrap rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700">Upload</button>
         </form>
+        <div id="media-upload-status" class="mt-2 hidden" role="status" aria-live="polite">
+          <div class="flex items-center gap-2 text-sm text-indigo-700">
+            <span class="inline-block h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600" aria-hidden="true"></span>
+            <span class="media-upload-status-text">{{ __('Uploading…') }}</span>
+          </div>
+            <div class="mt-1.5 h-0.5 w-full overflow-hidden rounded bg-gray-200">
+            <div class="media-upload-indeterminate h-full w-1/3 rounded bg-indigo-500"></div>
+          </div>
+        </div>
+        <style>
+          @keyframes mediaIndeterminate {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+          }
+          .media-upload-indeterminate {
+            animation: mediaIndeterminate 1.1s ease-in-out infinite;
+          }
+        </style>
       </div>
       <div id="media-grid" class="min-h-0 flex-1 overflow-auto p-4 grid grid-cols-2 gap-3 md:grid-cols-4"></div>
-      <div class="shrink-0 border-t border-gray-200 px-4 py-3 text-right">
+      <div class="shrink-0 border-t border-gray-200 px-4 py-3 flex flex-wrap items-center justify-end gap-2">
+        <button type="button" id="media-modal-insert" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500" disabled>
+          {{ __('Use selected image') }}
+        </button>
         <button type="button" class="js-media-modal-close rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Close</button>
       </div>
     </div>
@@ -81,6 +102,27 @@
 
       let mediaTargetInputId = null;
       let mediaItems = [];
+      let mediaSelectedPath = null;
+
+      function setMediaSelectedPath(path) {
+        mediaSelectedPath = (path && String(path)) || null;
+        const insertBtn = document.getElementById('media-modal-insert');
+        if (insertBtn) {
+          insertBtn.disabled = !mediaSelectedPath;
+        }
+      }
+
+      function applyMediaSelectionAndClose() {
+        if (!mediaTargetInputId || !mediaSelectedPath) return;
+        const input = document.getElementById(mediaTargetInputId);
+        if (input) {
+          input.value = mediaSelectedPath;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        setMediaSelectedPath(null);
+        closeMediaModal();
+      }
+
       function updateMediaModalSizing() {
         const modal = document.getElementById('media-modal');
         const panel = document.getElementById('media-modal-panel');
@@ -108,6 +150,7 @@
         panel.style.maxWidth = `min(72rem, ${Math.round(usable)}px)`;
       }
       function closeMediaModal() {
+        setMediaSelectedPath(null);
         const modal = document.getElementById('media-modal');
         if (!modal) return;
         modal.classList.add('hidden');
@@ -119,26 +162,36 @@
         if (!grid) return;
         const q = (filter || '').toLowerCase();
         const list = mediaItems.filter((m) => !q || m.name.toLowerCase().includes(q));
-        grid.innerHTML = list.map((m) => `
-          <button type="button" class="rounded-lg border border-gray-200 p-2 text-left shadow-sm hover:border-indigo-300 hover:bg-indigo-50/40" data-path="${m.path}">
-            <img src="${m.url}" alt="" class="h-24 w-full rounded-md object-cover" />
-            <p class="mt-2 truncate text-xs text-gray-700" title="${m.name}">${m.name}</p>
-          </button>
-        `).join('');
+        const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        grid.innerHTML = list.map((m) => {
+          const sel = mediaSelectedPath === m.path;
+          return `
+          <button type="button" class="rounded-lg border p-2 text-left shadow-sm transition-colors ${sel ? 'border-indigo-500 ring-2 ring-indigo-400 bg-indigo-50/50' : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/40'}" data-path="${esc(m.path)}" title="${esc(m.name)}">
+            <img src="${String(m.url).replace(/"/g, '&quot;')}" alt="" class="h-24 w-full rounded-md object-cover" />
+            <p class="mt-2 truncate text-xs text-gray-700" title="${esc(m.name)}">${esc(m.name)}</p>
+          </button>`;
+        }).join('');
         grid.querySelectorAll('button[data-path]').forEach((btn) => {
-          btn.addEventListener('click', () => {
+          const path = btn.getAttribute('data-path');
+          if (!path) return;
+          btn.addEventListener('click', (ev) => {
+            ev.preventDefault();
             if (!mediaTargetInputId) return;
-            const input = document.getElementById(mediaTargetInputId);
-            if (input) {
-              input.value = btn.getAttribute('data-path');
-              input.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-            closeMediaModal();
+            setMediaSelectedPath(path);
+            renderMediaGrid(document.getElementById('media-search')?.value || '');
+          });
+          btn.addEventListener('dblclick', (ev) => {
+            ev.preventDefault();
+            if (!mediaTargetInputId) return;
+            setMediaSelectedPath(path);
+            applyMediaSelectionAndClose();
           });
         });
+        setMediaSelectedPath(mediaSelectedPath);
       }
       async function openMediaModal(targetInputId) {
         mediaTargetInputId = targetInputId;
+        setMediaSelectedPath(null);
         const modal = document.getElementById('media-modal');
         if (!modal) return;
         modal.style.position = 'fixed';
@@ -157,6 +210,10 @@
           renderMediaGrid('');
         }
       }
+
+      document.getElementById('media-modal-insert')?.addEventListener('click', () => {
+        applyMediaSelectionAndClose();
+      });
       mediaSearch.addEventListener('input', (e) => {
         renderMediaGrid(e.target.value);
       });
@@ -233,9 +290,20 @@
       mediaUploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const input = document.getElementById('media-upload-input');
+        const submitBtn = document.getElementById('media-upload-submit');
+        const statusEl = document.getElementById('media-upload-status');
         if (!input.files || !input.files.length) return;
         const formData = new FormData(mediaUploadForm);
         const token = mediaUploadForm.querySelector('input[name="_token"]').value;
+        if (submitBtn) submitBtn.disabled = true;
+        input.disabled = true;
+        mediaUploadForm.setAttribute('aria-busy', 'true');
+        let statusHideMs = 2500;
+        if (statusEl) {
+          statusEl.classList.remove('hidden');
+          const t = statusEl.querySelector('.media-upload-status-text');
+          if (t) t.textContent = '{{ __('Uploading…') }}';
+        }
         try {
           const res = await fetch(mediaUploadForm.action, {
             method: 'POST',
@@ -243,11 +311,33 @@
             headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
             body: formData,
           });
-          if (!res.ok) return;
-          input.value = '';
-          await openMediaModal(mediaTargetInputId);
-        } catch (_) {
-          // Keep modal open even if upload fails.
+          if (statusEl) {
+            const t = statusEl.querySelector('.media-upload-status-text');
+            if (t) {
+              t.textContent = res.ok
+                ? '{{ __('Upload complete') }}'
+                : '{{ __('Upload failed') }} (HTTP ' + res.status + ')';
+            }
+          }
+          if (res.ok) {
+            statusHideMs = 800;
+            input.value = '';
+            await openMediaModal(mediaTargetInputId);
+          }
+        } catch (err) {
+          if (statusEl) {
+            const t = statusEl.querySelector('.media-upload-status-text');
+            if (t) t.textContent = '{{ __('Upload failed. Check your connection.') }}';
+          }
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+          input.disabled = false;
+          mediaUploadForm.removeAttribute('aria-busy');
+          if (statusEl) {
+            setTimeout(() => {
+              statusEl.classList.add('hidden');
+            }, statusHideMs);
+          }
         }
       });
     });
@@ -365,6 +455,9 @@
                       $inputId = 'section-'.$field['name'];
                     @endphp
                     @if ($field['type'] === 'image')
+                      @php
+                        $isThumbPreview = ($field['preview'] ?? '') === 'thumbnail';
+                      @endphp
                       <div class="js-media-field rounded-lg border border-gray-100 bg-slate-50/50 p-4 md:col-span-2">
                         <span class="block text-sm font-medium text-gray-700">{{ $field['label'] }}</span>
                         <p class="mt-1 text-xs text-gray-500">{{ __('Use the library to pick a file; the preview updates automatically. The path is stored on the server when you save the page.') }}</p>
@@ -389,24 +482,41 @@
                           autocomplete="off"
                         />
                         <div
-                          class="mt-3 rounded-md border border-dashed border-gray-300 bg-stone-50 p-3 shadow-inner"
+                          class="mt-3 rounded-md border border-dashed border-gray-300 bg-stone-50 p-3 shadow-inner @if($isThumbPreview) flex justify-center @endif"
                           data-media-preview-wrap="{{ $inputId }}"
                         >
-                          <div class="relative flex min-h-[10rem] max-h-[20rem] w-full items-center justify-center overflow-hidden rounded-md bg-white">
-                            <img
-                              src=""
-                              alt=""
-                              class="js-media-preview-img hidden max-h-[18rem] w-full object-contain"
-                            />
-                            <div class="js-media-preview-placeholder pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 bg-gradient-to-br from-gray-50 to-gray-100 p-4 text-center">
-                              <svg class="h-10 w-10 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
-                              <span class="text-xs font-medium text-gray-400">{{ __('No preview yet — select an image') }}</span>
+                          @if ($isThumbPreview)
+                            <div class="relative flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
+                              <img
+                                src=""
+                                alt=""
+                                class="js-media-preview-img hidden h-full w-full object-cover"
+                              />
+                              <div class="js-media-preview-placeholder pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 bg-gradient-to-br from-gray-50 to-gray-100 p-2 text-center">
+                                <svg class="h-8 w-8 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
+                                <span class="text-[10px] font-medium text-gray-400">{{ __('No preview') }}</span>
+                              </div>
+                              <div class="js-media-preview-error absolute inset-0 hidden flex-col items-center justify-center gap-0.5 bg-amber-50/95 p-2 text-center">
+                                <span class="text-[10px] font-medium text-amber-900">{{ __('Could not load') }}</span>
+                              </div>
                             </div>
-                            <div class="js-media-preview-error absolute inset-0 hidden flex-col items-center justify-center gap-1 bg-amber-50/95 p-4 text-center">
-                              <span class="text-xs font-medium text-amber-900">{{ __('Could not load preview') }}</span>
-                              <span class="text-[11px] text-amber-800">{{ __('Confirm the file exists under public/ or upload it via Media.') }}</span>
+                          @else
+                            <div class="relative flex min-h-[10rem] max-h-[20rem] w-full items-center justify-center overflow-hidden rounded-md bg-white">
+                              <img
+                                src=""
+                                alt=""
+                                class="js-media-preview-img hidden max-h-[18rem] w-full object-contain"
+                              />
+                              <div class="js-media-preview-placeholder pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 bg-gradient-to-br from-gray-50 to-gray-100 p-4 text-center">
+                                <svg class="h-10 w-10 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
+                                <span class="text-xs font-medium text-gray-400">{{ __('No preview yet — select an image') }}</span>
+                              </div>
+                              <div class="js-media-preview-error absolute inset-0 hidden flex-col items-center justify-center gap-1 bg-amber-50/95 p-4 text-center">
+                                <span class="text-xs font-medium text-amber-900">{{ __('Could not load preview') }}</span>
+                                <span class="text-[11px] text-amber-800">{{ __('Confirm the file exists under public/ or upload it via Media.') }}</span>
+                              </div>
                             </div>
-                          </div>
+                          @endif
                         </div>
                         <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1">
                           <div class="min-w-0 flex-1">

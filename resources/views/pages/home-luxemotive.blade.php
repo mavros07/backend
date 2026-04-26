@@ -7,7 +7,7 @@
   $heroBg = \App\Support\PlaceholderMedia::url($s['hero_image'] ?? 'asset/images/media/home-hero-main.jpg');
   $dealerCtaBg = \App\Support\PlaceholderMedia::url($s['dealer_cta_bg'] ?? 'asset/images/media/home-cta-left.jpg');
   $testimonialBg = \App\Support\PlaceholderMedia::url($s['testimonial_bg_image'] ?? 'asset/images/media/home-stats-bg.jpg');
-  $testimonialAvatar = \App\Support\PlaceholderMedia::url('asset/images/media/home-testimonial-avatar.jpg');
+  $testimonialAvatar = \App\Support\PlaceholderMedia::url($s['testimonial_avatar'] ?? 'asset/images/media/home-testimonial-avatar.jpg');
   $statsCar = \App\Support\PlaceholderMedia::url($s['stats_center_image'] ?? 'asset/images/media/home-stats-car.jpg');
   $heroCtaHref = $s['hero_cta_href'] ?? '/inventory';
   $heroCtaUrl = \Illuminate\Support\Str::startsWith($heroCtaHref, ['http://', 'https://']) ? $heroCtaHref : url($heroCtaHref);
@@ -40,12 +40,12 @@
 @section('content')
   {{-- Homepage does not render legacy WordPress/Elementor HTML here. Use Admin → Page Editors → Home for section copy and optional Content HTML on other pages. --}}
 
-  <section class="relative flex min-h-[94vh] items-start overflow-hidden pt-28 md:min-h-[100vh] md:pt-36">
+  <section class="relative flex min-h-[94vh] items-start overflow-hidden pt-32 md:min-h-[100vh] md:pt-40">
     <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ e($heroBg) }}');"></div>
     <div class="absolute inset-0 hero-gradient"></div>
     <div class="relative z-10 container mx-auto px-8 text-center">
-      <h1 class="text-white font-headline font-black text-4xl md:text-7xl leading-tight tracking-tight uppercase">{{ $heroTitle }}</h1>
-      <p class="text-primary font-bold tracking-widest mt-6 text-xl md:text-3xl uppercase">{{ $heroSubtitle }}</p>
+      <h1 class="text-white font-headline font-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight tracking-tight uppercase">{{ $heroTitle }}</h1>
+      <p class="text-primary font-bold tracking-widest mt-6 text-lg sm:text-xl md:text-2xl uppercase">{{ $heroSubtitle }}</p>
       <a href="{{ $heroCtaUrl }}" class="mt-10 inline-block bg-primary text-on_surface px-10 py-4 font-bold text-xs tracking-widest uppercase rounded shadow-lg hover:bg-yellow-400 transition-colors">
         {{ $s['hero_cta_text'] ?? 'Lorem CTA' }}
       </a>
@@ -147,13 +147,13 @@
         <span class="material-symbols-outlined mb-7 text-5xl text-[#222]">{{ $leftCtaIcon }}</span>
         <h3 class="font-headline text-xl font-extrabold uppercase leading-snug tracking-tight text-[#101010] md:text-[22px]">{{ $s['cta_left_title'] ?? 'Looking for a car?' }}</h3>
         <p class="mt-4 max-w-[26rem] text-[15px] leading-[1.8] text-[#5c6670]">{{ $s['cta_left_body'] ?? '' }}</p>
-        <a href="{{ $ctaLeftUrl }}" class="mt-8 inline-block bg-[#4b6ff7] px-8 py-3.5 text-[13px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#3457e7]">{{ $s['cta_left_button_text'] ?? 'Inventory' }}</a>
+        <a href="{{ $ctaLeftUrl }}" class="mt-8 inline-flex self-start items-center justify-center bg-[#4b6ff7] px-8 py-3.5 text-[13px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#3457e7]">{{ $s['cta_left_button_text'] ?? 'Inventory' }}</a>
       </div>
       <div class="flex min-h-[260px] flex-col justify-start bg-[#efb12c] px-8 py-9 text-left shadow-[0_10px_25px_rgba(0,0,0,0.08)] md:min-h-[305px] md:px-10 md:py-10">
         <span class="material-symbols-outlined mb-7 text-5xl text-[#222]">{{ $rightCtaIcon }}</span>
         <h3 class="font-headline text-xl font-extrabold uppercase leading-snug tracking-tight text-[#101010] md:text-[22px]">{{ $s['cta_right_title'] ?? 'Want to sell a car?' }}</h3>
         <p class="mt-4 max-w-[26rem] text-[15px] leading-[1.8] text-[#fff4d6]">{{ $s['cta_right_body'] ?? '' }}</p>
-        <a href="{{ $ctaRightUrl }}" class="mt-8 inline-block bg-[#4b6ff7] px-8 py-3.5 text-[13px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#3457e7]">{{ $s['cta_right_button_text'] ?? 'Sell your car' }}</a>
+        <a href="{{ $ctaRightUrl }}" class="mt-8 inline-flex self-start items-center justify-center bg-[#4b6ff7] px-8 py-3.5 text-[13px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#3457e7]">{{ $s['cta_right_button_text'] ?? 'Sell your car' }}</a>
       </div>
     </div>
   </section>
@@ -161,17 +161,17 @@
   <section class="py-24 bg-surface-container-low border-b border-slate-200">
     <div class="container mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
       <div class="bg-white p-10 rounded shadow-sm border border-slate-100 flex flex-col items-center text-center">
-        <div class="bg-slate-50 p-4 rounded-full mb-6"><span class="material-symbols-outlined text-primary text-2xl">stars</span></div>
+        <div class="bg-slate-50 p-4 rounded-full mb-6"><span class="material-symbols-outlined text-2xl text-slate-900">stars</span></div>
         <h4 class="font-headline font-bold text-lg mb-4 uppercase tracking-tight">{{ $s['feat1_title'] ?? 'Lorem ipsum' }}</h4>
         <p class="text-slate-500 text-sm leading-relaxed">{{ $s['feat1_body'] ?? 'Dolor sit amet, consectetur adipiscing elit.' }}</p>
       </div>
       <div class="bg-white p-10 rounded shadow-sm border border-slate-100 flex flex-col items-center text-center">
-        <div class="bg-slate-50 p-4 rounded-full mb-6"><span class="material-symbols-outlined text-primary text-2xl">groups</span></div>
+        <div class="bg-slate-50 p-4 rounded-full mb-6"><span class="material-symbols-outlined text-2xl text-slate-900">groups</span></div>
         <h4 class="font-headline font-bold text-lg mb-4 uppercase tracking-tight">{{ $s['feat2_title'] ?? 'Dolor sit amet' }}</h4>
         <p class="text-slate-500 text-sm leading-relaxed">{{ $s['feat2_body'] ?? 'Sed cursus ante dapibus diam. Sed nisi.' }}</p>
       </div>
       <div class="bg-white p-10 rounded shadow-sm border border-slate-100 flex flex-col items-center text-center">
-        <div class="bg-slate-50 p-4 rounded-full mb-6"><span class="material-symbols-outlined text-primary text-2xl">build</span></div>
+        <div class="bg-slate-50 p-4 rounded-full mb-6"><span class="material-symbols-outlined text-2xl text-slate-900">build</span></div>
         <h4 class="font-headline font-bold text-lg mb-4 uppercase tracking-tight">{{ $s['feat3_title'] ?? 'Consectetur elit' }}</h4>
         <p class="text-slate-500 text-sm leading-relaxed">{{ $s['feat3_body'] ?? 'Fusce nec tellus sed augue semper porta.' }}</p>
       </div>
@@ -194,22 +194,22 @@
         <div class="grid grid-cols-1 items-center gap-8 md:grid-cols-[1fr_auto_1fr] md:gap-10">
           <div class="grid gap-8 text-center md:gap-16 md:text-left">
             <div>
-              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ max(0, $approvedCount) }}">0</span>
+              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ max(0, $approvedCount) }}">{{ number_format(max(0, $approvedCount)) }}</span>
               <span class="mt-4 block text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">{{ $s['stats_metric_1_label'] ?? 'Listings' }}</span>
             </div>
             <div>
-              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ $statsM2 }}">0</span>
+              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ $statsM2 }}">{{ number_format($statsM2) }}</span>
               <span class="mt-4 block text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">{{ $s['stats_metric_2_label'] ?? 'Metric two' }}</span>
             </div>
           </div>
           <div class="mx-auto"><img class="h-auto w-52 drop-shadow-2xl sm:w-64 md:w-80" src="{{ $statsCar }}" alt=""/></div>
           <div class="grid gap-8 text-center md:gap-16 md:text-right">
             <div>
-              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ $statsM3 }}">0</span>
+              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ $statsM3 }}">{{ number_format($statsM3) }}</span>
               <span class="mt-4 block text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">{{ $s['stats_metric_3_label'] ?? 'Metric three' }}</span>
             </div>
             <div>
-              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ $statsM4 }}">0</span>
+              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ $statsM4 }}">{{ number_format($statsM4) }}</span>
               <span class="mt-4 block text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">{{ $s['stats_metric_4_label'] ?? 'Metric four' }}</span>
             </div>
           </div>

@@ -92,6 +92,7 @@ class PageController extends Controller
             'testimonial_overlay_opacity' => '0.55',
             'testimonial_name' => 'Lorem Ipsum',
             'testimonial_role' => 'Lorem role',
+            'testimonial_avatar' => 'asset/images/media/home-testimonial-avatar.jpg',
             'testimonial_quote' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla, velit id laoreet hendrerit, sapien nisl varius dolor, eu consequat erat augue in eros.',
         ]);
 
