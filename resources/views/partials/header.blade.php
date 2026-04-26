@@ -27,6 +27,7 @@
       [data-site-header].is-home-header.is-scrolled [data-header-logo],
       [data-site-header].is-home-header.is-scrolled [data-header-icon],
       [data-site-header].is-home-header.is-scrolled [data-header-action-text],
+      [data-site-header].is-home-header.is-scrolled [data-header-bag-count],
       [data-site-header].is-home-header.is-scrolled [data-header-menu-icon] { color: #111827 !important; }
       [data-site-header].is-home-header.is-scrolled [data-header-nav-link] { color: rgba(17, 24, 39, 0.92) !important; }
       [data-site-header].is-home-header.is-scrolled [data-header-nav-link]:hover { color: #111827 !important; }
@@ -80,51 +81,49 @@
   </div>
 
   <div class="h-[90px] transition-all duration-300 {{ $isHome ? 'border-b border-transparent bg-transparent' : 'border-b border-white/10 bg-[#232628]' }}" data-site-header-main>
-    <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
-      <div class="flex min-w-0 flex-1 items-center gap-7 xl:gap-11">
-        <a href="{{ route('home') }}" class="flex min-w-0 shrink items-center">
-          @if (!empty($logoPath))
-            <img src="{{ \App\Support\VehicleImageUrl::url($logoPath) }}" alt="{{ $brandName }}" class="h-9 w-auto max-w-[160px] object-contain sm:h-10" />
-          @else
-            <span data-header-logo class="block max-w-[min(68vw,17rem)] truncate font-headline text-[26px] font-black italic leading-none tracking-tight text-white sm:max-w-[22rem] sm:text-[32px] lg:max-w-none lg:text-[36px]">{{ strtolower($brandName) }}</span>
-          @endif
-        </a>
+    <div class="relative mx-auto flex h-full w-full max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
+      <a href="{{ route('home') }}" class="relative z-20 flex min-w-0 shrink items-center xl:min-w-[10rem]">
+        @if (!empty($logoPath))
+          <img src="{{ \App\Support\VehicleImageUrl::url($logoPath) }}" alt="{{ $brandName }}" class="h-9 w-auto max-w-[160px] object-contain sm:h-10" />
+        @else
+          <span data-header-logo class="block max-w-[min(68vw,17rem)] truncate font-headline text-[26px] font-black italic leading-none tracking-tight text-white sm:max-w-[22rem] sm:text-[32px] lg:max-w-none lg:text-[36px]">{{ strtolower($brandName) }}</span>
+        @endif
+      </a>
 
-        <nav class="hidden min-w-0 flex-1 items-center justify-start gap-5 xl:flex" aria-label="{{ __('Primary') }}">
-          @foreach ([
-            ['route' => 'home', 'label' => __('Home')],
-            ['route' => 'inventory.index', 'label' => __('Inventory')],
-            ['route' => 'about', 'label' => __('About')],
-            ['route' => 'faq', 'label' => __('FAQ')],
-            ['route' => 'contact', 'label' => __('Contact')],
-          ] as $item)
-            @php
-              $r = $item['route'];
-              $active = match ($r) {
-                'home' => request()->routeIs('home'),
-                'inventory.index' => request()->routeIs('inventory.*'),
-                default => request()->routeIs($r),
-              };
-            @endphp
-            <a href="{{ route($r) }}" data-header-nav-link class="group inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors {{ $active ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">
-              <span>{{ $item['label'] }}</span>
-            </a>
-          @endforeach
-        </nav>
-      </div>
+      <nav class="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-5 xl:flex xl:px-4" aria-label="{{ __('Primary') }}">
+        @foreach ([
+          ['route' => 'home', 'label' => __('Home')],
+          ['route' => 'inventory.index', 'label' => __('Inventory')],
+          ['route' => 'about', 'label' => __('About')],
+          ['route' => 'faq', 'label' => __('FAQ')],
+          ['route' => 'contact', 'label' => __('Contact')],
+        ] as $item)
+          @php
+            $r = $item['route'];
+            $active = match ($r) {
+              'home' => request()->routeIs('home'),
+              'inventory.index' => request()->routeIs('inventory.*'),
+              default => request()->routeIs($r),
+            };
+          @endphp
+          <a href="{{ route($r) }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors {{ $active ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">
+            <span>{{ $item['label'] }}</span>
+          </a>
+        @endforeach
+      </nav>
 
-      <div class="flex shrink-0 items-center gap-3 sm:gap-6">
+      <div class="relative z-20 flex shrink-0 items-center gap-3 sm:gap-6">
         <a href="{{ route('compare') }}" class="group hidden items-center gap-2 xl:inline-flex" title="{{ __('Compare vehicles') }}">
-          <span class="relative inline-flex">
-            <span data-header-icon class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]">compare_arrows</span>
+          <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Compare') }}</span>
+          <span class="relative ml-0.5 inline-flex">
+            <span data-header-icon class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]">speed</span>
             <span class="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#1280DF] px-1 text-[10px] font-extrabold text-white">{{ $compareCount }}</span>
           </span>
-          <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Compare') }}</span>
         </a>
 
         <span class="relative hidden xl:inline-flex border-l border-white/15 pl-5">
           <span data-header-icon class="material-symbols-outlined text-[27px] text-white">shopping_bag</span>
-          <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[22%] text-[10px] font-bold text-white">0</span>
+          <span data-header-bag-count class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[22%] text-[10px] font-bold text-white">0</span>
         </span>
 
         <button data-header-menu-button class="inline-flex h-11 w-11 items-center justify-center rounded border border-white/15 text-white hover:bg-white/10 xl:hidden" type="button" data-mobile-menu-toggle aria-label="{{ __('Menu') }}">

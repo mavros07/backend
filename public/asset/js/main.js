@@ -64,6 +64,44 @@
     activateTab(tabButtons[0].getAttribute('data-contact-tab'));
   }
 
+  function bindHomeStatsCountUp() {
+    var root = document.querySelector('[data-home-stats-root]');
+    if (!root) return;
+    var els = root.querySelectorAll('[data-count-up]');
+    if (!els.length) return;
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animateEl(el) {
+      var raw = el.getAttribute('data-target') || '0';
+      var target = parseInt(raw, 10);
+      if (isNaN(target) || target < 0) target = 0;
+      var start = performance.now();
+      var duration = 1100;
+      function frame(now) {
+        var p = Math.min(1, (now - start) / duration);
+        var v = Math.round(target * easeOutCubic(p));
+        el.textContent = String(v);
+        if (p < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        els.forEach(function (el) {
+          animateEl(el);
+        });
+      });
+    }, { threshold: 0.2, rootMargin: '0px 0px -40px 0px' });
+    io.observe(root);
+  }
+
   bindContactTabs();
   bindHeaderScrollState();
+  bindHomeStatsCountUp();
 })();

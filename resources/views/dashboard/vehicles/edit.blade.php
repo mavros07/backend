@@ -151,6 +151,11 @@
               <x-input-error :messages="$errors->get('description')" class="mt-2" />
             </div>
 
+            <div class="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50/80 px-3 py-2">
+              <input id="is_special" name="is_special" type="checkbox" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(old('is_special', $vehicle->is_special)) />
+              <x-input-label for="is_special" value="{{ __('Special listing (shows “Special” ribbon on homepage cards)') }}" class="!mb-0" />
+            </div>
+
             <div>
               <x-input-label for="images" value="Add Gallery Images" />
               <input id="images" name="images[]" type="file" multiple accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />

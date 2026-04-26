@@ -34,6 +34,7 @@ class Vehicle extends Model
         'interior_color',
         'vin',
         'description',
+        'is_special',
         'submitted_at',
         'approved_at',
         'approved_by',
@@ -46,6 +47,7 @@ class Vehicle extends Model
             'submitted_at' => 'datetime',
             'approved_at' => 'datetime',
             'features' => 'array',
+            'is_special' => 'boolean',
         ];
     }
 

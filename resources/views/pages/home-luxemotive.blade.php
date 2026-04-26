@@ -5,24 +5,42 @@
   $heroTitle = $s['hero_title'] ?? 'Lorem ipsum dolor sit amet';
   $heroSubtitle = $s['hero_subtitle'] ?? 'Consectetur adipiscing elit';
   $heroBg = \App\Support\PlaceholderMedia::url($s['hero_image'] ?? 'asset/images/media/home-hero-main.jpg');
-  $ctaLeftBg = \App\Support\PlaceholderMedia::url($s['cta_left_image'] ?? 'asset/images/media/home-cta-left.jpg');
-  $ctaRightBg = \App\Support\PlaceholderMedia::url($s['cta_right_image'] ?? 'asset/images/media/home-cta-right.jpg');
-  $statsBg = \App\Support\PlaceholderMedia::url('asset/images/media/home-stats-bg.jpg');
+  $dealerCtaBg = \App\Support\PlaceholderMedia::url($s['dealer_cta_bg'] ?? 'asset/images/media/home-cta-left.jpg');
+  $testimonialBg = \App\Support\PlaceholderMedia::url($s['testimonial_bg_image'] ?? 'asset/images/media/home-stats-bg.jpg');
   $testimonialAvatar = \App\Support\PlaceholderMedia::url('asset/images/media/home-testimonial-avatar.jpg');
-  $statsCar = \App\Support\PlaceholderMedia::url('asset/images/media/home-stats-car.jpg');
+  $statsCar = \App\Support\PlaceholderMedia::url($s['stats_center_image'] ?? 'asset/images/media/home-stats-car.jpg');
   $heroCtaHref = $s['hero_cta_href'] ?? '/inventory';
   $heroCtaUrl = \Illuminate\Support\Str::startsWith($heroCtaHref, ['http://', 'https://']) ? $heroCtaHref : url($heroCtaHref);
+  $ctaLeftHref = $s['cta_left_button_href'] ?? '/inventory';
+  $ctaLeftUrl = \Illuminate\Support\Str::startsWith($ctaLeftHref, ['http://', 'https://']) ? $ctaLeftHref : url($ctaLeftHref);
+  $ctaRightHref = $s['cta_right_button_href'] ?? (auth()->check() ? '/dashboard/vehicles/create' : '/register');
+  $ctaRightUrl = \Illuminate\Support\Str::startsWith($ctaRightHref, ['http://', 'https://']) ? $ctaRightHref : url($ctaRightHref);
   $approvedCount = (int) ($approvedListingCount ?? 0);
+  $statsM2 = max(0, (int) preg_replace('/\D/', '', (string) ($s['stats_metric_2_value'] ?? '0')));
+  $statsM3 = max(0, (int) preg_replace('/\D/', '', (string) ($s['stats_metric_3_value'] ?? '0')));
+  $statsM4 = max(0, (int) preg_replace('/\D/', '', (string) ($s['stats_metric_4_value'] ?? '0')));
+  $testimonialOverlay = min(0.95, max(0.0, (float) ($s['testimonial_overlay_opacity'] ?? 0.55)));
+  $leftCtaIcon = preg_replace('/[^a-z0-9_]/', '', strtolower((string) ($s['dealer_cta_left_icon'] ?? 'directions_car'))) ?: 'directions_car';
+  $rightCtaIcon = preg_replace('/[^a-z0-9_]/', '', strtolower((string) ($s['dealer_cta_right_icon'] ?? 'sell'))) ?: 'sell';
   $recentTitleRaw = trim((string) ($s['recent_title'] ?? 'RECENT CARS'));
   $recentTitleParts = preg_split('/\s+/', $recentTitleRaw) ?: ['RECENT', 'CARS'];
   $recentLastWord = array_pop($recentTitleParts) ?: 'CARS';
   $recentFirstWords = trim(implode(' ', $recentTitleParts));
+  $welcomeVideoRaw = trim((string) ($s['welcome_video_url'] ?? ''));
+  $welcomeYoutubeWatch = null;
+  if ($welcomeVideoRaw !== '') {
+    if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $welcomeVideoRaw, $m)) {
+      $welcomeYoutubeWatch = 'https://www.youtube.com/watch?v=' . $m[1];
+    } elseif (preg_match('/^[a-zA-Z0-9_-]{11}$/', $welcomeVideoRaw)) {
+      $welcomeYoutubeWatch = 'https://www.youtube.com/watch?v=' . $welcomeVideoRaw;
+    }
+  }
 @endphp
 
 @section('content')
   {{-- Homepage does not render legacy WordPress/Elementor HTML here. Use Admin → Page Editors → Home for section copy and optional Content HTML on other pages. --}}
 
-  <section class="relative flex min-h-[90vh] items-start overflow-hidden pt-24 md:min-h-[96vh] md:pt-32">
+  <section class="relative flex min-h-[94vh] items-start overflow-hidden pt-28 md:min-h-[100vh] md:pt-36">
     <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ e($heroBg) }}');"></div>
     <div class="absolute inset-0 hero-gradient"></div>
     <div class="relative z-10 container mx-auto px-8 text-center">
@@ -34,8 +52,8 @@
     </div>
   </section>
 
-  <section class="container mx-auto px-8 -mt-16 relative z-20">
-    <div class="rounded-lg bg-[#232628] p-7 shadow-2xl md:p-8 ring-1 ring-black/20">
+  <section class="container mx-auto max-w-5xl px-4 sm:px-6 md:px-8 -mt-16 relative z-20">
+    <div class="rounded-lg bg-[#232628] p-6 shadow-2xl ring-1 ring-black/20 md:p-8">
       <form method="get" action="{{ route('inventory.index') }}" class="space-y-4">
         <div class="flex items-center gap-2.5 text-white">
           <span class="material-symbols-outlined text-[28px] text-primary">search_insights</span>
@@ -94,7 +112,9 @@
           <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="group block overflow-hidden rounded-sm border border-slate-500/50 bg-[#232628] shadow-md transition hover:shadow-xl">
             <div class="relative aspect-[16/9] overflow-hidden">
               <img alt="{{ $vehicle->title }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" src="{{ $url }}"/>
-              <div class="pointer-events-none absolute -right-8 top-3 rotate-45 bg-[#3b63d6] px-10 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">Special</div>
+              @if ($vehicle->is_special)
+                <div class="pointer-events-none absolute -right-8 top-3 rotate-45 bg-[#3b63d6] px-10 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">{{ __('Special') }}</div>
+              @endif
             </div>
             <div class="border-t-2 border-[#3b63d6]/90 bg-[#31363c] px-4 pb-3.5 pt-3">
               <div class="flex items-start justify-between gap-2">
@@ -118,25 +138,22 @@
     </div>
   </section>
 
-  <section class="flex flex-col md:flex-row md:h-[500px]">
-    <div class="relative flex min-h-[250px] flex-1 items-center justify-center overflow-hidden p-6 text-center group md:p-12">
-      <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ $ctaLeftBg }}');"></div>
-      <div class="absolute inset-0 m-0 my-px bg-black/60 p-0 transition-all duration-500 group-hover:bg-black/40"></div>
-      <div class="relative z-10 text-white">
-        <span class="material-symbols-outlined text-4xl mb-4">directions_car</span>
-        <h3 class="mb-4 font-headline text-2xl font-black tracking-tight uppercase md:mb-6 md:text-4xl">{{ $s['cta_left_title'] ?? 'Lorem ipsum dolor' }}</h3>
-        <p class="mx-auto mb-6 max-w-xs leading-relaxed opacity-90 md:mb-10">{{ $s['cta_left_body'] ?? 'Sit amet, consectetur adipiscing elit.' }}</p>
-        <a href="{{ route('inventory.index') }}" class="inline-block rounded bg-[#4a69e2] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-xl transition-all hover:bg-blue-700 md:px-10 md:py-4">Lorem link</a>
+  <section
+    class="relative bg-cover bg-center py-14 md:py-[4.5rem]"
+    style="background-image: linear-gradient(rgba(255,255,255,0.12), rgba(255,255,255,0.12)), url('{{ e($dealerCtaBg) }}');"
+  >
+    <div class="mx-auto grid max-w-[1020px] grid-cols-1 gap-[18px] px-5 md:grid-cols-2">
+      <div class="flex min-h-[260px] flex-col justify-start bg-white px-8 py-9 text-left shadow-[0_10px_25px_rgba(0,0,0,0.08)] md:min-h-[305px] md:px-10 md:py-10">
+        <span class="material-symbols-outlined mb-7 text-5xl text-[#222]">{{ $leftCtaIcon }}</span>
+        <h3 class="font-headline text-xl font-extrabold uppercase leading-snug tracking-tight text-[#101010] md:text-[22px]">{{ $s['cta_left_title'] ?? 'Looking for a car?' }}</h3>
+        <p class="mt-4 max-w-[26rem] text-[15px] leading-[1.8] text-[#5c6670]">{{ $s['cta_left_body'] ?? '' }}</p>
+        <a href="{{ $ctaLeftUrl }}" class="mt-8 inline-block bg-[#4b6ff7] px-8 py-3.5 text-[13px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#3457e7]">{{ $s['cta_left_button_text'] ?? 'Inventory' }}</a>
       </div>
-    </div>
-    <div class="relative flex min-h-[250px] flex-1 items-center justify-center overflow-hidden p-6 text-center group md:p-12">
-      <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ $ctaRightBg }}');"></div>
-      <div class="absolute inset-0 m-0 my-px bg-[#ffb129]/80 p-0 transition-all duration-500 group-hover:bg-[#ffb129]/70"></div>
-      <div class="relative z-10 text-slate-900">
-        <span class="material-symbols-outlined text-4xl mb-4">sell</span>
-        <h3 class="mb-4 font-headline text-2xl font-black tracking-tight uppercase md:mb-6 md:text-4xl">{{ $s['cta_right_title'] ?? 'Consectetur adipiscing' }}</h3>
-        <p class="mx-auto mb-6 max-w-xs leading-relaxed opacity-90 md:mb-10">{{ $s['cta_right_body'] ?? 'Elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' }}</p>
-        <a href="{{ auth()->check() ? route('dashboard.vehicles.create') : route('register') }}" class="inline-block rounded bg-[#4a69e2] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-xl transition-all hover:bg-blue-700 md:px-10 md:py-4">Lorem action</a>
+      <div class="flex min-h-[260px] flex-col justify-start bg-[#efb12c] px-8 py-9 text-left shadow-[0_10px_25px_rgba(0,0,0,0.08)] md:min-h-[305px] md:px-10 md:py-10">
+        <span class="material-symbols-outlined mb-7 text-5xl text-[#222]">{{ $rightCtaIcon }}</span>
+        <h3 class="font-headline text-xl font-extrabold uppercase leading-snug tracking-tight text-[#101010] md:text-[22px]">{{ $s['cta_right_title'] ?? 'Want to sell a car?' }}</h3>
+        <p class="mt-4 max-w-[26rem] text-[15px] leading-[1.8] text-[#fff4d6]">{{ $s['cta_right_body'] ?? '' }}</p>
+        <a href="{{ $ctaRightUrl }}" class="mt-8 inline-block bg-[#4b6ff7] px-8 py-3.5 text-[13px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#3457e7]">{{ $s['cta_right_button_text'] ?? 'Sell your car' }}</a>
       </div>
     </div>
   </section>
@@ -161,39 +178,59 @@
     </div>
   </section>
 
-  <section class="bg-inverse-surface py-24 relative" style="background-image:url('{{ $statsBg }}');background-size:cover;background-position:center;">
-    <div class="absolute inset-0 bg-black/70"></div>
-    <div class="container mx-auto px-8 relative z-10 flex flex-col items-center text-center">
-      <div class="w-24 h-24 rounded-full border-4 border-white overflow-hidden mb-6"><img alt="" class="w-full h-full object-cover" src="{{ $testimonialAvatar }}"/></div>
-      <h6 class="text-white font-headline font-bold text-xl uppercase tracking-widest mb-1">{{ strtoupper($s['testimonial_name'] ?? 'Lorem Ipsum') }}</h6>
-      <p class="text-primary font-bold text-xs uppercase mb-8">{{ $s['testimonial_role'] ?? 'Lorem role' }}</p>
-      <p class="text-white font-headline font-light text-2xl italic max-w-3xl leading-relaxed">&ldquo;{{ $s['testimonial_quote'] ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' }}&rdquo;</p>
+  <section class="relative bg-inverse-surface bg-cover bg-center py-24" style="background-image:url('{{ e($testimonialBg) }}');">
+    <div class="absolute inset-0" style="background-color: rgba(0,0,0,{{ $testimonialOverlay }});"></div>
+    <div class="container relative z-10 mx-auto flex flex-col items-center px-8 text-center">
+      <div class="mb-6 h-24 w-24 overflow-hidden rounded-full border-4 border-white"><img alt="" class="h-full w-full object-cover" src="{{ $testimonialAvatar }}"/></div>
+      <h6 class="mb-1 font-headline text-xl font-bold uppercase tracking-widest text-white">{{ strtoupper($s['testimonial_name'] ?? 'Lorem Ipsum') }}</h6>
+      <p class="mb-8 text-xs font-bold uppercase text-primary">{{ $s['testimonial_role'] ?? 'Lorem role' }}</p>
+      <p class="max-w-3xl font-headline text-2xl font-light italic leading-relaxed text-white">&ldquo;{{ $s['testimonial_quote'] ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' }}&rdquo;</p>
     </div>
   </section>
 
   <section class="overflow-hidden bg-slate-50 py-16 md:py-32">
     <div class="container mx-auto max-w-6xl px-4 sm:px-6 md:px-8">
-      <div class="relative rounded-2xl bg-white p-6 shadow-2xl md:p-16">
+      <div class="relative rounded-2xl bg-white p-6 shadow-2xl md:p-16" data-home-stats-root>
         <div class="grid grid-cols-1 items-center gap-8 md:grid-cols-[1fr_auto_1fr] md:gap-10">
           <div class="grid gap-8 text-center md:gap-16 md:text-left">
-          <div><span class="font-headline font-black text-6xl text-slate-900 block leading-none">{{ max(0, $approvedCount) }}</span><span class="font-bold text-[11px] tracking-[0.2em] text-slate-400 uppercase mt-4 block">Lorem — listings</span></div>
-          <div><span class="font-headline font-black text-6xl text-slate-900 block leading-none">00</span><span class="font-bold text-[11px] tracking-[0.2em] text-slate-400 uppercase mt-4 block">Lorem — metric two</span></div>
+            <div>
+              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ max(0, $approvedCount) }}">0</span>
+              <span class="mt-4 block text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">{{ $s['stats_metric_1_label'] ?? 'Listings' }}</span>
+            </div>
+            <div>
+              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ $statsM2 }}">0</span>
+              <span class="mt-4 block text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">{{ $s['stats_metric_2_label'] ?? 'Metric two' }}</span>
+            </div>
           </div>
           <div class="mx-auto"><img class="h-auto w-52 drop-shadow-2xl sm:w-64 md:w-80" src="{{ $statsCar }}" alt=""/></div>
           <div class="grid gap-8 text-center md:gap-16 md:text-right">
-          <div><span class="font-headline font-black text-6xl text-slate-900 block leading-none">00</span><span class="font-bold text-[11px] tracking-[0.2em] text-slate-400 uppercase mt-4 block">Lorem — metric three</span></div>
-          <div><span class="font-headline font-black text-6xl text-slate-900 block leading-none">00</span><span class="font-bold text-[11px] tracking-[0.2em] text-slate-400 uppercase mt-4 block">Lorem — metric four</span></div>
+            <div>
+              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ $statsM3 }}">0</span>
+              <span class="mt-4 block text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">{{ $s['stats_metric_3_label'] ?? 'Metric three' }}</span>
+            </div>
+            <div>
+              <span class="font-headline block text-6xl font-black leading-none text-slate-900" data-count-up data-target="{{ $statsM4 }}">0</span>
+              <span class="mt-4 block text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">{{ $s['stats_metric_4_label'] ?? 'Metric four' }}</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="py-32 bg-white">
-    <div class="container mx-auto px-8 flex flex-col items-center text-center">
-      <h2 class="font-headline font-black text-4xl tracking-tight mb-8 uppercase">{{ $s['welcome_title'] ?? 'Lorem ipsum welcome block' }}</h2>
-      <p class="max-w-3xl text-slate-500 leading-relaxed font-body text-lg mb-12">{{ $s['welcome_body'] ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ipsum. Praesent mauris.' }}</p>
-      <div class="w-20 h-20 bg-[#4a69e2] rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-lg"><span class="material-symbols-outlined text-white text-4xl ml-1" style="font-variation-settings: 'FILL' 1;">play_arrow</span></div>
+  <section class="bg-white py-32">
+    <div class="container mx-auto flex flex-col items-center px-8 text-center">
+      <h2 class="mb-8 font-headline text-4xl font-black uppercase tracking-tight">{{ $s['welcome_title'] ?? 'Lorem ipsum welcome block' }}</h2>
+      <p class="mb-12 max-w-3xl font-body text-lg leading-relaxed text-slate-500">{{ $s['welcome_body'] ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ipsum. Praesent mauris.' }}</p>
+      @if ($welcomeYoutubeWatch)
+        <a href="{{ $welcomeYoutubeWatch }}" target="_blank" rel="noopener noreferrer" class="flex h-20 w-20 items-center justify-center rounded-full bg-[#4a69e2] shadow-lg transition-transform hover:scale-110" aria-label="{{ __('Watch video') }}">
+          <span class="material-symbols-outlined ml-1 text-4xl text-white" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+        </a>
+      @else
+        <div class="flex h-20 w-20 cursor-not-allowed items-center justify-center rounded-full bg-slate-300 shadow-lg opacity-60" title="{{ __('Add a YouTube URL in Admin → Pages → Home') }}">
+          <span class="material-symbols-outlined ml-1 text-4xl text-white" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+        </div>
+      @endif
     </div>
   </section>
 

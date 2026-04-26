@@ -39,6 +39,8 @@ trait InteractsWithVehicleForms
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
+        $data['is_special'] = $request->boolean('is_special');
+
         $data['features'] = $this->parseFeatures($data['features_text'] ?? null);
         unset($data['features_text']);
 
