@@ -43,7 +43,7 @@
   <section class="relative flex min-h-[94vh] items-start overflow-hidden pt-32 md:min-h-[100vh] md:pt-40">
     <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ e($heroBg) }}');"></div>
     <div class="absolute inset-0 hero-gradient"></div>
-    <div class="relative z-10 container mx-auto px-8 text-center">
+    <div class="relative z-10 container mx-auto px-8 py-[65px] text-center">
       <h1 class="text-white font-headline font-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight tracking-tight uppercase">{{ $heroTitle }}</h1>
       <p class="text-primary font-bold tracking-widest mt-6 text-lg sm:text-xl md:text-2xl uppercase">{{ $heroSubtitle }}</p>
       <a href="{{ $heroCtaUrl }}" class="mt-10 inline-block bg-primary text-on_surface px-10 py-4 font-bold text-xs tracking-widest uppercase rounded shadow-lg hover:bg-yellow-400 transition-colors">
