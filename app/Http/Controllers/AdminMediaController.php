@@ -96,8 +96,9 @@ class AdminMediaController extends Controller
 
     public function upload(Request $request): RedirectResponse|JsonResponse
     {
-        $data = $request->validate([
-            'file' => ['required', 'image', 'max:5120'],
+        $request->validate([
+            'files' => ['required', 'array'],
+            'files.*' => ['image', 'max:5120'],
         ]);
 
         $dir = $this->mediaDir();
@@ -105,31 +106,38 @@ class AdminMediaController extends Controller
             File::makeDirectory($dir, 0755, true);
         }
 
-        $file = $data['file'];
-        $name = Str::slug(pathinfo((string) $file->getClientOriginalName(), PATHINFO_FILENAME));
-        $ext = strtolower((string) $file->getClientOriginalExtension());
-        $size = (int) $file->getSize();
-        $filename = ($name !== '' ? $name : 'media').'-'.time().'.'.$ext;
-        $file->move($dir, $filename);
-        Media::query()->create([
-            'filename' => $filename,
-            'original_name' => (string) $file->getClientOriginalName(),
-            'file_path' => 'asset/images/media/'.$filename,
-            'file_type' => $ext,
-            'file_size' => $size,
-            'uploaded_by' => $request->user()?->id,
-        ]);
+        $files = $request->file('files');
+        $uploadedCount = 0;
+
+        foreach ($files as $file) {
+            $name = Str::slug(pathinfo((string) $file->getClientOriginalName(), PATHINFO_FILENAME));
+            $ext = strtolower((string) $file->getClientOriginalExtension());
+            $size = (int) $file->getSize();
+            $filename = ($name !== '' ? $name : 'media').'-'.Str::random(6).'-'.time().'.'.$ext;
+            
+            $file->move($dir, $filename);
+            
+            Media::query()->create([
+                'filename' => $filename,
+                'original_name' => (string) $file->getClientOriginalName(),
+                'file_path' => 'asset/images/media/'.$filename,
+                'file_type' => $ext,
+                'file_size' => $size,
+                'uploaded_by' => $request->user()?->id,
+            ]);
+            $uploadedCount++;
+        }
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Media uploaded successfully.',
+                'message' => $uploadedCount . ' media file(s) uploaded successfully.',
             ], Response::HTTP_CREATED);
         }
 
         return redirect()
             ->route('admin.media.index')
-            ->with('status', 'Media uploaded successfully.');
+            ->with('status', $uploadedCount . ' media file(s) uploaded successfully.');
     }
 
     public function destroy(Request $request, Media $media): RedirectResponse|JsonResponse

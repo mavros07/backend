@@ -50,7 +50,7 @@
     <div class="rounded-lg bg-white p-6 shadow-sm sm:rounded-lg">
       <form method="post" action="{{ route('admin.media.upload') }}" enctype="multipart/form-data" class="flex flex-wrap items-center gap-3">
         @csrf
-        <input type="file" name="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="block w-full max-w-lg text-sm text-gray-700" required />
+        <input type="file" name="files[]" accept="image/jpeg,image/jpg,image/png,image/webp" class="block w-full max-w-lg text-sm text-gray-700" multiple required />
         <button class="whitespace-nowrap rounded bg-indigo-600 px-4 py-2 text-sm text-white">Upload</button>
       </form>
     </div>

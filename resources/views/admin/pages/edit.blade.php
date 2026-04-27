@@ -13,7 +13,7 @@
       <div class="shrink-0 border-b border-gray-200 bg-gray-50 p-4">
         <form id="media-upload-form" method="post" action="{{ route('admin.media.upload') }}" enctype="multipart/form-data" class="flex flex-col gap-2 sm:flex-row sm:items-center">
           @csrf
-          <input id="media-upload-input" type="file" name="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="block w-full text-sm text-gray-700" />
+          <input id="media-upload-input" type="file" name="files[]" accept="image/jpeg,image/jpg,image/png,image/webp" class="block w-full text-sm text-gray-700" multiple />
           <button type="submit" id="media-upload-submit" class="whitespace-nowrap rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700">Upload</button>
         </form>
         <div id="media-upload-status" class="mt-2 hidden" role="status" aria-live="polite">
@@ -431,7 +431,7 @@
           if (res.ok) {
             statusHideMs = 800;
             input.value = '';
-            await openMediaModal(mediaTargetInputId);
+            await openMediaModal(mediaTargetInputId, mediaIsMulti);
           }
         } catch (err) {
           if (statusEl) {
