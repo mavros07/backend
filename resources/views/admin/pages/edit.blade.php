@@ -417,21 +417,6 @@
             </div>
           </div>
 
-          <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div class="border-b border-gray-100 bg-gray-50/80 px-5 py-4">
-              <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500">{{ __('Custom HTML') }}</h3>
-              <p class="mt-1 text-sm text-gray-600">{{ __('Optional extra markup for this page template.') }}</p>
-            </div>
-            <div class="p-5">
-              <x-input-label for="content_html" value="{{ __('Content HTML') }}" />
-              <textarea
-                id="content_html"
-                name="content_html"
-                rows="12"
-                class="mt-1 block w-full rounded-md border-gray-300 font-mono text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              >{{ old('content_html', $page->content_html) }}</textarea>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -579,6 +564,27 @@
           </div>
         </div>
       @endif
+
+      <details class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <summary class="cursor-pointer select-none border-b border-gray-100 bg-gray-50/80 px-5 py-4">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500">{{ __('Advanced: Custom HTML') }}</h3>
+              <p class="mt-1 text-sm text-gray-600">{{ __('Optional extra markup for this page template. Prefer section fields above when possible.') }}</p>
+            </div>
+            <span class="text-xs font-semibold text-gray-500">{{ __('Toggle') }}</span>
+          </div>
+        </summary>
+        <div class="p-5">
+          <x-input-label for="content_html" value="{{ __('Content HTML') }}" />
+          <textarea
+            id="content_html"
+            name="content_html"
+            rows="12"
+            class="mt-1 block w-full rounded-md border-gray-300 font-mono text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          >{{ old('content_html', $page->content_html) }}</textarea>
+        </div>
+      </details>
 
       <div class="sticky bottom-4 z-20 rounded-xl border border-gray-200 bg-white/95 p-4 shadow-lg backdrop-blur sm:flex sm:items-center sm:justify-between">
         <label class="flex cursor-pointer items-start gap-3">
