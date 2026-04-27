@@ -8,14 +8,29 @@
     $valGrid3 = \App\Support\VehicleImageUrl::url($sections['values_grid_3'] ?? 'asset/images/media/about-values-3.jpg');
     $valGrid4 = \App\Support\VehicleImageUrl::url($sections['values_grid_4'] ?? 'asset/images/media/about-values-4.jpg');
 
-    $galleryKeys = [
-        'gallery_image_1','gallery_image_2','gallery_image_3','gallery_image_4',
-        'gallery_image_5','gallery_image_6','gallery_image_7','gallery_image_8',
-        'gallery_image_9','gallery_image_10','gallery_image_11','gallery_image_12',
-    ];
-    $gallery = collect($galleryKeys)
-      ->map(fn ($k) => trim((string) ($sections[$k] ?? '')))
-      ->filter(fn ($p) => $p !== '')
+    $rawGallery = trim((string) ($sections['gallery'] ?? '[]'));
+    $galleryPaths = [];
+    try {
+        $galleryPaths = json_decode($rawGallery, true);
+        if (!is_array($galleryPaths)) {
+            $galleryPaths = [];
+        }
+    } catch (\Exception $e) {
+        $galleryPaths = [];
+    }
+
+    // Fallback to defaults if empty
+    if (empty($galleryPaths)) {
+        $galleryPaths = [
+            'asset/images/media/about-gallery-1.jpg',
+            'asset/images/media/about-gallery-2.jpg',
+            'asset/images/media/about-gallery-3.jpg',
+            'asset/images/media/about-gallery-4.jpg',
+        ];
+    }
+
+    $gallery = collect($galleryPaths)
+      ->filter(fn ($p) => !empty(trim((string) $p)))
       ->map(fn ($p) => \App\Support\VehicleImageUrl::url($p))
       ->values();
 

@@ -100,26 +100,75 @@
         img.src = publicUrlFromPath(p);
       }
 
+      function syncGalleryField(inputId) {
+        const input = document.getElementById(inputId);
+        const previewWrap = document.querySelector(`[data-gallery-preview-wrap="${inputId}"]`);
+        if (!input || !previewWrap) return;
+
+        let paths = [];
+        try {
+          paths = JSON.parse(input.value || '[]');
+        } catch (e) {
+          paths = [];
+        }
+        if (!Array.isArray(paths)) paths = [];
+
+        previewWrap.innerHTML = '';
+        if (paths.length === 0) {
+          previewWrap.classList.add('hidden');
+          return;
+        }
+        previewWrap.classList.remove('hidden');
+
+        paths.forEach((path, idx) => {
+          const thumb = document.createElement('div');
+          thumb.className = 'group relative aspect-square overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm';
+          thumb.innerHTML = `
+            <img src="${publicUrlFromPath(path)}" class="h-full w-full object-cover" />
+            <button type="button" class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-red-600 shadow-sm opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-50" title="{{ __('Remove image') }}">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          `;
+          thumb.querySelector('button').addEventListener('click', () => {
+            const newPaths = [...paths];
+            newPaths.splice(idx, 1);
+            input.value = JSON.stringify(newPaths);
+            syncGalleryField(inputId);
+          });
+          previewWrap.appendChild(thumb);
+        });
+      }
+
       let mediaTargetInputId = null;
       let mediaItems = [];
-      let mediaSelectedPath = null;
+      let mediaSelectedPaths = []; // Changed from single path to array
+      let mediaIsMulti = false;
+      let shiftAnchor = null;
 
-      function setMediaSelectedPath(path) {
-        mediaSelectedPath = (path && String(path)) || null;
+      function setMediaSelectedPaths(paths) {
+        mediaSelectedPaths = Array.isArray(paths) ? paths.map(p => String(p)) : [];
         const insertBtn = document.getElementById('media-modal-insert');
         if (insertBtn) {
-          insertBtn.disabled = !mediaSelectedPath;
+          insertBtn.disabled = mediaSelectedPaths.length === 0;
+          insertBtn.textContent = mediaSelectedPaths.length > 1 
+            ? `{{ __('Use') }} ${mediaSelectedPaths.length} {{ __('selected images') }}`
+            : (mediaSelectedPaths.length === 1 ? `{{ __('Use selected image') }}` : `{{ __('Use selected image') }}`);
         }
       }
 
       function applyMediaSelectionAndClose() {
-        if (!mediaTargetInputId || !mediaSelectedPath) return;
+        if (!mediaTargetInputId || mediaSelectedPaths.length === 0) return;
         const input = document.getElementById(mediaTargetInputId);
         if (input) {
-          input.value = mediaSelectedPath;
+          if (mediaIsMulti) {
+            // For gallery fields, we store as JSON array
+            input.value = JSON.stringify(mediaSelectedPaths);
+          } else {
+            input.value = mediaSelectedPaths[0];
+          }
           input.dispatchEvent(new Event('input', { bubbles: true }));
         }
-        setMediaSelectedPath(null);
+        setMediaSelectedPaths([]);
         closeMediaModal();
       }
 
@@ -150,23 +199,25 @@
         panel.style.maxWidth = `min(72rem, ${Math.round(usable)}px)`;
       }
       function closeMediaModal() {
-        setMediaSelectedPath(null);
+        setMediaSelectedPaths([]);
         const modal = document.getElementById('media-modal');
         if (!modal) return;
         modal.classList.add('hidden');
         modal.classList.remove('flex');
       }
       window.closeMediaModal = closeMediaModal;
+
       function renderMediaGrid(filter = '') {
         const grid = document.getElementById('media-grid');
         if (!grid) return;
         const q = (filter || '').toLowerCase();
         const list = mediaItems.filter((m) => !q || m.name.toLowerCase().includes(q));
         const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-        grid.innerHTML = list.map((m) => {
-          const sel = mediaSelectedPath === m.path;
+        
+        grid.innerHTML = list.map((m, index) => {
+          const sel = mediaSelectedPaths.includes(m.path);
           return `
-          <button type="button" class="group relative flex flex-col rounded-lg border p-2 text-left shadow-sm transition-all duration-200 ${sel ? 'border-indigo-600 ring-4 ring-indigo-100 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300 hover:bg-slate-50'}" data-path="${esc(m.path)}" title="${esc(m.name)}">
+          <button type="button" data-index="${index}" data-path="${esc(m.path)}" class="group relative flex flex-col rounded-lg border p-2 text-left shadow-sm transition-all duration-200 ${sel ? 'border-indigo-600 ring-4 ring-indigo-100 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300 hover:bg-slate-50'}" title="${esc(m.name)}">
             <div class="relative overflow-hidden rounded-md">
               <img src="${String(m.url).replace(/"/g, '&quot;')}" alt="" class="h-24 w-full object-cover transition-transform duration-300 group-hover:scale-110" />
               ${sel ? `
@@ -181,29 +232,66 @@
             <p class="mt-2 truncate text-[11px] font-medium ${sel ? 'text-indigo-900' : 'text-gray-600'} transition-colors" title="${esc(m.name)}">${esc(m.name)}</p>
           </button>`;
         }).join('');
+
         grid.querySelectorAll('button[data-path]').forEach((btn) => {
           const path = btn.getAttribute('data-path');
+          const idx = parseInt(btn.getAttribute('data-index'));
           if (!path) return;
+
           btn.addEventListener('click', (ev) => {
             ev.preventDefault();
             if (!mediaTargetInputId) return;
-            setMediaSelectedPath(path);
+
+            if (mediaIsMulti) {
+              if (ev.shiftKey && shiftAnchor !== null) {
+                const [start, end] = [Math.min(shiftAnchor, idx), Math.max(shiftAnchor, idx)];
+                const range = list.slice(start, end + 1).map(item => item.path);
+                const unique = new Set([...mediaSelectedPaths, ...range]);
+                setMediaSelectedPaths(Array.from(unique));
+              } else if (ev.ctrlKey || ev.metaKey) {
+                if (mediaSelectedPaths.includes(path)) {
+                  setMediaSelectedPaths(mediaSelectedPaths.filter(p => p !== path));
+                } else {
+                  setMediaSelectedPaths([...mediaSelectedPaths, path]);
+                }
+                shiftAnchor = idx;
+              } else {
+                setMediaSelectedPaths([path]);
+                shiftAnchor = idx;
+              }
+            } else {
+              setMediaSelectedPaths([path]);
+              shiftAnchor = idx;
+            }
             renderMediaGrid(document.getElementById('media-search')?.value || '');
           });
+
           btn.addEventListener('dblclick', (ev) => {
             ev.preventDefault();
             if (!mediaTargetInputId) return;
-            setMediaSelectedPath(path);
-            applyMediaSelectionAndClose();
+            if (!mediaIsMulti) {
+              setMediaSelectedPaths([path]);
+              applyMediaSelectionAndClose();
+            }
           });
         });
-        setMediaSelectedPath(mediaSelectedPath);
       }
-      async function openMediaModal(targetInputId) {
+      async function openMediaModal(targetInputId, isMulti = false) {
         mediaTargetInputId = targetInputId;
-        setMediaSelectedPath(null);
+        mediaIsMulti = !!isMulti;
+        setMediaSelectedPaths([]);
+        shiftAnchor = null;
         const modal = document.getElementById('media-modal');
         if (!modal) return;
+        
+        // Update instruction text for multi-select
+        const searchInput = document.getElementById('media-search');
+        if (searchInput) {
+          searchInput.placeholder = mediaIsMulti 
+            ? "{{ __('Search media... (Ctrl/Shift-click to select multiple)') }}"
+            : "{{ __('Search media...') }}";
+        }
+
         modal.style.position = 'fixed';
         modal.style.inset = 'auto';
         modal.style.zIndex = '220';
@@ -229,7 +317,8 @@
       });
       document.querySelectorAll('.js-media-picker').forEach((btn) => {
         btn.addEventListener('click', () => {
-          openMediaModal(btn.getAttribute('data-media-target'));
+          const isMulti = btn.getAttribute('data-media-multi') === '1';
+          openMediaModal(btn.getAttribute('data-media-target'), isMulti);
         });
       });
       document.querySelectorAll('.js-media-modal-close').forEach((btn) => {
@@ -252,8 +341,18 @@
       }
 
       document.querySelectorAll('.js-media-path-input').forEach((input) => {
-        input.addEventListener('input', () => syncMediaPathInput(input));
-        syncMediaPathInput(input);
+        input.addEventListener('input', () => {
+          if (input.classList.contains('js-gallery-input')) {
+            syncGalleryField(input.id);
+          } else {
+            syncMediaPathInput(input);
+          }
+        });
+        if (input.classList.contains('js-gallery-input')) {
+          syncGalleryField(input.id);
+        } else {
+          syncMediaPathInput(input);
+        }
       });
 
       document.querySelectorAll('.js-media-manual-input').forEach((manual) => {
@@ -518,6 +617,39 @@
                             />
                           </div>
                         </details>
+                      </div>
+                    @elseif ($field['type'] === 'gallery')
+                      <div class="js-media-field rounded-lg border border-gray-100 bg-slate-50/40 p-4 md:col-span-2">
+                        <div class="flex items-center justify-between gap-4">
+                          <span class="block text-sm font-semibold text-gray-800">{{ $field['label'] }}</span>
+                          <div class="flex items-center gap-2">
+                            <button
+                              type="button"
+                              class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 js-media-picker"
+                              data-media-target="{{ $inputId }}"
+                              data-media-multi="1"
+                            >{{ __('Select images') }}</button>
+                            <button
+                              type="button"
+                              class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm hover:bg-gray-50 js-media-clear"
+                              data-clear-target="{{ $inputId }}"
+                            >{{ __('Clear all') }}</button>
+                          </div>
+                        </div>
+
+                        <input
+                          type="hidden"
+                          name="sections[{{ $field['name'] }}]"
+                          id="{{ $inputId }}"
+                          value="{{ $value }}"
+                          class="js-media-path-input js-gallery-input"
+                          autocomplete="off"
+                        />
+
+                        <div
+                          class="mt-4 hidden grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6"
+                          data-gallery-preview-wrap="{{ $inputId }}"
+                        ></div>
                       </div>
                     @elseif ($field['type'] === 'textarea')
                       <div class="md:col-span-2">
