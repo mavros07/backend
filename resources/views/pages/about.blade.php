@@ -103,34 +103,30 @@
 
   {{-- Media gallery (carousel strip) --}}
   @if ($gallery->isNotEmpty())
-    <section class="bg-white py-16">
+    <section class="bg-[#232628] py-12 md:py-14">
       <div class="mx-auto max-w-6xl px-6">
         <div class="text-center">
-          <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-slate-900">{{ $sections['gallery_title'] ?? __('MEDIA GALLERY') }}</h2>
+          <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-white">{{ $sections['gallery_title'] ?? __('MEDIA GALLERY') }}</h2>
           <div class="motors-colored-separator">
             <div class="first-long"></div><div class="last-short"></div>
           </div>
         </div>
 
-        <div class="motors-carousel motors-carousel--gallery relative mt-10" data-simple-carousel data-carousel-type="gallery">
+        <div class="motors-carousel motors-carousel--gallery relative mt-8" data-simple-carousel data-carousel-type="gallery">
           <div class="motors-carousel-viewport overflow-hidden" data-carousel-viewport>
             <div class="motors-carousel-track flex gap-4" data-carousel-track>
-            @foreach ($gallery as $img)
-              <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="shrink-0" data-carousel-slide>
-                <img src="{{ $img }}" alt="{{ __('Gallery image') }}" class="h-[180px] w-[85vw] max-w-[270px] rounded object-cover" loading="lazy" decoding="async" />
-              </a>
-            @endforeach
+              @foreach ($gallery as $img)
+                <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="shrink-0" data-carousel-slide>
+                  <img src="{{ $img }}" alt="{{ __('Gallery image') }}" class="motors-gallery-img h-[110px] w-[220px] object-cover md:h-[130px] md:w-[260px]" loading="lazy" decoding="async" />
+                </a>
+              @endforeach
             </div>
           </div>
 
-          <button type="button" class="motors-carousel-nav motors-carousel-prev" data-carousel-prev aria-label="{{ __('Previous') }}">
-            <span class="material-symbols-outlined text-[20px]">chevron_left</span>
-          </button>
-          <button type="button" class="motors-carousel-nav motors-carousel-next" data-carousel-next aria-label="{{ __('Next') }}">
-            <span class="material-symbols-outlined text-[20px]">chevron_right</span>
-          </button>
+          <button type="button" class="motors-gallery-arrow motors-gallery-prev" data-carousel-prev aria-label="{{ __('Previous') }}">‹</button>
+          <button type="button" class="motors-gallery-arrow motors-gallery-next" data-carousel-next aria-label="{{ __('Next') }}">›</button>
 
-          <div class="motors-carousel-dots mt-4 flex justify-center gap-2" data-carousel-dots></div>
+          <div class="motors-gallery-dots mt-5 flex justify-center gap-2" data-carousel-dots></div>
         </div>
       </div>
     </section>
@@ -208,49 +204,7 @@
     </div>
   </section>
 
-  {{-- Team --}}
-  @if ($team->isNotEmpty())
-    <section class="bg-white py-16">
-      <div class="mx-auto max-w-6xl px-6">
-        <div class="text-center">
-          <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-slate-900">{{ $sections['team_title'] ?? __('OUR TEAM') }}</h2>
-          <div class="motors-colored-separator">
-            <div class="first-long"></div><div class="last-short"></div>
-          </div>
-        </div>
-
-        <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          @foreach ($team as $m)
-            @php
-              $photoUrl = \App\Support\VehicleImageUrl::url($m['photo'] !== '' ? $m['photo'] : 'asset/images/media/team-placeholder.jpg');
-              $hasContact = ($m['email'] !== '' || $m['phone'] !== '');
-            @endphp
-            <div class="group overflow-hidden rounded border border-slate-200 bg-white shadow-sm">
-              <div class="relative">
-                <img src="{{ $photoUrl }}" alt="{{ $m['name'] }}" class="h-[220px] w-full object-cover" loading="lazy" decoding="async" />
-                @if ($hasContact)
-                  <div class="absolute inset-x-0 bottom-0 hidden bg-black/70 p-3 text-sm text-white group-hover:block">
-                    @if ($m['email'] !== '')
-                      <a href="mailto:{{ $m['email'] }}" class="block truncate hover:underline">{{ $m['email'] }}</a>
-                    @endif
-                    @if ($m['phone'] !== '')
-                      <a href="tel:{{ preg_replace('/\\s+/', '', $m['phone']) }}" class="mt-1 block hover:underline">{{ $m['phone'] }}</a>
-                    @endif
-                  </div>
-                @endif
-              </div>
-              <div class="p-4">
-                <div class="text-sm font-bold text-slate-900">{{ $m['name'] }}</div>
-                @if ($m['role'] !== '')
-                  <div class="mt-1 text-sm text-slate-500">{{ $m['role'] }}</div>
-                @endif
-              </div>
-            </div>
-          @endforeach
-        </div>
-      </div>
-    </section>
-  @endif
+  {{-- Our Team removed per requirements (About is section-fields only; no team block). --}}
 
   {{-- Intentionally do NOT render $page->content_html on About.
        This page is section-fields only (no Elementor/HTML dumps). --}}

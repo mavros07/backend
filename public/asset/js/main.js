@@ -237,6 +237,12 @@
         if (type === 'testimonials') {
           perView = 1;
         }
+        if (type === 'gallery') {
+          // Motors “Media Gallery” shows 4 thumbnails on desktop, fewer on smaller screens.
+          if (viewW >= 1024) perView = 4;
+          else if (viewW >= 640) perView = 3;
+          else perView = 1;
+        }
         var maxIndex = Math.max(0, slides.length - perView);
         return { slideW: slideW, gap: gap, perView: perView, maxIndex: maxIndex };
       }

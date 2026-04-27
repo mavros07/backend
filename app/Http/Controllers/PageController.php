@@ -172,27 +172,7 @@ class PageController extends Controller
             'testimonial_3_author' => 'Robert Frost',
             'testimonial_3_brand' => 'Chevrolet',
 
-            'team_title' => 'Our Team',
-            'team_1_photo' => 'asset/images/media/team-1.jpg',
-            'team_1_name' => 'Lennox Wardell',
-            'team_1_role' => 'Chief Executive Officer',
-            'team_1_email' => 'sales@example.com',
-            'team_1_phone' => '+1 913-677-74-27',
-            'team_2_photo' => 'asset/images/media/team-2.jpg',
-            'team_2_name' => 'Sarah Odegard',
-            'team_2_role' => 'President of Finance',
-            'team_2_email' => 'finance@example.com',
-            'team_2_phone' => '',
-            'team_3_photo' => 'asset/images/media/team-3.jpg',
-            'team_3_name' => 'Lars Jakuba',
-            'team_3_role' => 'Executive Vice President',
-            'team_3_email' => '',
-            'team_3_phone' => '+1-234-567-89-00',
-            'team_4_photo' => 'asset/images/media/team-4.jpg',
-            'team_4_name' => 'Mikey Diokles',
-            'team_4_role' => 'Sales Manager',
-            'team_4_email' => '',
-            'team_4_phone' => '',
+            // Our Team removed from About per requirements.
         ]);
 
         return view('pages.about', [

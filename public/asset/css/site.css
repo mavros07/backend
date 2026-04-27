@@ -182,10 +182,47 @@ body {
   background: #ffb129;
 }
 
+/* About → Media Gallery: match Motors screenshot styling */
+.motors-carousel--gallery .motors-carousel-viewport {
+  padding-top: 10px;
+}
+.motors-carousel--gallery .motors-carousel-track {
+  transition-timing-function: ease;
+}
+.motors-gallery-img {
+  border-radius: 0;
+  display: block;
+}
+.motors-gallery-arrow {
+  position: absolute;
+  top: calc(100% + 14px);
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  font-size: 44px;
+  line-height: 1;
+  padding: 0 6px;
+}
+.motors-gallery-prev { left: calc(50% - 150px); }
+.motors-gallery-next { right: calc(50% - 150px); }
+.motors-gallery-arrow:hover { color: rgba(255,255,255,0.8); }
+.motors-gallery-arrow[disabled] { opacity: 0.25; cursor: not-allowed; }
+.motors-gallery-dots button {
+  height: 6px;
+  width: 6px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.25);
+}
+.motors-gallery-dots button[data-active="1"] {
+  background: #3b63d6;
+}
+
 /* Breakpoints: match Motors behavior */
 @media (max-width: 639px) {
   /* Mobile: hide arrows (use swipe + dots), keep clean layout */
   .motors-carousel-nav { display: none; }
+  .motors-gallery-arrow { display: none; }
   .motors-carousel { --motors-nav-size: 40px; }
 }
 @media (min-width: 640px) and (max-width: 1023px) {
