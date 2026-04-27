@@ -139,6 +139,66 @@ body {
   height: 0;
 }
 
+/* Motors-like carousel chrome (About page). */
+.motors-carousel {
+  --motors-nav-size: 42px;
+}
+.motors-carousel-viewport {
+  touch-action: pan-y;
+}
+.motors-carousel-track {
+  will-change: transform;
+  transition: transform 320ms ease;
+}
+.motors-carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: var(--motors-nav-size);
+  width: var(--motors-nav-size);
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.motors-carousel-prev { left: -14px; }
+.motors-carousel-next { right: -14px; }
+.motors-carousel-nav[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.motors-carousel-dots button {
+  height: 10px;
+  width: 10px;
+  border-radius: 9999px;
+  background: #cbd5e1;
+}
+.motors-carousel-dots button[data-active="1"] {
+  background: #ffb129;
+}
+
+/* Breakpoints: match Motors behavior */
+@media (max-width: 639px) {
+  /* Mobile: hide arrows (use swipe + dots), keep clean layout */
+  .motors-carousel-nav { display: none; }
+  .motors-carousel { --motors-nav-size: 40px; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  /* Tablet: keep arrows but inside edge so they don’t overflow */
+  .motors-carousel-prev { left: 6px; }
+  .motors-carousel-next { right: 6px; }
+}
+@media (min-width: 1024px) {
+  /* Desktop: slightly outside edges like reference */
+  .motors-carousel-prev { left: -14px; }
+  .motors-carousel-next { right: -14px; }
+}
+
 body.mobile-menu-open {
   overflow: hidden;
 }

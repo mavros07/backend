@@ -112,27 +112,25 @@
           </div>
         </div>
 
-        <div class="relative mt-10" data-simple-carousel>
-          <div class="simple-carousel-track flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2" data-carousel-track>
+        <div class="motors-carousel motors-carousel--gallery relative mt-10" data-simple-carousel data-carousel-type="gallery">
+          <div class="motors-carousel-viewport overflow-hidden" data-carousel-viewport>
+            <div class="motors-carousel-track flex gap-4" data-carousel-track>
             @foreach ($gallery as $img)
-              <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="snap-start shrink-0" data-carousel-slide>
-                <img src="{{ $img }}" alt="{{ __('Gallery image') }}" class="h-[180px] w-[270px] rounded object-cover" loading="lazy" decoding="async" />
+              <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="shrink-0" data-carousel-slide>
+                <img src="{{ $img }}" alt="{{ __('Gallery image') }}" class="h-[180px] w-[85vw] max-w-[270px] rounded object-cover" loading="lazy" decoding="async" />
               </a>
             @endforeach
+            </div>
           </div>
 
-          <button type="button" class="absolute -left-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 md:flex" data-carousel-prev aria-label="{{ __('Previous') }}">
-            <span class="material-symbols-outlined text-base">chevron_left</span>
+          <button type="button" class="motors-carousel-nav motors-carousel-prev" data-carousel-prev aria-label="{{ __('Previous') }}">
+            <span class="material-symbols-outlined text-[20px]">chevron_left</span>
           </button>
-          <button type="button" class="absolute -right-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 md:flex" data-carousel-next aria-label="{{ __('Next') }}">
-            <span class="material-symbols-outlined text-base">chevron_right</span>
+          <button type="button" class="motors-carousel-nav motors-carousel-next" data-carousel-next aria-label="{{ __('Next') }}">
+            <span class="material-symbols-outlined text-[20px]">chevron_right</span>
           </button>
 
-          <div class="mt-4 flex justify-center gap-2">
-            @foreach ($gallery as $i => $_)
-              <button type="button" class="h-2.5 w-2.5 rounded-full bg-slate-300 data-[active=1]:bg-primary" data-carousel-dot data-index="{{ $i }}" data-active="{{ $i === 0 ? '1' : '0' }}" aria-label="{{ __('Go to slide') }}"></button>
-            @endforeach
-          </div>
+          <div class="motors-carousel-dots mt-4 flex justify-center gap-2" data-carousel-dots></div>
         </div>
       </div>
     </section>
@@ -173,10 +171,11 @@
           <hr class="mt-4 border-slate-200" />
 
           @if ($testimonials->isNotEmpty())
-            <div class="relative mt-6" data-simple-carousel>
-              <div class="simple-carousel-track flex snap-x snap-mandatory overflow-x-auto scroll-smooth" data-carousel-track>
+            <div class="motors-carousel motors-carousel--testimonials relative mt-6" data-simple-carousel data-carousel-type="testimonials">
+              <div class="motors-carousel-viewport overflow-hidden" data-carousel-viewport>
+                <div class="motors-carousel-track flex gap-4" data-carousel-track>
                 @foreach ($testimonials as $t)
-                  <div class="w-full shrink-0 snap-start rounded border border-slate-200 bg-white p-5" data-carousel-slide>
+                  <div class="w-full shrink-0 rounded border border-slate-200 bg-white p-5" data-carousel-slide>
                     @if ($t['title'] !== '')
                       <h5 class="text-[15px] font-bold text-slate-900">{{ $t['title'] }}</h5>
                     @endif
@@ -191,20 +190,17 @@
                     </div>
                   </div>
                 @endforeach
+                </div>
               </div>
 
-              <button type="button" class="absolute -left-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 md:flex" data-carousel-prev aria-label="{{ __('Previous') }}">
-                <span class="material-symbols-outlined text-base">chevron_left</span>
+              <button type="button" class="motors-carousel-nav motors-carousel-prev" data-carousel-prev aria-label="{{ __('Previous') }}">
+                <span class="material-symbols-outlined text-[20px]">chevron_left</span>
               </button>
-              <button type="button" class="absolute -right-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 md:flex" data-carousel-next aria-label="{{ __('Next') }}">
-                <span class="material-symbols-outlined text-base">chevron_right</span>
+              <button type="button" class="motors-carousel-nav motors-carousel-next" data-carousel-next aria-label="{{ __('Next') }}">
+                <span class="material-symbols-outlined text-[20px]">chevron_right</span>
               </button>
 
-              <div class="mt-4 flex justify-center gap-2">
-                @foreach ($testimonials as $i => $_)
-                  <button type="button" class="h-2.5 w-2.5 rounded-full bg-slate-300 data-[active=1]:bg-primary" data-carousel-dot data-index="{{ $i }}" data-active="{{ $i === 0 ? '1' : '0' }}" aria-label="{{ __('Go to slide') }}"></button>
-                @endforeach
-              </div>
+              <div class="motors-carousel-dots mt-4 flex justify-center gap-2" data-carousel-dots></div>
             </div>
           @endif
         </div>

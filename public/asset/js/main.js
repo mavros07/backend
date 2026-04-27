@@ -201,10 +201,11 @@
    * Simple scroll-snap carousel: About page gallery/testimonials.
    * Markup:
    * - root: [data-simple-carousel]
+   * - viewport (overflow hidden): [data-carousel-viewport]
    * - track: [data-carousel-track]
    * - slides: children with [data-carousel-slide]
    * - prev/next buttons: [data-carousel-prev], [data-carousel-next]
-   * - dots: [data-carousel-dot] with data-index
+   * - dots container: [data-carousel-dots] (dots will be generated)
    */
   function bindSimpleCarousels() {
     var roots = document.querySelectorAll('[data-simple-carousel]');
@@ -213,6 +214,8 @@
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
     roots.forEach(function (root) {
+      var type = root.getAttribute('data-carousel-type') || '';
+      var viewport = root.querySelector('[data-carousel-viewport]') || root;
       var track = root.querySelector('[data-carousel-track]');
       if (!track) return;
       var slides = track.querySelectorAll('[data-carousel-slide]');
@@ -220,59 +223,119 @@
 
       var prev = root.querySelector('[data-carousel-prev]');
       var next = root.querySelector('[data-carousel-next]');
-      var dots = root.querySelectorAll('[data-carousel-dot]');
+      var dotsWrap = root.querySelector('[data-carousel-dots]');
+      var index = 0;
 
-      function nearestIndex() {
-        var left = track.scrollLeft;
-        var best = 0;
-        var bestDist = Infinity;
-        slides.forEach(function (s, i) {
-          var dist = Math.abs(s.offsetLeft - left);
-          if (dist < bestDist) { bestDist = dist; best = i; }
-        });
-        return best;
+      function px(v) { return parseFloat(String(v || '0').replace('px', '')) || 0; }
+
+      function metrics() {
+        var first = slides[0];
+        var slideW = first.getBoundingClientRect().width || first.offsetWidth || 0;
+        var gap = px(window.getComputedStyle(track).gap);
+        var viewW = viewport.getBoundingClientRect().width || viewport.offsetWidth || 0;
+        var perView = Math.max(1, Math.floor((viewW + gap) / Math.max(1, (slideW + gap))));
+        if (type === 'testimonials') {
+          perView = 1;
+        }
+        var maxIndex = Math.max(0, slides.length - perView);
+        return { slideW: slideW, gap: gap, perView: perView, maxIndex: maxIndex };
       }
 
-      function setActive(i) {
-        dots.forEach(function (d) {
-          var di = parseInt(d.getAttribute('data-index') || '0', 10);
+      function buildDots(pageCount) {
+        if (!dotsWrap) return [];
+        dotsWrap.innerHTML = '';
+        var dots = [];
+        for (var i = 0; i < pageCount; i++) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.setAttribute('data-index', String(i));
+          b.setAttribute('data-active', i === 0 ? '1' : '0');
+          b.setAttribute('aria-label', 'Go to slide');
+          b.addEventListener('click', function (e) {
+            e.preventDefault();
+            var di = parseInt(this.getAttribute('data-index') || '0', 10);
+            if (!isNaN(di)) goTo(di);
+          });
+          dotsWrap.appendChild(b);
+          dots.push(b);
+        }
+        return dots;
+      }
+
+      var dots = [];
+
+      function setActive(i, maxIndex) {
+        if (prev) prev.disabled = i <= 0;
+        if (next) next.disabled = i >= maxIndex;
+        dots.forEach(function (d, di) {
           d.setAttribute('data-active', di === i ? '1' : '0');
         });
       }
 
-      function goTo(i) {
-        i = clamp(i, 0, slides.length - 1);
-        track.scrollTo({ left: slides[i].offsetLeft, behavior: 'smooth' });
-        setActive(i);
+      function applyTransform(i) {
+        var m = metrics();
+        index = clamp(i, 0, m.maxIndex);
+        var x = (m.slideW + m.gap) * index;
+        track.style.transform = 'translate3d(' + (-x) + 'px,0,0)';
+        setActive(index, m.maxIndex);
       }
 
-      function step(dir) {
-        var i = nearestIndex();
-        goTo(i + dir);
-      }
+      function goTo(i) { applyTransform(i); }
+
+      function step(dir) { goTo(index + dir); }
 
       prev && prev.addEventListener('click', function (e) { e.preventDefault(); step(-1); });
       next && next.addEventListener('click', function (e) { e.preventDefault(); step(1); });
 
-      dots.forEach(function (d) {
-        d.addEventListener('click', function (e) {
-          e.preventDefault();
-          var i = parseInt(d.getAttribute('data-index') || '0', 10);
-          if (!isNaN(i)) goTo(i);
-        });
-      });
+      function rebuild() {
+        var m = metrics();
+        dots = buildDots(m.maxIndex + 1);
+        applyTransform(index);
+      }
 
-      var ticking = false;
-      track.addEventListener('scroll', function () {
-        if (ticking) return;
-        ticking = true;
-        window.requestAnimationFrame(function () {
-          ticking = false;
-          setActive(nearestIndex());
-        });
-      }, { passive: true });
+      // Touch swipe (Motors/Swiper-like feel on mobile)
+      (function bindSwipe() {
+        var startX = 0;
+        var startY = 0;
+        var active = false;
+        var moved = false;
 
-      setActive(0);
+        function onStart(e) {
+          if (!e.touches || !e.touches[0]) return;
+          active = true;
+          moved = false;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+        }
+
+        function onMove(e) {
+          if (!active || !e.touches || !e.touches[0]) return;
+          var dx = e.touches[0].clientX - startX;
+          var dy = e.touches[0].clientY - startY;
+          if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
+            moved = true;
+          }
+        }
+
+        function onEnd(e) {
+          if (!active) return;
+          active = false;
+          if (!moved) return;
+          var t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+          if (!t) return;
+          var dx = t.clientX - startX;
+          if (Math.abs(dx) < 40) return;
+          step(dx < 0 ? 1 : -1);
+        }
+
+        viewport.addEventListener('touchstart', onStart, { passive: true });
+        viewport.addEventListener('touchmove', onMove, { passive: true });
+        viewport.addEventListener('touchend', onEnd, { passive: true });
+        viewport.addEventListener('touchcancel', function () { active = false; }, { passive: true });
+      })();
+
+      window.addEventListener('resize', function () { rebuild(); }, { passive: true });
+      rebuild();
     });
   }
 
