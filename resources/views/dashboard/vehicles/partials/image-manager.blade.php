@@ -180,13 +180,12 @@
       button.disabled = true;
       try {
         const response = await fetch(url, {
-          method: 'POST',
+          method: 'DELETE',
           headers: {
             'X-CSRF-TOKEN': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
           },
-          body: '_method=DELETE',
           credentials: 'same-origin',
         });
 
