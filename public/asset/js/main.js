@@ -341,6 +341,41 @@
     });
   }
 
+  function bindAccordions() {
+    var items = document.querySelectorAll('[data-accordion-item]');
+    if (!items.length) return;
+
+    items.forEach(function (item) {
+      var btn = item.querySelector('[data-accordion-btn]');
+      var content = item.querySelector('[data-accordion-content]');
+      if (!btn || !content) return;
+
+      btn.addEventListener('click', function () {
+        var isOpen = item.classList.contains('is-active');
+        
+        // Optional: close other accordions in the same group/parent
+        var parent = item.parentElement;
+        if (parent) {
+          parent.querySelectorAll('[data-accordion-item].is-active').forEach(function (other) {
+            if (other !== item) {
+              other.classList.remove('is-active');
+              var otherContent = other.querySelector('[data-accordion-content]');
+              if (otherContent) otherContent.style.maxHeight = null;
+            }
+          });
+        }
+
+        item.classList.toggle('is-active', !isOpen);
+        if (!isOpen) {
+          content.style.maxHeight = content.scrollHeight + 'px';
+        } else {
+          content.style.maxHeight = null;
+        }
+      });
+    });
+  }
+
+  bindAccordions();
   bindContactTabs();
   bindHeaderScrollState();
   bindHomeStatsCountUp();
