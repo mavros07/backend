@@ -43,7 +43,7 @@
         <div class="w-full md:w-1/2 flex items-center px-12 md:px-24 py-20 bg-white">
             <div class="max-w-xl">
                 <h2 class="text-sm font-label font-bold text-primary tracking-[0.3em] uppercase mb-4">Established {{ $sections['established_year'] ?? '1999' }}</h2>
-                <h1 class="text-6xl md:text-8xl font-black font-headline text-on_surface leading-[0.9] mb-8 uppercase">
+                <h1 class="text-6xl md:text-7xl font-black font-headline text-on_surface leading-[0.9] mb-8 uppercase">
                     @php
                         $heading = $sections['heading'] ?? 'WELCOME TO THE MOTORS';
                         if (str_contains($heading, 'THE MOTORS')) {
@@ -127,36 +127,51 @@
     </div>
 </section>
 
-<!-- Media Gallery -->
-<section class="py-32 bg-slate-900 text-white">
-    <div class="max-w-7xl mx-auto px-8">
-        <div class="flex flex-col items-center mb-16">
-            <h2 class="text-4xl font-black font-headline mb-4 tracking-widest uppercase">{{ $sections['gallery_title'] ?? 'Media Gallery' }}</h2>
-            <div class="w-24 h-1.5 bg-primary"></div>
-        </div>
-        <div class="relative group">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                @foreach($gallery as $img)
-                <div class="h-80 bg-slate-800 overflow-hidden group/item cursor-pointer @if($loop->iteration == 3) border-t-4 border-primary @endif">
-                    <img alt="Gallery" class="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110" src="{{ $img }}"/>
-                </div>
-                @endforeach
-            </div>
-            <!-- Carousel Nav -->
-            <button class="absolute -left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-primary text-slate-900 flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition-opacity">
-                <span class="material-symbols-outlined">chevron_left</span>
-            </button>
-            <button class="absolute -right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-primary text-slate-900 flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition-opacity">
-                <span class="material-symbols-outlined">chevron_right</span>
-            </button>
-            <div class="flex justify-center gap-3 mt-10">
-                <div class="w-10 h-1 bg-primary"></div>
-                <div class="w-10 h-1 bg-white/20"></div>
-                <div class="w-10 h-1 bg-white/20"></div>
-            </div>
-        </div>
+<!-- Media Gallery (Motors reference palette) -->
+@if($gallery->isNotEmpty())
+@php $galleryPages = $gallery->chunk(4)->values(); @endphp
+<section class="bg-[#232628] py-24 px-6 md:px-12 lg:px-24">
+  <div class="max-w-7xl mx-auto w-full">
+    <div class="text-center mb-16">
+      <h2 class="text-white font-headline text-3xl md:text-4xl font-extrabold tracking-tight uppercase">
+        {{ strtoupper((string) ($sections['gallery_title'] ?? 'Media Gallery')) }}
+      </h2>
+      <div class="motors-colored-separator">
+        <div class="first-long"></div>
+        <div class="last-short"></div>
+      </div>
     </div>
+
+    <div class="motors-carousel motors-carousel--gallery" data-simple-carousel data-carousel-type="gallery-pages">
+      <div class="motors-carousel-viewport overflow-hidden" data-carousel-viewport>
+        <div class="motors-carousel-track flex gap-0" data-carousel-track>
+          @foreach ($galleryPages as $page)
+            <div class="w-full shrink-0" data-carousel-slide>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+                @foreach ($page as $img)
+                  <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="aspect-[4/3] overflow-hidden group cursor-pointer block bg-black/10">
+                    <img src="{{ $img }}" alt="{{ __('Gallery image') }}" data-gallery-image class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async" />
+                  </a>
+                @endforeach
+              </div>
+            </div>
+          @endforeach
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center mt-12 gap-8">
+        <button type="button" class="motors-gallery-chevron" data-carousel-prev aria-label="{{ __('Previous') }}">
+          <span class="material-symbols-outlined text-3xl">chevron_left</span>
+        </button>
+        <div class="motors-gallery-dots flex items-center gap-3" data-carousel-dots></div>
+        <button type="button" class="motors-gallery-chevron" data-carousel-next aria-label="{{ __('Next') }}">
+          <span class="material-symbols-outlined text-3xl">chevron_right</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </section>
+@endif
 
 <!-- Quick Links -->
 <section class="py-20 bg-white">

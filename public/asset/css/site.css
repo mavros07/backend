@@ -203,7 +203,7 @@ body {
   transition: color 160ms ease;
 }
 .motors-gallery-chevron:hover {
-  color: #ffb129;
+  color: rgba(255,255,255,0.82);
 }
 .motors-gallery-chevron[disabled] {
   opacity: 0.35;
@@ -213,7 +213,7 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 9999px;
-  background: rgba(255,255,255,0.2);
+  background: #5c5f61;
 }
 .motors-gallery-dots button[data-active="1"] {
   background: #4e77ed;

@@ -166,9 +166,19 @@
         grid.innerHTML = list.map((m) => {
           const sel = mediaSelectedPath === m.path;
           return `
-          <button type="button" class="rounded-lg border p-2 text-left shadow-sm transition-colors ${sel ? 'border-indigo-500 ring-2 ring-indigo-400 bg-indigo-50/50' : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/40'}" data-path="${esc(m.path)}" title="${esc(m.name)}">
-            <img src="${String(m.url).replace(/"/g, '&quot;')}" alt="" class="h-24 w-full rounded-md object-cover" />
-            <p class="mt-2 truncate text-xs text-gray-700" title="${esc(m.name)}">${esc(m.name)}</p>
+          <button type="button" class="group relative flex flex-col rounded-lg border p-2 text-left shadow-sm transition-all duration-200 ${sel ? 'border-indigo-600 ring-4 ring-indigo-100 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300 hover:bg-slate-50'}" data-path="${esc(m.path)}" title="${esc(m.name)}">
+            <div class="relative overflow-hidden rounded-md">
+              <img src="${String(m.url).replace(/"/g, '&quot;')}" alt="" class="h-24 w-full object-cover transition-transform duration-300 group-hover:scale-110" />
+              ${sel ? `
+                <div class="absolute inset-0 flex items-center justify-center bg-indigo-600/30 backdrop-blur-[1px]">
+                  <div class="rounded-full bg-white p-1 shadow-lg">
+                    <svg class="h-5 w-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                  </div>
+                </div>
+              ` : ''}
+              <div class="absolute inset-0 bg-indigo-600 opacity-0 transition-opacity group-hover:opacity-10 pointer-events-none"></div>
+            </div>
+            <p class="mt-2 truncate text-[11px] font-medium ${sel ? 'text-indigo-900' : 'text-gray-600'} transition-colors" title="${esc(m.name)}">${esc(m.name)}</p>
           </button>`;
         }).join('');
         grid.querySelectorAll('button[data-path]').forEach((btn) => {
