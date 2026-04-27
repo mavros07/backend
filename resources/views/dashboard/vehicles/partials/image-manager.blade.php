@@ -179,9 +179,8 @@
 
       button.disabled = true;
       try {
-        // Use POST + method spoofing for maximum compatibility with hosting/WAF rules that block DELETE.
+        // Use POST for maximum compatibility with hosting/WAF rules that block DELETE.
         const params = new URLSearchParams();
-        params.set('_method', 'DELETE');
         params.set('_token', csrfToken);
 
         const response = await fetch(url, {
