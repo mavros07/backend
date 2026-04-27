@@ -37,8 +37,11 @@ trait InteractsWithVehicleForms
             'vin' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:50000'],
             'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'main_image_path' => ['nullable', 'string', 'max:2048', 'regex:/^(https?:\/\/|\/?(asset|storage)\/).+/i'],
             'images' => ['sometimes', 'array', 'max:12'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'gallery_image_paths' => ['sometimes', 'array', 'max:12'],
+            'gallery_image_paths.*' => ['string', 'max:2048', 'regex:/^(https?:\/\/|\/?(asset|storage)\/).+/i'],
         ]);
 
         $data['is_special'] = $request->boolean('is_special');
@@ -94,18 +97,34 @@ trait InteractsWithVehicleForms
     {
         $nextSortOrder = (int) $vehicle->images()->max('sort_order');
 
-        if ($request->hasFile('main_image')) {
+        $mainImagePath = $this->normalizeSelectedImagePath((string) $request->input('main_image_path', ''));
+        if ($request->hasFile('main_image') || $mainImagePath !== '') {
             $vehicle->images()->increment('sort_order');
-            $stored = $this->storeImageOnPublicDisk($request->file('main_image'), $vehicle);
             $vehicle->images()->create([
-                'path' => 'storage/' . $stored,
+                'path' => $request->hasFile('main_image')
+                    ? 'storage/' . $this->storeImageOnPublicDisk($request->file('main_image'), $vehicle)
+                    : $mainImagePath,
                 'sort_order' => 1,
             ]);
             $nextSortOrder = (int) $vehicle->images()->max('sort_order');
         }
 
-        if (! $request->hasFile('images')) {
+        $galleryPaths = collect($request->input('gallery_image_paths', []))
+            ->map(fn ($path) => $this->normalizeSelectedImagePath((string) $path))
+            ->filter(fn ($path) => $path !== '')
+            ->values()
+            ->all();
+
+        if (! $request->hasFile('images') && $galleryPaths === []) {
             return;
+        }
+
+        foreach ($galleryPaths as $galleryPath) {
+            $nextSortOrder++;
+            $vehicle->images()->create([
+                'path' => $galleryPath,
+                'sort_order' => $nextSortOrder,
+            ]);
         }
 
         foreach ($request->file('images', []) as $uploadedImage) {
@@ -116,6 +135,20 @@ trait InteractsWithVehicleForms
                 'sort_order' => $nextSortOrder,
             ]);
         }
+    }
+
+    protected function normalizeSelectedImagePath(string $path): string
+    {
+        $path = trim($path);
+        if ($path === '') {
+            return '';
+        }
+
+        if (preg_match('#^https?://#i', $path) === 1) {
+            return $path;
+        }
+
+        return ltrim($path, '/');
     }
 
     protected function storeImageOnPublicDisk(\Illuminate\Http\UploadedFile $uploadedImage, Vehicle $vehicle): string

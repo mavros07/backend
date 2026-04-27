@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\InteractsWithVehicleForms;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Services\Mail\OutboundMailService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -159,7 +160,7 @@ class UserVehicleController extends Controller
             ->with('status', 'Listing deleted.');
     }
 
-    public function destroyImage(Request $request, Vehicle $vehicle, VehicleImage $image): RedirectResponse
+    public function destroyImage(Request $request, Vehicle $vehicle, VehicleImage $image): RedirectResponse|JsonResponse
     {
         $this->authorizeVehicleAccess($request, $vehicle);
         abort_unless($image->vehicle_id === $vehicle->id, 404);
@@ -170,6 +171,13 @@ class UserVehicleController extends Controller
         }
         $image->delete();
         $this->resequenceImages($vehicle);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'Image removed.',
+            ]);
+        }
 
         return back()->with('status', 'Image removed.');
     }

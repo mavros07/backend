@@ -156,61 +156,88 @@
               <x-input-label for="is_special" value="{{ __('Special listing (shows “Special” ribbon on homepage cards)') }}" class="!mb-0" />
             </div>
 
-            <div>
-              <x-input-label for="main_image" value="Replace Main Image" />
-              <input id="main_image" name="main_image" type="file" accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
-              <p class="mt-1 text-sm text-gray-500">Upload one image to become the new featured image. It will be inserted first in the gallery.</p>
-              <x-input-error :messages="$errors->get('main_image')" class="mt-2" />
-            </div>
+            <section class="rounded-lg border border-gray-200 p-4">
+              <h3 class="text-base font-semibold text-gray-900">Images</h3>
+              <p class="mt-1 text-sm text-gray-600">Main and gallery images use the same preview/remove pattern. Click a preview to open larger.</p>
 
-            <div>
-              <x-input-label for="images" value="Add Gallery Images" />
-              <input id="images" name="images[]" type="file" multiple accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
-              <p class="mt-1 text-sm text-gray-500">Upload additional gallery images here. Existing order is preserved.</p>
-              <x-input-error :messages="$errors->get('images')" class="mt-2" />
-              <x-input-error :messages="$errors->get('images.*')" class="mt-2" />
-            </div>
+              <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                <div class="rounded-md border border-gray-200 p-3">
+                  <x-input-label for="main_image" value="Replace Main Image" />
+                  <input id="main_image" name="main_image" type="file" accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
+                  <input type="hidden" id="main_image_path" name="main_image_path" value="{{ old('main_image_path', '') }}" />
+                  <p class="mt-1 text-xs text-gray-500">Upload one image to become the new featured image.</p>
+                  @if(auth()->user()?->hasRole('admin'))
+                    <button type="button" id="main-image-library" class="mt-2 text-sm text-indigo-700 hover:underline">Select from media library</button>
+                  @endif
+                  <x-input-error :messages="$errors->get('main_image')" class="mt-2" />
+                  <x-input-error :messages="$errors->get('main_image_path')" class="mt-2" />
+                  <button type="button" id="main-image-clear" class="mt-3 hidden text-sm text-red-700 hover:underline">Remove replacement</button>
+                  <div id="main-image-preview" class="mt-3 hidden"></div>
+                </div>
+
+                <div class="rounded-md border border-gray-200 p-3">
+                  <x-input-label for="images" value="Add Gallery Images" />
+                  <input id="images" name="images[]" type="file" multiple accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
+                  <div id="gallery-paths-holder"></div>
+                  <p class="mt-1 text-xs text-gray-500">Select multiple files with Ctrl/Cmd-click or Shift-click.</p>
+                  @if(auth()->user()?->hasRole('admin'))
+                    <button type="button" id="gallery-library" class="mt-2 text-sm text-indigo-700 hover:underline">Select multiple from media library</button>
+                  @endif
+                  <x-input-error :messages="$errors->get('images')" class="mt-2" />
+                  <x-input-error :messages="$errors->get('images.*')" class="mt-2" />
+                  <x-input-error :messages="$errors->get('gallery_image_paths')" class="mt-2" />
+                  <x-input-error :messages="$errors->get('gallery_image_paths.*')" class="mt-2" />
+                  <button type="button" id="gallery-clear-all" class="mt-3 hidden text-sm text-red-700 hover:underline">Clear new gallery selection</button>
+                  <div id="gallery-preview" class="mt-3 hidden grid grid-cols-2 gap-3 sm:grid-cols-3"></div>
+                </div>
+              </div>
+
+              <div class="mt-5">
+                <h4 class="text-sm font-semibold text-gray-900">Current Gallery</h4>
+                <p class="mt-1 text-xs text-gray-500">The first image is the featured image across the public site.</p>
+                @if(session('status'))
+                  <div class="mt-3 rounded-md bg-green-50 px-4 py-3 text-sm text-green-700">
+                    {{ session('status') }}
+                  </div>
+                @endif
+
+                @if($vehicle->images->isEmpty())
+                  <p class="mt-3 text-sm text-gray-500">No images uploaded yet.</p>
+                @else
+                  <div id="existing-gallery-grid" class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach($vehicle->images as $image)
+                      <div class="rounded-lg border border-gray-200 p-3" data-image-card data-image-id="{{ $image->id }}">
+                        <img
+                          src="{{ \App\Support\VehicleImageUrl::url($image->path) }}"
+                          alt=""
+                          class="h-40 w-full cursor-zoom-in rounded-md object-cover"
+                          data-preview-image
+                        />
+                        <div class="mt-3 flex items-center justify-between gap-3">
+                          <span data-image-role class="text-xs font-medium {{ $loop->first ? 'text-indigo-600' : 'text-gray-500' }}">
+                            {{ $loop->first ? 'Featured image' : 'Gallery image' }}
+                          </span>
+                          <button
+                            type="button"
+                            class="text-sm text-red-700 hover:underline"
+                            data-remove-image
+                            data-delete-url="{{ route('dashboard.vehicles.images.destroy', [$vehicle, $image]) }}"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    @endforeach
+                  </div>
+                @endif
+              </div>
+            </section>
 
             <div class="flex items-center gap-3">
               <x-primary-button>Save</x-primary-button>
               <a href="{{ route('dashboard.vehicles.index') }}" class="text-sm text-gray-600 hover:underline">Back</a>
             </div>
           </form>
-        </div>
-      </div>
-
-      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 text-gray-900">
-          @if(session('status'))
-            <div class="mb-4 rounded-md bg-green-50 px-4 py-3 text-sm text-green-700">
-              {{ session('status') }}
-            </div>
-          @endif
-
-          <h3 class="font-semibold">Gallery</h3>
-          <p class="mt-1 text-sm text-gray-600">First image is used as the featured image across the public site.</p>
-
-          @if($vehicle->images->isEmpty())
-            <p class="mt-4 text-sm text-gray-500">No images uploaded yet.</p>
-          @else
-            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              @foreach($vehicle->images as $image)
-                <div class="rounded-lg border border-gray-200 p-3">
-                  <img src="{{ \App\Support\VehicleImageUrl::url($image->path) }}" alt="" class="h-40 w-full rounded-md object-cover" />
-                  <div class="mt-3 flex items-center justify-between gap-3">
-                    <span class="text-xs font-medium {{ $loop->first ? 'text-indigo-600' : 'text-gray-500' }}">
-                      {{ $loop->first ? 'Featured image' : 'Gallery image' }}
-                    </span>
-                    <form method="post" action="{{ route('dashboard.vehicles.images.destroy', [$vehicle, $image]) }}">
-                      @csrf
-                      @method('DELETE')
-                      <button type="submit" class="text-sm text-red-700 hover:underline">Remove</button>
-                    </form>
-                  </div>
-                </div>
-              @endforeach
-            </div>
-          @endif
         </div>
       </div>
 
@@ -263,4 +290,6 @@
       </div>
   </div>
 </x-app-layout>
+
+@include('dashboard.vehicles.partials.image-manager', ['supportsExistingGalleryDelete' => true])
 

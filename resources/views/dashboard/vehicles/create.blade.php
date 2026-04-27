@@ -125,20 +125,42 @@
               <x-input-label for="is_special" value="{{ __('Special listing (shows “Special” ribbon on homepage cards)') }}" class="!mb-0" />
             </div>
 
-            <div>
-              <x-input-label for="main_image" value="Main Image" />
-              <input id="main_image" name="main_image" type="file" accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
-              <p class="mt-1 text-sm text-gray-500">Upload a single featured image used on listing cards and detail pages.</p>
-              <x-input-error :messages="$errors->get('main_image')" class="mt-2" />
-            </div>
+            <section class="rounded-lg border border-gray-200 p-4">
+              <h3 class="text-base font-semibold text-gray-900">Images</h3>
+              <p class="mt-1 text-sm text-gray-600">Use one featured image plus gallery images. Click any preview to open it larger.</p>
 
-            <div>
-              <x-input-label for="images" value="Gallery Images" />
-              <input id="images" name="images[]" type="file" multiple accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
-              <p class="mt-1 text-sm text-gray-500">Upload up to 12 JPG, PNG, or WebP gallery images. These appear after the main image.</p>
-              <x-input-error :messages="$errors->get('images')" class="mt-2" />
-              <x-input-error :messages="$errors->get('images.*')" class="mt-2" />
-            </div>
+              <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                <div class="rounded-md border border-gray-200 p-3">
+                  <x-input-label for="main_image" value="Main Image" />
+                  <input id="main_image" name="main_image" type="file" accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
+                  <input type="hidden" id="main_image_path" name="main_image_path" value="{{ old('main_image_path', '') }}" />
+                  <p class="mt-1 text-xs text-gray-500">Single featured image used on cards and details.</p>
+                  @if(auth()->user()?->hasRole('admin'))
+                    <button type="button" id="main-image-library" class="mt-2 text-sm text-indigo-700 hover:underline">Select from media library</button>
+                  @endif
+                  <x-input-error :messages="$errors->get('main_image')" class="mt-2" />
+                  <x-input-error :messages="$errors->get('main_image_path')" class="mt-2" />
+                  <button type="button" id="main-image-clear" class="mt-3 hidden text-sm text-red-700 hover:underline">Remove main image</button>
+                  <div id="main-image-preview" class="mt-3 hidden"></div>
+                </div>
+
+                <div class="rounded-md border border-gray-200 p-3">
+                  <x-input-label for="images" value="Gallery Images" />
+                  <input id="images" name="images[]" type="file" multiple accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
+                  <div id="gallery-paths-holder"></div>
+                  <p class="mt-1 text-xs text-gray-500">Select multiple files with Ctrl/Cmd-click or Shift-click.</p>
+                  @if(auth()->user()?->hasRole('admin'))
+                    <button type="button" id="gallery-library" class="mt-2 text-sm text-indigo-700 hover:underline">Select multiple from media library</button>
+                  @endif
+                  <x-input-error :messages="$errors->get('images')" class="mt-2" />
+                  <x-input-error :messages="$errors->get('images.*')" class="mt-2" />
+                  <x-input-error :messages="$errors->get('gallery_image_paths')" class="mt-2" />
+                  <x-input-error :messages="$errors->get('gallery_image_paths.*')" class="mt-2" />
+                  <button type="button" id="gallery-clear-all" class="mt-3 hidden text-sm text-red-700 hover:underline">Clear gallery selection</button>
+                  <div id="gallery-preview" class="mt-3 hidden grid grid-cols-2 gap-3 sm:grid-cols-3"></div>
+                </div>
+              </div>
+            </section>
 
             <div class="flex items-center gap-3">
               <x-primary-button>Create</x-primary-button>
@@ -149,4 +171,6 @@
       </div>
   </div>
 </x-app-layout>
+
+@include('dashboard.vehicles.partials.image-manager', ['supportsExistingGalleryDelete' => false])
 
