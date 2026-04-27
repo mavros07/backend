@@ -167,20 +167,6 @@ class PageController extends Controller
             'testimonial_1_body' => 'The acquisition process for my vintage collection was handled with unparalleled professionalism. Velocity Motors doesn\'t just sell cars; they curate legacies.',
             'testimonial_1_author' => 'John Doe',
             'testimonial_1_brand' => 'Private Collector, London',
-
-            'team_title' => 'Our Team',
-            'team_1_photo' => 'asset/images/media/team-1.jpg',
-            'team_1_name' => 'Lennox Wardell',
-            'team_1_role' => 'Founder & CEO',
-            'team_2_photo' => 'asset/images/media/team-2.jpg',
-            'team_2_name' => 'Sarah Odegard',
-            'team_2_role' => 'Head of Acquisition',
-            'team_3_photo' => 'asset/images/media/team-3.jpg',
-            'team_3_name' => 'Lars Jakuba',
-            'team_3_role' => 'Chief Engineer',
-            'team_4_photo' => 'asset/images/media/team-4.jpg',
-            'team_4_name' => 'Mikey Diokles',
-            'team_4_role' => 'Client Concierge',
         ]);
 
         return view('pages.about', [
