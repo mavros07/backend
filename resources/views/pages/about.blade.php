@@ -1,297 +1,241 @@
 @extends('layouts.site')
 
 @section('content')
-  @php
-    $brand = config('app.name', 'Motors');
+@php
     $heroImg = \App\Support\VehicleImageUrl::url($sections['hero_image'] ?? 'asset/images/media/about-hero-bg.jpg');
-    $welcomeImg = \App\Support\VehicleImageUrl::url($sections['welcome_image'] ?? 'asset/images/media/about-welcome.jpg');
-    $valuesImg = \App\Support\VehicleImageUrl::url($sections['values_image'] ?? 'asset/images/media/about-values.jpg');
+    $valGrid1 = \App\Support\VehicleImageUrl::url($sections['values_grid_1'] ?? 'asset/images/media/about-values-1.jpg');
+    $valGrid2 = \App\Support\VehicleImageUrl::url($sections['values_grid_2'] ?? 'asset/images/media/about-values-2.jpg');
+    $valGrid3 = \App\Support\VehicleImageUrl::url($sections['values_grid_3'] ?? 'asset/images/media/about-values-3.jpg');
+    $valGrid4 = \App\Support\VehicleImageUrl::url($sections['values_grid_4'] ?? 'asset/images/media/about-values-4.jpg');
 
-    $valuesList = preg_split('/\r\n|\r|\n/', (string) ($sections['values_list'] ?? '')) ?: [];
-    $valuesList = collect($valuesList)->map(fn ($s) => trim((string) $s))->filter()->values();
-
-    $galleryKeys = ['gallery_image_1','gallery_image_2','gallery_image_3','gallery_image_4','gallery_image_5','gallery_image_6'];
+    $galleryKeys = ['gallery_image_1','gallery_image_2','gallery_image_3','gallery_image_4'];
     $gallery = collect($galleryKeys)
       ->map(fn ($k) => trim((string) ($sections[$k] ?? '')))
       ->filter(fn ($p) => $p !== '')
       ->map(fn ($p) => \App\Support\VehicleImageUrl::url($p))
       ->values();
 
-    $testimonials = collect([1, 2, 3])->map(function ($i) use ($sections) {
+    $tBody = trim((string) ($sections['testimonial_1_body'] ?? ''));
+    $tAuthor = trim((string) ($sections['testimonial_1_author'] ?? ''));
+    $tBrand = trim((string) ($sections['testimonial_1_brand'] ?? ''));
+
+    $team = collect([1, 2, 3, 4])->map(function ($i) use ($sections) {
       return [
-        'title' => trim((string) ($sections['testimonial_'.$i.'_title'] ?? '')),
-        'body' => trim((string) ($sections['testimonial_'.$i.'_body'] ?? '')),
-        'author' => trim((string) ($sections['testimonial_'.$i.'_author'] ?? '')),
-        'brand' => trim((string) ($sections['testimonial_'.$i.'_brand'] ?? '')),
+        'photo' => \App\Support\VehicleImageUrl::url(trim((string) ($sections['team_'.$i.'_photo'] ?? ''))),
+        'name' => trim((string) ($sections['team_'.$i.'_name'] ?? '')),
+        'role' => trim((string) ($sections['team_'.$i.'_role'] ?? '')),
       ];
-    })->filter(fn ($t) => $t['title'] !== '' || $t['body'] !== '' || $t['author'] !== '')->values();
-  @endphp
+    })->filter(fn ($m) => $m['name'] !== '')->values();
+@endphp
 
-  {{-- Hero Section (Motors Dealer Two Style) --}}
-  <section class="relative min-h-[400px] flex items-center overflow-hidden bg-slate-900 py-20 md:py-32">
-    <div class="absolute inset-0 z-0">
-      <img src="{{ $heroImg }}" alt="" class="h-full w-full object-cover" />
-      <div class="absolute inset-0 bg-black/50"></div>
-    </div>
-    <div class="container relative z-10 mx-auto px-6">
-      <div class="max-w-3xl">
-        @if (!empty($sections['kicker']))
-          <span class="inline-block bg-primary px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white mb-6">
-            {{ $sections['kicker'] }}
-          </span>
-        @endif
-        <h1 class="font-headline text-4xl font-black uppercase tracking-tight text-white md:text-6xl lg:text-7xl">
-          {{ $sections['heading'] ?? ($page->title ?? 'About Us') }}
-        </h1>
-        @if (!empty($sections['intro']) || !empty($page->meta_description))
-          <p class="mt-6 text-lg leading-relaxed text-white/90 md:text-xl">
-            {{ $sections['intro'] ?? $page->meta_description }}
-          </p>
-        @endif
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .metallic-gradient {
+        background: linear-gradient(135deg, #815500 0%, #ffb129 100%);
+    }
+</style>
 
-        <div class="mt-10 flex flex-wrap gap-4">
-          @if (!empty($sections['hero_primary_cta_text']))
-            <a href="{{ $sections['hero_primary_cta_href'] ?? '/inventory' }}" class="inline-flex h-12 items-center justify-center bg-primary px-8 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-primary/90">
-              {{ $sections['hero_primary_cta_text'] }}
-            </a>
-          @endif
-          @if (!empty($sections['hero_secondary_cta_text']))
-            <a href="{{ $sections['hero_secondary_cta_href'] ?? '/contact' }}" class="inline-flex h-12 items-center justify-center border-2 border-white px-8 text-sm font-bold uppercase tracking-wider text-white transition-all hover:bg-white hover:text-slate-900">
-              {{ $sections['hero_secondary_cta_text'] }}
-            </a>
-          @endif
+<!-- Hero Section -->
+<section class="relative min-h-screen pt-20 flex items-center overflow-hidden">
+    <div class="flex flex-col md:flex-row w-full h-full">
+        <div class="w-full md:w-1/2 relative h-[500px] md:h-screen">
+            <img alt="Hero Image" class="w-full h-full object-cover" src="{{ $heroImg }}"/>
+            <div class="absolute bottom-12 right-0 bg-primary-container text-on-primary-container px-8 py-6 flex flex-col items-center justify-center transform translate-x-1/4">
+                <span class="text-4xl font-black font-headline">{{ $sections['hero_stat_value'] ?? '25+' }}</span>
+                <span class="text-xs font-bold font-label tracking-tighter uppercase">{{ $sections['hero_stat_label'] ?? 'Years of Excellence' }}</span>
+            </div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- Welcome Section --}}
-  <section class="bg-white py-16 md:py-24">
-    <div class="container mx-auto px-6">
-      <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
-        <div class="relative group">
-            <div class="absolute -inset-4 bg-primary/10 rounded-2xl scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500"></div>
-            <img src="{{ $welcomeImg }}" alt="{{ $sections['welcome_title'] ?? 'Welcome' }}" class="relative z-10 w-full rounded-xl shadow-2xl shadow-slate-200/50 object-cover aspect-[4/3] lg:aspect-square" loading="lazy" />
+        <div class="w-full md:w-1/2 flex items-center px-12 md:px-24 py-20 bg-white">
+            <div class="max-w-xl">
+                <h2 class="text-sm font-label font-bold text-primary tracking-[0.3em] uppercase mb-4">Established {{ $sections['established_year'] ?? '1999' }}</h2>
+                <h1 class="text-6xl md:text-8xl font-black font-display text-on-surface leading-[0.9] mb-8 uppercase">
+                    @php
+                        $heading = $sections['heading'] ?? 'WELCOME TO THE MOTORS';
+                        // Split into "WELCOME TO" and "THE MOTORS"
+                        if (str_contains($heading, 'THE MOTORS')) {
+                            $parts = explode('THE MOTORS', $heading);
+                            $firstPart = trim($parts[0]);
+                            $lastPart = 'THE MOTORS';
+                        } else {
+                            $words = explode(' ', $heading);
+                            $lastPart = array_pop($words);
+                            $firstPart = implode(' ', $words);
+                        }
+                    @endphp
+                    {!! nl2br(e($firstPart)) !!} <br/>
+                    <span class="text-primary-container">{{ $lastPart }}</span>
+                </h1>
+                <p class="text-lg font-body text-on-surface-variant leading-relaxed mb-10">
+                    {{ $sections['intro'] ?? 'Experience the pinnacle of automotive engineering and white-glove service.' }}
+                </p>
+                @if(!empty($sections['hero_primary_cta_text']))
+                <a href="{{ $sections['hero_primary_cta_href'] ?? '#' }}" class="inline-block px-10 py-4 border-2 border-on-surface text-on-surface font-bold font-label uppercase tracking-widest hover:bg-on-surface hover:text-white transition-all text-center">
+                    {{ $sections['hero_primary_cta_text'] }}
+                </a>
+                @endif
+            </div>
         </div>
+    </div>
+</section>
+
+<!-- Core Values -->
+<section class="py-32 bg-surface-container-low overflow-hidden">
+    <div class="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
         <div>
-          <div class="mb-8">
-            <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-slate-900 md:text-4xl">
-              @php
-                $welcomeTitle = $sections['welcome_title'] ?? 'Welcome to Motors';
-                $words = explode(' ', $welcomeTitle);
-                $lastWord = array_pop($words);
-                $firstPart = implode(' ', $words);
-              @endphp
-              {{ $firstPart }} <span class="text-primary">{{ $lastWord }}</span>
+            <h2 class="text-5xl font-black font-headline text-on-surface mb-12 tracking-tight uppercase">
+                @php
+                    $vTitle = $sections['values_title'] ?? 'CORE VALUES';
+                    $vWords = explode(' ', $vTitle);
+                    $vLast = array_pop($vWords);
+                    $vFirst = implode(' ', $vWords);
+                @endphp
+                {{ $vFirst }} <span class="text-primary">{{ $vLast }}</span>
             </h2>
-            <div class="motors-colored-separator mt-4 !justify-start">
-              <div class="first-long"></div>
-              <div class="last-short"></div>
-            </div>
-          </div>
-
-          @if (!empty($sections['welcome_subtitle']))
-            <h4 class="text-lg font-bold italic leading-relaxed text-slate-800 md:text-xl">
-              "{{ $sections['welcome_subtitle'] }}"
-            </h4>
-          @endif
-
-          @if (!empty($sections['welcome_body']))
-            <div class="mt-6 space-y-4 text-base leading-relaxed text-slate-600 md:text-lg">
-              {!! nl2br(e($sections['welcome_body'])) !!}
-            </div>
-          @endif
-
-          @if (!empty($sections['welcome_signature']))
-            <div class="mt-10 flex items-center gap-4">
-               <div class="h-px w-12 bg-slate-300"></div>
-               <p class="font-headline text-sm font-bold uppercase tracking-wider text-slate-500">
-                 {{ $sections['welcome_signature'] }}
-               </p>
-            </div>
-          @endif
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- Advantages Section --}}
-  <section class="bg-slate-50 py-16 md:py-24">
-    <div class="container mx-auto px-6">
-      <div class="mb-16 text-center">
-        <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-slate-900 md:text-4xl">
-          {{ $sections['advantages_title'] ?? __('OUR ADVANTAGES') }}
-        </h2>
-        <div class="motors-colored-separator mt-4">
-          <div class="first-long"></div>
-          <div class="last-short"></div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-        @foreach ([1, 2, 3] as $i)
-          @php
-            $icon = trim((string) ($sections['adv_'.$i.'_icon'] ?? ''));
-            $title = trim((string) ($sections['adv_'.$i.'_title'] ?? ''));
-            $body = trim((string) ($sections['adv_'.$i.'_body'] ?? ''));
-          @endphp
-          @if ($title !== '')
-            <div class="group bg-white p-8 text-center shadow-sm transition-all hover:-translate-y-2 hover:shadow-xl">
-              <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
-                <span class="material-symbols-outlined text-4xl">
-                  {{ $icon !== '' ? $icon : 'check_circle' }}
-                </span>
-              </div>
-              <h3 class="font-headline text-lg font-black uppercase tracking-tight text-slate-900">{{ $title }}</h3>
-              @if ($body !== '')
-                <p class="mt-4 text-sm leading-relaxed text-slate-500">{{ $body }}</p>
-              @endif
-            </div>
-          @endif
-        @endforeach
-      </div>
-    </div>
-  </section>
-
-  {{-- Core Values Section --}}
-  <section class="bg-white py-16 md:py-24">
-    <div class="container mx-auto px-6">
-      <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
-        <div class="order-2 lg:order-1">
-          <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-slate-900 md:text-4xl">
-            {{ $sections['values_title'] ?? __('CORE VALUES') }}
-          </h2>
-          <div class="motors-colored-separator mt-4 !justify-start">
-            <div class="first-long"></div>
-            <div class="last-short"></div>
-          </div>
-          @if (!empty($sections['values_body']))
-            <p class="mt-8 text-base leading-relaxed text-slate-600 md:text-lg">
-              {{ $sections['values_body'] }}
-            </p>
-          @endif
-          @if ($valuesList->isNotEmpty())
-            <ul class="mt-8 space-y-4">
-              @foreach ($valuesList as $item)
-                <li class="flex items-start gap-3">
-                  <span class="material-symbols-outlined text-primary mt-0.5">check_circle</span>
-                  <span class="text-base font-medium text-slate-700">{{ $item }}</span>
-                </li>
-              @endforeach
-            </ul>
-          @endif
-        </div>
-        <div class="order-1 lg:order-2">
-            <img src="{{ $valuesImg }}" alt="{{ $sections['values_title'] ?? 'Core Values' }}" class="w-full rounded-xl shadow-xl object-cover aspect-[4/3]" loading="lazy" />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- Media Gallery --}}
-  @if ($gallery->isNotEmpty())
-    @php
-      $galleryPages = $gallery->chunk(4)->values();
-    @endphp
-    <section class="bg-[#232628] py-20 px-6">
-      <div class="container mx-auto">
-        <div class="text-center mb-16">
-          <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-white md:text-4xl">
-            {{ $sections['gallery_title'] ?? __('MEDIA GALLERY') }}
-          </h2>
-          <div class="motors-colored-separator mt-4">
-            <div class="first-long"></div>
-            <div class="last-short"></div>
-          </div>
-        </div>
-
-        <div class="motors-carousel" data-simple-carousel data-carousel-type="gallery-pages">
-          <div class="motors-carousel-viewport overflow-hidden" data-carousel-viewport>
-            <div class="motors-carousel-track flex" data-carousel-track>
-              @foreach ($galleryPages as $pageChunk)
-                <div class="w-full shrink-0 px-2" data-carousel-slide>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    @foreach ($pageChunk as $img)
-                      <div class="group relative aspect-[4/3] overflow-hidden rounded bg-black/20">
-                        <img src="{{ $img }}" alt="Gallery" data-gallery-image class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                        <div class="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                           <span class="material-symbols-outlined text-white text-4xl">zoom_in</span>
+            <div class="space-y-10">
+                @foreach([1, 2, 3] as $i)
+                    @php
+                        $vT = $sections['val_'.$i.'_title'] ?? '';
+                        $vB = $sections['val_'.$i.'_body'] ?? '';
+                    @endphp
+                    @if($vT)
+                    <div class="flex items-start gap-6 group">
+                        <div class="mt-1 flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary-container text-on-primary-container">
+                            <span class="material-symbols-outlined font-bold">check</span>
                         </div>
-                      </div>
-                    @endforeach
-                  </div>
-                </div>
-              @endforeach
-            </div>
-          </div>
-
-          <div class="mt-12 flex items-center justify-center gap-6">
-            <button type="button" class="motors-gallery-chevron" data-carousel-prev>
-              <span class="material-symbols-outlined text-3xl">chevron_left</span>
-            </button>
-            <div class="motors-gallery-dots flex gap-2" data-carousel-dots></div>
-            <button type="button" class="motors-gallery-chevron" data-carousel-next>
-              <span class="material-symbols-outlined text-3xl">chevron_right</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-  @endif
-
-  {{-- Testimonials --}}
-  <section class="bg-slate-50 py-16 md:py-24">
-    <div class="container mx-auto px-6">
-       <div class="mb-16 text-center">
-        <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-slate-900 md:text-4xl">
-          {{ $sections['testimonials_title'] ?? __('CUSTOMER TESTIMONIALS') }}
-        </h2>
-        <div class="motors-colored-separator mt-4">
-          <div class="first-long"></div>
-          <div class="last-short"></div>
-        </div>
-      </div>
-
-      @if ($testimonials->isNotEmpty())
-        <div class="motors-carousel relative" data-simple-carousel data-carousel-type="testimonials">
-          <div class="motors-carousel-viewport overflow-hidden" data-carousel-viewport>
-            <div class="motors-carousel-track flex" data-carousel-track>
-              @foreach ($testimonials as $t)
-                <div class="w-full shrink-0 px-4" data-carousel-slide>
-                  <div class="mx-auto max-w-3xl bg-white p-10 shadow-xl shadow-slate-200/50 rounded-lg text-center relative overflow-hidden">
-                    {{-- Decorative quote icon --}}
-                    <span class="material-symbols-outlined absolute -top-4 -left-4 text-9xl text-slate-50 select-none">format_quote</span>
-                    
-                    @if ($t['title'] !== '')
-                      <h5 class="relative z-10 text-xl font-bold text-slate-900">{{ $t['title'] }}</h5>
-                    @endif
-                    @if ($t['body'] !== '')
-                      <p class="relative z-10 mt-6 text-lg italic leading-relaxed text-slate-600">"{{ $t['body'] }}"</p>
-                    @endif
-                    <div class="relative z-10 mt-10 flex flex-col items-center gap-2">
-                       <span class="h-1 w-12 bg-primary rounded-full"></span>
-                       <div class="text-base font-black uppercase tracking-tight text-slate-900">{{ $t['author'] }}</div>
-                       @if ($t['brand'] !== '')
-                         <div class="text-sm font-bold text-primary">{{ $t['brand'] }}</div>
-                       @endif
+                        <div>
+                            <h3 class="text-xl font-bold font-headline mb-2 uppercase tracking-wide">{{ $vT }}</h3>
+                            <p class="text-on-surface-variant font-body">{{ $vB }}</p>
+                        </div>
                     </div>
-                  </div>
-                </div>
-              @endforeach
+                    @endif
+                @endforeach
             </div>
-          </div>
-
-          <button type="button" class="motors-carousel-nav motors-carousel-prev !-left-4 lg:!-left-8" data-carousel-prev>
-            <span class="material-symbols-outlined">chevron_left</span>
-          </button>
-          <button type="button" class="motors-carousel-nav motors-carousel-next !-right-4 lg:!-right-8" data-carousel-next>
-            <span class="material-symbols-outlined">chevron_right</span>
-          </button>
-
-          <div class="mt-10 flex justify-center gap-2" data-carousel-dots></div>
         </div>
-      @endif
+        <div class="grid grid-cols-2 gap-4 h-[600px]">
+            <div class="space-y-4 pt-12">
+                <div class="h-1/2 overflow-hidden bg-slate-200">
+                    <img alt="Value 1" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" src="{{ $valGrid1 }}"/>
+                </div>
+                <div class="h-1/2 overflow-hidden bg-slate-200">
+                    <img alt="Value 2" class="w-full h-full object-cover" src="{{ $valGrid2 }}"/>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div class="h-1/2 overflow-hidden bg-slate-200">
+                    <img alt="Value 3" class="w-full h-full object-cover" src="{{ $valGrid3 }}"/>
+                </div>
+                <div class="h-1/2 overflow-hidden bg-slate-200 relative">
+                    <div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
+                    <img alt="Value 4" class="w-full h-full object-cover" src="{{ $valGrid4 }}"/>
+                </div>
+            </div>
+        </div>
     </div>
-  </section>
+</section>
+
+<!-- Media Gallery -->
+<section class="py-32 bg-inverse-surface text-white">
+    <div class="max-w-7xl mx-auto px-8">
+        <div class="flex flex-col items-center mb-16">
+            <h2 class="text-4xl font-black font-headline mb-4 tracking-widest uppercase">{{ $sections['gallery_title'] ?? 'Media Gallery' }}</h2>
+            <div class="w-24 h-1.5 bg-primary-container"></div>
+        </div>
+        <div class="relative group">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                @foreach($gallery as $img)
+                <div class="h-80 bg-slate-800 overflow-hidden group/item cursor-pointer @if($loop->iteration == 3) border-t-4 border-primary-container @endif">
+                    <img alt="Gallery" class="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110" src="{{ $img }}"/>
+                </div>
+                @endforeach
+            </div>
+            <!-- Carousel Nav -->
+            <button class="absolute -left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-primary-container text-on-primary-container flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button class="absolute -right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-primary-container text-on-primary-container flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+            <div class="flex justify-center gap-3 mt-10">
+                <div class="w-10 h-1 bg-primary-container"></div>
+                <div class="w-10 h-1 bg-white/20"></div>
+                <div class="w-10 h-1 bg-white/20"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Links -->
+<section class="py-20 bg-surface">
+    <div class="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+        @foreach([1, 2, 3] as $i)
+            @php
+                $qT = $sections['adv_'.$i.'_title'] ?? '';
+                $qB = $sections['adv_'.$i.'_body'] ?? '';
+                $qI = $sections['adv_'.$i.'_icon'] ?? 'directions_car';
+                $qH = $sections['adv_'.$i.'_href'] ?? '#';
+            @endphp
+            @if($qT)
+            <div class="bg-surface-container-low p-10 flex flex-col items-center text-center group hover:bg-white transition-all shadow-xl shadow-transparent hover:shadow-slate-200 @if($i == 2) border-b-4 border-primary @endif">
+                <div class="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center text-primary mb-6 transition-colors group-hover:bg-primary-container group-hover:text-on-primary-container">
+                    <span class="material-symbols-outlined text-3xl">{{ $qI }}</span>
+                </div>
+                <h3 class="text-xl font-black font-headline mb-4 uppercase">{{ $qT }}</h3>
+                <p class="text-on-surface-variant font-body mb-8">{{ $qB }}</p>
+                <a class="font-label font-bold text-sm uppercase tracking-widest text-primary hover:underline flex items-center gap-2" href="{{ $qH }}">
+                    {{ str_contains($qT, 'sell') ? 'Appraise Now' : (str_contains($qT, 'new car') ? 'Browse Inventory' : 'Book Appointment') }} <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            </div>
+            @endif
+        @endforeach
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-32 bg-inverse-surface relative overflow-hidden">
+    <div class="absolute top-0 right-0 p-20 opacity-5">
+        <span class="material-symbols-outlined text-[300px]" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+    </div>
+    <div class="max-w-4xl mx-auto px-8 text-center relative z-10">
+        <span class="material-symbols-outlined text-primary-container text-6xl mb-8" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+        <p class="text-3xl font-light font-body text-white leading-relaxed italic mb-12">
+            "{{ $tBody }}"
+        </p>
+        <div class="flex flex-col items-center">
+            <h4 class="text-lg font-bold font-headline text-white uppercase tracking-widest mb-1">{{ $tAuthor }}</h4>
+            <p class="text-primary-container text-sm font-label font-semibold tracking-tighter uppercase">{{ $tBrand }}</p>
+        </div>
+        <div class="mt-16 text-3xl font-black font-display text-white/20 italic tracking-tighter uppercase">
+            {{ config('app.name') }}
+        </div>
+    </div>
+</section>
+
+<!-- Our Team -->
+<section class="py-32 bg-white">
+    <div class="max-w-7xl mx-auto px-8">
+        <h2 class="text-5xl font-black font-headline text-on-surface mb-20 tracking-tighter text-center uppercase">
+            @php
+                $teamTitle = $sections['team_title'] ?? 'OUR TEAM';
+                $tWords = explode(' ', $teamTitle);
+                $tLast = array_pop($tWords);
+                $tFirst = implode(' ', $tWords);
+            @endphp
+            {{ $tFirst }} <span class="text-primary">{{ $tLast }}</span>
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            @foreach($team as $m)
+            <div class="group cursor-pointer">
+                <div class="aspect-[3/4] mb-6 overflow-hidden bg-slate-100 grayscale hover:grayscale-0 transition-all duration-500">
+                    <img alt="{{ $m['name'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" src="{{ $m['photo'] }}"/>
+                </div>
+                <h3 class="text-xl font-bold font-headline uppercase">{{ $m['name'] }}</h3>
+                <p class="text-on-surface-variant font-label text-sm font-medium tracking-wide uppercase">{{ $m['role'] }}</p>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
 
 @endsection
