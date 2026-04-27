@@ -197,8 +197,88 @@
     });
   }
 
+  /**
+   * Simple scroll-snap carousel: About page gallery/testimonials.
+   * Markup:
+   * - root: [data-simple-carousel]
+   * - track: [data-carousel-track]
+   * - slides: children with [data-carousel-slide]
+   * - prev/next buttons: [data-carousel-prev], [data-carousel-next]
+   * - dots: [data-carousel-dot] with data-index
+   */
+  function bindSimpleCarousels() {
+    var roots = document.querySelectorAll('[data-simple-carousel]');
+    if (!roots.length) return;
+
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    roots.forEach(function (root) {
+      var track = root.querySelector('[data-carousel-track]');
+      if (!track) return;
+      var slides = track.querySelectorAll('[data-carousel-slide]');
+      if (!slides.length) return;
+
+      var prev = root.querySelector('[data-carousel-prev]');
+      var next = root.querySelector('[data-carousel-next]');
+      var dots = root.querySelectorAll('[data-carousel-dot]');
+
+      function nearestIndex() {
+        var left = track.scrollLeft;
+        var best = 0;
+        var bestDist = Infinity;
+        slides.forEach(function (s, i) {
+          var dist = Math.abs(s.offsetLeft - left);
+          if (dist < bestDist) { bestDist = dist; best = i; }
+        });
+        return best;
+      }
+
+      function setActive(i) {
+        dots.forEach(function (d) {
+          var di = parseInt(d.getAttribute('data-index') || '0', 10);
+          d.setAttribute('data-active', di === i ? '1' : '0');
+        });
+      }
+
+      function goTo(i) {
+        i = clamp(i, 0, slides.length - 1);
+        track.scrollTo({ left: slides[i].offsetLeft, behavior: 'smooth' });
+        setActive(i);
+      }
+
+      function step(dir) {
+        var i = nearestIndex();
+        goTo(i + dir);
+      }
+
+      prev && prev.addEventListener('click', function (e) { e.preventDefault(); step(-1); });
+      next && next.addEventListener('click', function (e) { e.preventDefault(); step(1); });
+
+      dots.forEach(function (d) {
+        d.addEventListener('click', function (e) {
+          e.preventDefault();
+          var i = parseInt(d.getAttribute('data-index') || '0', 10);
+          if (!isNaN(i)) goTo(i);
+        });
+      });
+
+      var ticking = false;
+      track.addEventListener('scroll', function () {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(function () {
+          ticking = false;
+          setActive(nearestIndex());
+        });
+      }, { passive: true });
+
+      setActive(0);
+    });
+  }
+
   bindContactTabs();
   bindHeaderScrollState();
   bindHomeStatsCountUp();
   bindListingHoverGalleries();
+  bindSimpleCarousels();
 })();

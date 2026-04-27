@@ -126,6 +126,20 @@ class AdminPageController extends Controller
                     ['name' => 'adv_3_title', 'label' => 'Advantage 3 title', 'type' => 'text', 'default' => 'Schedule service online', 'group' => 'Advantages'],
                     ['name' => 'adv_3_body', 'label' => 'Advantage 3 body', 'type' => 'textarea', 'default' => 'Book service in minutes. Choose a time, tell us what you need, and we’ll take care of the rest.', 'group' => 'Advantages'],
 
+                    ['name' => 'testimonials_title', 'label' => 'Testimonials title', 'type' => 'text', 'default' => 'Customer Testimonials', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_1_title', 'label' => 'Testimonial 1 title', 'type' => 'text', 'default' => 'Vestibulum laoreet eu lorem vel tempor', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_1_body', 'label' => 'Testimonial 1 body', 'type' => 'textarea', 'default' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla, velit id laoreet hendrerit, sapien nisl varius dolor, eu consequat erat augue in eros.', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_1_author', 'label' => 'Testimonial 1 author', 'type' => 'text', 'default' => 'John Doe', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_1_brand', 'label' => 'Testimonial 1 brand (optional)', 'type' => 'text', 'default' => 'Toyota', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_2_title', 'label' => 'Testimonial 2 title', 'type' => 'text', 'default' => 'Pellentesque non turpis ut est', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_2_body', 'label' => 'Testimonial 2 body', 'type' => 'textarea', 'default' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla, velit id laoreet hendrerit, sapien nisl varius dolor, eu consequat erat augue in eros.', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_2_author', 'label' => 'Testimonial 2 author', 'type' => 'text', 'default' => 'Alice Smart', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_2_brand', 'label' => 'Testimonial 2 brand (optional)', 'type' => 'text', 'default' => 'BMW', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_3_title', 'label' => 'Testimonial 3 title', 'type' => 'text', 'default' => 'Nam condimentum pellentesque augue', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_3_body', 'label' => 'Testimonial 3 body', 'type' => 'textarea', 'default' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla, velit id laoreet hendrerit, sapien nisl varius dolor, eu consequat erat augue in eros.', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_3_author', 'label' => 'Testimonial 3 author', 'type' => 'text', 'default' => 'Robert Frost', 'group' => 'Testimonials'],
+                    ['name' => 'testimonial_3_brand', 'label' => 'Testimonial 3 brand (optional)', 'type' => 'text', 'default' => 'Chevrolet', 'group' => 'Testimonials'],
+
                     ['name' => 'team_title', 'label' => 'Team title', 'type' => 'text', 'default' => 'Our Team', 'group' => 'Team'],
                     ['name' => 'team_1_photo', 'label' => 'Team member 1 photo', 'type' => 'image', 'default' => 'asset/images/media/team-1.jpg', 'group' => 'Team', 'preview' => 'thumbnail'],
                     ['name' => 'team_1_name', 'label' => 'Team member 1 name', 'type' => 'text', 'default' => 'Lennox Wardell', 'group' => 'Team'],
@@ -135,12 +149,18 @@ class AdminPageController extends Controller
                     ['name' => 'team_2_photo', 'label' => 'Team member 2 photo', 'type' => 'image', 'default' => 'asset/images/media/team-2.jpg', 'group' => 'Team', 'preview' => 'thumbnail'],
                     ['name' => 'team_2_name', 'label' => 'Team member 2 name', 'type' => 'text', 'default' => 'Sarah Odegard', 'group' => 'Team'],
                     ['name' => 'team_2_role', 'label' => 'Team member 2 role', 'type' => 'text', 'default' => 'President of Finance', 'group' => 'Team'],
+                    ['name' => 'team_2_email', 'label' => 'Team member 2 email (optional)', 'type' => 'text', 'default' => 'finance@example.com', 'group' => 'Team'],
+                    ['name' => 'team_2_phone', 'label' => 'Team member 2 phone (optional)', 'type' => 'text', 'default' => '', 'group' => 'Team'],
                     ['name' => 'team_3_photo', 'label' => 'Team member 3 photo', 'type' => 'image', 'default' => 'asset/images/media/team-3.jpg', 'group' => 'Team', 'preview' => 'thumbnail'],
                     ['name' => 'team_3_name', 'label' => 'Team member 3 name', 'type' => 'text', 'default' => 'Lars Jakuba', 'group' => 'Team'],
                     ['name' => 'team_3_role', 'label' => 'Team member 3 role', 'type' => 'text', 'default' => 'Executive Vice President', 'group' => 'Team'],
+                    ['name' => 'team_3_email', 'label' => 'Team member 3 email (optional)', 'type' => 'text', 'default' => '', 'group' => 'Team'],
+                    ['name' => 'team_3_phone', 'label' => 'Team member 3 phone (optional)', 'type' => 'text', 'default' => '+1-234-567-89-00', 'group' => 'Team'],
                     ['name' => 'team_4_photo', 'label' => 'Team member 4 photo', 'type' => 'image', 'default' => 'asset/images/media/team-4.jpg', 'group' => 'Team', 'preview' => 'thumbnail'],
                     ['name' => 'team_4_name', 'label' => 'Team member 4 name', 'type' => 'text', 'default' => 'Mikey Diokles', 'group' => 'Team'],
                     ['name' => 'team_4_role', 'label' => 'Team member 4 role', 'type' => 'text', 'default' => 'Sales Manager', 'group' => 'Team'],
+                    ['name' => 'team_4_email', 'label' => 'Team member 4 email (optional)', 'type' => 'text', 'default' => '', 'group' => 'Team'],
+                    ['name' => 'team_4_phone', 'label' => 'Team member 4 phone (optional)', 'type' => 'text', 'default' => '', 'group' => 'Team'],
                 ],
             ],
             'faq' => [
@@ -242,6 +262,11 @@ class AdminPageController extends Controller
             'content_html' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
         ]);
+
+        // About is section-fields only: never persist arbitrary HTML dumps.
+        if ($slug === 'about') {
+            $data['content_html'] = '';
+        }
 
         CmsPage::query()->updateOrCreate(
             ['slug' => $slug],

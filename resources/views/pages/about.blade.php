@@ -2,6 +2,7 @@
 
 @section('content')
   @php
+    $brand = config('app.name', 'Motors');
     $heroImg = \App\Support\VehicleImageUrl::url($sections['hero_image'] ?? 'asset/images/media/about-hero-bg.jpg');
     $welcomeImg = \App\Support\VehicleImageUrl::url($sections['welcome_image'] ?? 'asset/images/media/about-welcome.jpg');
     $valuesImg = \App\Support\VehicleImageUrl::url($sections['values_image'] ?? 'asset/images/media/about-values.jpg');
@@ -25,159 +26,228 @@
         'phone' => trim((string) ($sections['team_'.$i.'_phone'] ?? '')),
       ];
     })->filter(fn ($m) => $m['name'] !== '')->values();
+
+    $testimonials = collect([1, 2, 3])->map(function ($i) use ($sections) {
+      return [
+        'title' => trim((string) ($sections['testimonial_'.$i.'_title'] ?? '')),
+        'body' => trim((string) ($sections['testimonial_'.$i.'_body'] ?? '')),
+        'author' => trim((string) ($sections['testimonial_'.$i.'_author'] ?? '')),
+        'brand' => trim((string) ($sections['testimonial_'.$i.'_brand'] ?? '')),
+      ];
+    })->filter(fn ($t) => $t['title'] !== '' || $t['body'] !== '' || $t['author'] !== '')->values();
   @endphp
 
-  <section class="relative overflow-hidden py-20 md:py-24">
-    <img src="{{ $heroImg }}" alt="" class="absolute inset-0 h-full w-full object-cover" />
-    <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/50"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,177,41,0.22),transparent_55%)]"></div>
-    <div class="relative z-10 mx-auto max-w-6xl px-6 text-white">
-      <p class="text-primary font-bold text-xs tracking-[0.22em] uppercase">{{ $sections['kicker'] ?? 'Our Story' }}</p>
-      <h1 class="mt-3 font-headline text-4xl font-black uppercase tracking-tight sm:text-5xl md:text-6xl">
-        {{ $sections['heading'] ?? ($page->title ?? 'About Us') }}
-      </h1>
+  {{-- Hero (Motors-style simple banner) --}}
+  <section class="relative overflow-hidden bg-white">
+    <div class="absolute inset-0">
+      <img src="{{ $heroImg }}" alt="" class="h-full w-full object-cover" />
+      <div class="absolute inset-0 bg-black/45"></div>
+    </div>
+    <div class="relative mx-auto max-w-6xl px-6 py-16 text-white md:py-20">
+      <h1 class="font-headline text-4xl font-black uppercase tracking-tight md:text-5xl">{{ $sections['heading'] ?? ($page->title ?? 'About Us') }}</h1>
       @if (!empty($sections['intro']) || !empty($page->meta_description))
-        <p class="mt-6 max-w-3xl text-sm leading-relaxed text-slate-200/90 sm:text-base">
-          {{ $sections['intro'] ?? $page->meta_description }}
-        </p>
+        <p class="mt-4 max-w-3xl text-sm text-white/85 md:text-base">{{ $sections['intro'] ?? $page->meta_description }}</p>
       @endif
-
-      <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-        @php
-          $primaryHref = trim((string) ($sections['hero_primary_cta_href'] ?? '/inventory')) ?: '/inventory';
-          $secondaryHref = trim((string) ($sections['hero_secondary_cta_href'] ?? '/contact')) ?: '/contact';
-          $primaryUrl = \Illuminate\Support\Str::startsWith($primaryHref, ['http://', 'https://']) ? $primaryHref : url($primaryHref);
-          $secondaryUrl = \Illuminate\Support\Str::startsWith($secondaryHref, ['http://', 'https://']) ? $secondaryHref : url($secondaryHref);
-        @endphp
-        <a href="{{ $primaryUrl }}" class="inline-flex items-center justify-center rounded bg-primary px-8 py-3 text-xs font-black uppercase tracking-[0.18em] text-on_surface shadow-lg transition hover:bg-yellow-400">
-          {{ $sections['hero_primary_cta_text'] ?? __('Browse Inventory') }}
-        </a>
-        <a href="{{ $secondaryUrl }}" class="inline-flex items-center justify-center rounded border border-white/20 bg-white/5 px-8 py-3 text-xs font-black uppercase tracking-[0.18em] text-white backdrop-blur transition hover:bg-white/10">
-          {{ $sections['hero_secondary_cta_text'] ?? __('Contact') }}
-        </a>
-      </div>
     </div>
   </section>
 
-  <section class="bg-[#0b0e12] py-16 md:py-20">
-    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 md:grid-cols-2 md:items-center">
-      <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-        <img src="{{ $welcomeImg }}" alt="" class="h-full w-full object-cover" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0"></div>
-      </div>
-      <div class="text-white">
-        <h2 class="font-headline text-3xl font-black uppercase tracking-tight md:text-4xl">{{ $sections['welcome_title'] ?? __('Welcome') }}</h2>
-        <p class="mt-4 text-sm font-semibold uppercase tracking-[0.16em] text-primary/95">{{ $sections['welcome_subtitle'] ?? '' }}</p>
-        <p class="mt-5 text-sm leading-relaxed text-slate-200/90 sm:text-base">{{ $sections['welcome_body'] ?? '' }}</p>
-        @if (!empty($sections['welcome_signature']))
-          <p class="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-slate-300/90">{{ $sections['welcome_signature'] }}</p>
-        @endif
-      </div>
-    </div>
-  </section>
-
-  <section class="bg-black py-16 md:py-20">
-    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 md:grid-cols-2 md:items-center">
-      <div class="text-white">
-        <h2 class="font-headline text-3xl font-black uppercase tracking-tight md:text-4xl">{{ $sections['values_title'] ?? __('Core Values') }}</h2>
-        <p class="mt-4 text-sm leading-relaxed text-slate-200/90 sm:text-base">{{ $sections['values_body'] ?? '' }}</p>
-
-        @if ($valuesList->isNotEmpty())
-          <ul class="mt-6 grid gap-3">
-            @foreach ($valuesList as $item)
-              <li class="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                <span class="material-symbols-outlined mt-0.5 text-primary">check_circle</span>
-                <span class="text-sm font-semibold text-slate-100/95">{{ $item }}</span>
-              </li>
-            @endforeach
-          </ul>
-        @endif
-      </div>
-
-      <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-        <img src="{{ $valuesImg }}" alt="" class="h-full w-full object-cover" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0"></div>
-      </div>
-    </div>
-  </section>
-
-  @if ($gallery->isNotEmpty())
-    <section class="bg-[#0b0e12] py-16 md:py-20">
-      <div class="mx-auto max-w-6xl px-6">
-        <div class="flex items-end justify-between gap-6">
-          <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-white md:text-4xl">{{ $sections['gallery_title'] ?? __('Media Gallery') }}</h2>
-          <a href="{{ route('inventory.index') }}" class="hidden text-xs font-bold uppercase tracking-[0.18em] text-primary hover:text-yellow-400 sm:inline-flex">{{ __('View inventory') }} →</a>
+  {{-- Welcome --}}
+  <section class="bg-white py-16">
+    <div class="mx-auto max-w-6xl px-6">
+      <div class="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-start">
+        <div class="overflow-hidden rounded">
+          <img src="{{ $welcomeImg }}" alt="" class="h-auto w-full object-cover" loading="lazy" decoding="async" />
         </div>
-        <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
-          @foreach ($gallery as $img)
-            <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-sm">
-              <img src="{{ $img }}" alt="" class="h-40 w-full object-cover transition-transform duration-500 group-hover:scale-105 sm:h-44" loading="lazy" decoding="async" />
-              <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/0 to-black/0 opacity-70"></div>
-            </a>
-          @endforeach
+        <div>
+          <h3 class="font-headline text-2xl font-black uppercase tracking-tight text-slate-900 md:text-3xl">
+            {{ __('WELCOME TO THE') }} <span class="text-primary">{{ strtoupper($brand) }}</span>
+          </h3>
+          @if (!empty($sections['welcome_subtitle']))
+            <h5 class="mt-4 text-[15px] font-semibold leading-relaxed text-slate-700">{{ $sections['welcome_subtitle'] }}</h5>
+          @endif
+          @if (!empty($sections['welcome_body']))
+            <p class="mt-5 text-[15px] leading-[1.9] text-slate-600">{{ $sections['welcome_body'] }}</p>
+          @endif
+          @if (!empty($sections['welcome_signature']))
+            <p class="mt-4 text-sm italic text-slate-500">{{ $sections['welcome_signature'] }}</p>
+          @endif
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {{-- Core values --}}
+  <section class="bg-white py-16">
+    <div class="mx-auto max-w-6xl px-6">
+      <div class="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-start">
+        <div>
+          <h3 class="font-headline text-2xl font-black uppercase tracking-tight text-slate-900 md:text-3xl">{{ $sections['values_title'] ?? __('CORE VALUES') }}</h3>
+          <hr class="mt-4 border-slate-200" />
+          @if (!empty($sections['values_body']))
+            <p class="mt-6 text-sm leading-[2] text-slate-500">{{ $sections['values_body'] }}</p>
+          @endif
+          @if ($valuesList->isNotEmpty())
+            <ul class="mt-5 list-disc pl-5 text-[15px] leading-[2] text-slate-700">
+              @foreach ($valuesList as $item)
+                <li>{{ $item }}</li>
+              @endforeach
+            </ul>
+          @endif
+        </div>
+        <div class="overflow-hidden rounded">
+          <img src="{{ $valuesImg }}" alt="" class="h-auto w-full object-cover" loading="lazy" decoding="async" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {{-- Media gallery (carousel strip) --}}
+  @if ($gallery->isNotEmpty())
+    <section class="bg-white py-16">
+      <div class="mx-auto max-w-6xl px-6">
+        <div class="text-center">
+          <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-slate-900">{{ $sections['gallery_title'] ?? __('MEDIA GALLERY') }}</h2>
+          <div class="motors-colored-separator">
+            <div class="first-long"></div><div class="last-short"></div>
+          </div>
+        </div>
+
+        <div class="relative mt-10" data-simple-carousel>
+          <div class="simple-carousel-track flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2" data-carousel-track>
+            @foreach ($gallery as $img)
+              <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="snap-start shrink-0" data-carousel-slide>
+                <img src="{{ $img }}" alt="{{ __('Gallery image') }}" class="h-[180px] w-[270px] rounded object-cover" loading="lazy" decoding="async" />
+              </a>
+            @endforeach
+          </div>
+
+          <button type="button" class="absolute -left-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 md:flex" data-carousel-prev aria-label="{{ __('Previous') }}">
+            <span class="material-symbols-outlined text-base">chevron_left</span>
+          </button>
+          <button type="button" class="absolute -right-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 md:flex" data-carousel-next aria-label="{{ __('Next') }}">
+            <span class="material-symbols-outlined text-base">chevron_right</span>
+          </button>
+
+          <div class="mt-4 flex justify-center gap-2">
+            @foreach ($gallery as $i => $_)
+              <button type="button" class="h-2.5 w-2.5 rounded-full bg-slate-300 data-[active=1]:bg-primary" data-carousel-dot data-index="{{ $i }}" data-active="{{ $i === 0 ? '1' : '0' }}" aria-label="{{ __('Go to slide') }}"></button>
+            @endforeach
+          </div>
         </div>
       </div>
     </section>
   @endif
 
-  <section class="bg-black py-16 md:py-20">
+  {{-- Advantages + Testimonials --}}
+  <section class="bg-white py-16">
     <div class="mx-auto max-w-6xl px-6">
-      <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-white md:text-4xl">{{ $sections['advantages_title'] ?? __('Our Advantages') }}</h2>
-      <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-        @foreach ([1,2,3] as $i)
-          @php
-            $t = trim((string) ($sections['adv_'.$i.'_title'] ?? ''));
-            $b = trim((string) ($sections['adv_'.$i.'_body'] ?? ''));
-          @endphp
-          @if ($t !== '')
-            <details class="group rounded-2xl border border-white/10 bg-white/5 p-5 text-white open:bg-white/[0.07]">
-              <summary class="flex cursor-pointer list-none items-center justify-between gap-4">
-                <span class="text-sm font-black uppercase tracking-[0.14em]">{{ $t }}</span>
-                <span class="material-symbols-outlined text-white/60 transition-transform group-open:rotate-180">expand_more</span>
-              </summary>
-              @if ($b !== '')
-                <p class="mt-4 text-sm leading-relaxed text-slate-200/90">{{ $b }}</p>
+      <div class="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-start">
+        <div>
+          <h3 class="font-headline text-2xl font-black uppercase tracking-tight text-slate-900 md:text-3xl">{{ $sections['advantages_title'] ?? __('OUR ADVANTAGES') }}</h3>
+          <hr class="mt-4 border-slate-200" />
+          <div class="mt-6 space-y-3">
+            @foreach ([1,2,3] as $i)
+              @php
+                $t = trim((string) ($sections['adv_'.$i.'_title'] ?? ''));
+                $b = trim((string) ($sections['adv_'.$i.'_body'] ?? ''));
+              @endphp
+              @if ($t !== '')
+                <details class="rounded border border-slate-200 bg-white p-4 open:shadow-sm">
+                  <summary class="cursor-pointer list-none">
+                    <div class="flex items-center justify-between gap-4">
+                      <span class="text-sm font-bold text-slate-900">{{ $t }}</span>
+                      <span class="material-symbols-outlined text-base text-slate-500">expand_more</span>
+                    </div>
+                  </summary>
+                  @if ($b !== '')
+                    <p class="mt-3 text-[15px] leading-[1.9] text-slate-600">{{ $b }}</p>
+                  @endif
+                </details>
               @endif
-            </details>
+            @endforeach
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-headline text-2xl font-black uppercase tracking-tight text-slate-900 md:text-3xl">{{ $sections['testimonials_title'] ?? __('CUSTOMER TESTIMONIALS') }}</h3>
+          <hr class="mt-4 border-slate-200" />
+
+          @if ($testimonials->isNotEmpty())
+            <div class="relative mt-6" data-simple-carousel>
+              <div class="simple-carousel-track flex snap-x snap-mandatory overflow-x-auto scroll-smooth" data-carousel-track>
+                @foreach ($testimonials as $t)
+                  <div class="w-full shrink-0 snap-start rounded border border-slate-200 bg-white p-5" data-carousel-slide>
+                    @if ($t['title'] !== '')
+                      <h5 class="text-[15px] font-bold text-slate-900">{{ $t['title'] }}</h5>
+                    @endif
+                    @if ($t['body'] !== '')
+                      <p class="mt-3 text-[15px] leading-[1.9] text-slate-600">{{ $t['body'] }}</p>
+                    @endif
+                    <div class="mt-4 flex items-center justify-between gap-4 text-sm">
+                      <div class="font-semibold text-slate-900">{{ $t['author'] !== '' ? $t['author'] : '—' }}</div>
+                      @if ($t['brand'] !== '')
+                        <div class="text-slate-500">{{ $t['brand'] }}</div>
+                      @endif
+                    </div>
+                  </div>
+                @endforeach
+              </div>
+
+              <button type="button" class="absolute -left-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 md:flex" data-carousel-prev aria-label="{{ __('Previous') }}">
+                <span class="material-symbols-outlined text-base">chevron_left</span>
+              </button>
+              <button type="button" class="absolute -right-4 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 md:flex" data-carousel-next aria-label="{{ __('Next') }}">
+                <span class="material-symbols-outlined text-base">chevron_right</span>
+              </button>
+
+              <div class="mt-4 flex justify-center gap-2">
+                @foreach ($testimonials as $i => $_)
+                  <button type="button" class="h-2.5 w-2.5 rounded-full bg-slate-300 data-[active=1]:bg-primary" data-carousel-dot data-index="{{ $i }}" data-active="{{ $i === 0 ? '1' : '0' }}" aria-label="{{ __('Go to slide') }}"></button>
+                @endforeach
+              </div>
+            </div>
           @endif
-        @endforeach
+        </div>
       </div>
     </div>
   </section>
 
+  {{-- Team --}}
   @if ($team->isNotEmpty())
-    <section class="bg-[#0b0e12] py-16 md:py-20">
+    <section class="bg-white py-16">
       <div class="mx-auto max-w-6xl px-6">
-        <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-white md:text-4xl">{{ $sections['team_title'] ?? __('Our Team') }}</h2>
-        <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="text-center">
+          <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-slate-900">{{ $sections['team_title'] ?? __('OUR TEAM') }}</h2>
+          <div class="motors-colored-separator">
+            <div class="first-long"></div><div class="last-short"></div>
+          </div>
+        </div>
+
+        <div class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           @foreach ($team as $m)
             @php
               $photoUrl = \App\Support\VehicleImageUrl::url($m['photo'] !== '' ? $m['photo'] : 'asset/images/media/team-placeholder.jpg');
+              $hasContact = ($m['email'] !== '' || $m['phone'] !== '');
             @endphp
-            <div class="overflow-hidden rounded-2xl border border-white/10 bg-white/5 text-white shadow-sm">
-              <div class="relative aspect-[4/3] overflow-hidden">
-                <img src="{{ $photoUrl }}" alt="" class="h-full w-full object-cover" loading="lazy" decoding="async" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-black/0"></div>
+            <div class="group overflow-hidden rounded border border-slate-200 bg-white shadow-sm">
+              <div class="relative">
+                <img src="{{ $photoUrl }}" alt="{{ $m['name'] }}" class="h-[220px] w-full object-cover" loading="lazy" decoding="async" />
+                @if ($hasContact)
+                  <div class="absolute inset-x-0 bottom-0 hidden bg-black/70 p-3 text-sm text-white group-hover:block">
+                    @if ($m['email'] !== '')
+                      <a href="mailto:{{ $m['email'] }}" class="block truncate hover:underline">{{ $m['email'] }}</a>
+                    @endif
+                    @if ($m['phone'] !== '')
+                      <a href="tel:{{ preg_replace('/\\s+/', '', $m['phone']) }}" class="mt-1 block hover:underline">{{ $m['phone'] }}</a>
+                    @endif
+                  </div>
+                @endif
               </div>
               <div class="p-4">
-                <div class="text-sm font-black uppercase tracking-[0.14em]">{{ $m['name'] }}</div>
+                <div class="text-sm font-bold text-slate-900">{{ $m['name'] }}</div>
                 @if ($m['role'] !== '')
-                  <div class="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary/95">{{ $m['role'] }}</div>
+                  <div class="mt-1 text-sm text-slate-500">{{ $m['role'] }}</div>
                 @endif
-                <div class="mt-3 grid gap-1.5 text-xs text-slate-200/90">
-                  @if ($m['email'] !== '')
-                    <a href="mailto:{{ $m['email'] }}" class="inline-flex items-center gap-2 hover:text-white">
-                      <span class="material-symbols-outlined text-[16px] text-white/50">mail</span>
-                      <span class="truncate">{{ $m['email'] }}</span>
-                    </a>
-                  @endif
-                  @if ($m['phone'] !== '')
-                    <a href="tel:{{ preg_replace('/\\s+/', '', $m['phone']) }}" class="inline-flex items-center gap-2 hover:text-white">
-                      <span class="material-symbols-outlined text-[16px] text-white/50">call</span>
-                      <span class="truncate">{{ $m['phone'] }}</span>
-                    </a>
-                  @endif
-                </div>
               </div>
             </div>
           @endforeach
@@ -186,19 +256,6 @@
     </section>
   @endif
 
-  @if (!empty($page?->content_html))
-    <section class="bg-black py-10">
-      <div class="mx-auto max-w-6xl px-6">
-        <details class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white">
-          <summary class="flex cursor-pointer list-none items-center justify-between gap-4">
-            <span class="text-sm font-black uppercase tracking-[0.14em]">{{ __('Additional content') }}</span>
-            <span class="material-symbols-outlined text-white/60">expand_more</span>
-          </summary>
-          <div class="prose prose-invert mt-5 max-w-none">
-            {!! $page->content_html !!}
-          </div>
-        </details>
-      </div>
-    </section>
-  @endif
+  {{-- Intentionally do NOT render $page->content_html on About.
+       This page is section-fields only (no Elementor/HTML dumps). --}}
 @endsection
