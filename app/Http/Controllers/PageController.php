@@ -9,7 +9,9 @@ use App\Models\Vehicle;
 use App\Support\Compare;
 use App\Support\VehicleImageUrl;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
 
 class PageController extends Controller
@@ -197,12 +199,26 @@ class PageController extends Controller
             'fuel_type' => ['nullable', 'string', 'max:255'],
             'transmission' => ['nullable', 'string', 'max:255'],
             'body_type' => ['nullable', 'string', 'max:255'],
+            'drive' => ['nullable', 'string', 'max:255'],
+            'exterior_color' => ['nullable', 'string', 'max:255'],
+            'vin' => ['nullable', 'string', 'max:255'],
             'year_min' => ['nullable', 'integer', 'min:1900', 'max:'.$yearUpper],
             'year_max' => ['nullable', 'integer', 'min:1900', 'max:'.$yearUpper],
+            'mileage_min' => ['nullable', 'integer', 'min:0', 'max:999999999'],
+            'mileage_max' => ['nullable', 'integer', 'min:0', 'max:999999999'],
             'price_min' => ['nullable', 'integer', 'min:0', 'max:999999999'],
             'price_max' => ['nullable', 'integer', 'min:0', 'max:999999999'],
             'sort' => ['nullable', 'string', Rule::in(['newest', 'price_low', 'price_high', 'year_new', 'year_old'])],
         ]);
+        if (!empty($filters['year_min']) && !empty($filters['year_max']) && (int) $filters['year_min'] > (int) $filters['year_max']) {
+            throw ValidationException::withMessages(['year_min' => __('Minimum year cannot be greater than maximum year.')]);
+        }
+        if (!empty($filters['mileage_min']) && !empty($filters['mileage_max']) && (int) $filters['mileage_min'] > (int) $filters['mileage_max']) {
+            throw ValidationException::withMessages(['mileage_min' => __('Minimum mileage cannot be greater than maximum mileage.')]);
+        }
+        if (!empty($filters['price_min']) && !empty($filters['price_max']) && (int) $filters['price_min'] > (int) $filters['price_max']) {
+            throw ValidationException::withMessages(['price_min' => __('Minimum price cannot be greater than maximum price.')]);
+        }
 
         $query = Vehicle::query()
             ->with('images')
@@ -231,11 +247,15 @@ class PageController extends Controller
             $query->where('location', $location);
         }
 
-        foreach (['make', 'model', 'fuel_type', 'transmission', 'body_type'] as $field) {
+        foreach (['make', 'model', 'fuel_type', 'transmission', 'body_type', 'drive', 'exterior_color'] as $field) {
             $value = isset($filters[$field]) ? trim((string) $filters[$field]) : '';
             if ($value !== '') {
                 $query->where($field, $value);
             }
+        }
+        $vin = isset($filters['vin']) ? trim((string) $filters['vin']) : '';
+        if ($vin !== '') {
+            $query->where('vin', 'like', '%' . $vin . '%');
         }
 
         $yearMin = (int) ($filters['year_min'] ?? 0);
@@ -256,6 +276,14 @@ class PageController extends Controller
         $priceMax = (int) ($filters['price_max'] ?? 0);
         if ($priceMax > 0) {
             $query->where('price', '<=', $priceMax);
+        }
+        $mileageMin = (int) ($filters['mileage_min'] ?? 0);
+        if ($mileageMin > 0) {
+            $query->where('mileage', '>=', $mileageMin);
+        }
+        $mileageMax = (int) ($filters['mileage_max'] ?? 0);
+        if ($mileageMax > 0) {
+            $query->where('mileage', '<=', $mileageMax);
         }
 
         $sort = (string) ($filters['sort'] ?? 'newest');
@@ -295,10 +323,15 @@ class PageController extends Controller
             'fuel_type' => '',
             'transmission' => '',
             'body_type' => '',
+            'drive' => '',
+            'exterior_color' => '',
+            'vin' => '',
             'condition' => '',
             'location' => '',
             'year_min' => '',
             'year_max' => '',
+            'mileage_min' => '',
+            'mileage_max' => '',
             'price_min' => '',
             'price_max' => '',
             'sort' => 'newest',
@@ -315,13 +348,36 @@ class PageController extends Controller
         $optionQuery = Vehicle::query()->where('status', 'approved');
 
         return [
-            'makes' => (clone $optionQuery)->whereNotNull('make')->where('make', '!=', '')->distinct()->orderBy('make')->pluck('make'),
-            'models' => (clone $optionQuery)->whereNotNull('model')->where('model', '!=', '')->distinct()->orderBy('model')->pluck('model'),
-            'fuel_types' => (clone $optionQuery)->whereNotNull('fuel_type')->where('fuel_type', '!=', '')->distinct()->orderBy('fuel_type')->pluck('fuel_type'),
-            'transmissions' => (clone $optionQuery)->whereNotNull('transmission')->where('transmission', '!=', '')->distinct()->orderBy('transmission')->pluck('transmission'),
-            'body_types' => (clone $optionQuery)->whereNotNull('body_type')->where('body_type', '!=', '')->distinct()->orderBy('body_type')->pluck('body_type'),
-            'locations' => (clone $optionQuery)->whereNotNull('location')->where('location', '!=', '')->distinct()->orderBy('location')->pluck('location'),
+            'makes' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('make')->where('make', '!=', '')->pluck('make')),
+            'models' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('model')->where('model', '!=', '')->pluck('model')),
+            'fuel_types' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('fuel_type')->where('fuel_type', '!=', '')->pluck('fuel_type')),
+            'transmissions' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('transmission')->where('transmission', '!=', '')->pluck('transmission')),
+            'body_types' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('body_type')->where('body_type', '!=', '')->pluck('body_type')),
+            'locations' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('location')->where('location', '!=', '')->pluck('location')),
+            'drives' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('drive')->where('drive', '!=', '')->pluck('drive')),
+            'exterior_colors' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('exterior_color')->where('exterior_color', '!=', '')->pluck('exterior_color')),
         ];
+    }
+
+    /**
+     * @param  Collection<int, string>  $values
+     * @return Collection<int, string>
+     */
+    protected function normalizeOptionValues(Collection $values): Collection
+    {
+        $byLower = [];
+        foreach ($values as $value) {
+            $trimmed = trim((string) $value);
+            if ($trimmed === '') {
+                continue;
+            }
+            $key = mb_strtolower($trimmed);
+            if (!isset($byLower[$key])) {
+                $byLower[$key] = $trimmed;
+            }
+        }
+        natcasesort($byLower);
+        return collect(array_values($byLower));
     }
 
     public function vehicleShow(Request $request, string $slug = '2021-bmw-m4-competition')

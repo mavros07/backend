@@ -7,6 +7,7 @@ use App\Support\VehicleImageUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
 
 trait InteractsWithVehicleForms
@@ -35,6 +36,7 @@ trait InteractsWithVehicleForms
             'interior_color' => ['nullable', 'string', 'max:255'],
             'vin' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:50000'],
+            'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'images' => ['sometimes', 'array', 'max:12'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
@@ -90,33 +92,50 @@ trait InteractsWithVehicleForms
 
     protected function storeUploadedImages(Request $request, Vehicle $vehicle): void
     {
+        $nextSortOrder = (int) $vehicle->images()->max('sort_order');
+
+        if ($request->hasFile('main_image')) {
+            $vehicle->images()->increment('sort_order');
+            $stored = $this->storeImageOnPublicDisk($request->file('main_image'), $vehicle);
+            $vehicle->images()->create([
+                'path' => 'storage/' . $stored,
+                'sort_order' => 1,
+            ]);
+            $nextSortOrder = (int) $vehicle->images()->max('sort_order');
+        }
+
         if (! $request->hasFile('images')) {
             return;
         }
 
-        $nextSortOrder = (int) $vehicle->images()->max('sort_order');
-
         foreach ($request->file('images', []) as $uploadedImage) {
             $nextSortOrder++;
-            $extension = match ($uploadedImage->getMimeType()) {
-                'image/jpeg' => 'jpg',
-                'image/png' => 'png',
-                'image/webp' => 'webp',
-                default => 'jpg',
-            };
-            $filename = (string) Str::uuid() . '.' . $extension;
-            $dir = config('media.listing_photos_directory', 'listings/vehicles').'/'.$vehicle->id;
-            $stored = $uploadedImage->storePubliclyAs(
-                $dir,
-                $filename,
-                'public'
-            );
-
+            $stored = $this->storeImageOnPublicDisk($uploadedImage, $vehicle);
             $vehicle->images()->create([
                 'path' => 'storage/' . $stored,
                 'sort_order' => $nextSortOrder,
             ]);
         }
+    }
+
+    protected function storeImageOnPublicDisk(\Illuminate\Http\UploadedFile $uploadedImage, Vehicle $vehicle): string
+    {
+        $extension = match ($uploadedImage->getMimeType()) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            default => 'jpg',
+        };
+        $filename = (string) Str::uuid() . '.' . $extension;
+        $dir = config('media.listing_photos_directory', 'listings/vehicles').'/'.$vehicle->id;
+        $stored = $uploadedImage->storePubliclyAs($dir, $filename, 'public');
+        if (!is_string($stored) || $stored === '') {
+            throw ValidationException::withMessages([
+                'images' => __('An image could not be uploaded. Please try again.'),
+            ]);
+        }
+
+        return $stored;
     }
 
     protected function resequenceImages(Vehicle $vehicle): void

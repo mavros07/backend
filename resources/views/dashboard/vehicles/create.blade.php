@@ -126,9 +126,16 @@
             </div>
 
             <div>
+              <x-input-label for="main_image" value="Main Image" />
+              <input id="main_image" name="main_image" type="file" accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
+              <p class="mt-1 text-sm text-gray-500">Upload a single featured image used on listing cards and detail pages.</p>
+              <x-input-error :messages="$errors->get('main_image')" class="mt-2" />
+            </div>
+
+            <div>
               <x-input-label for="images" value="Gallery Images" />
               <input id="images" name="images[]" type="file" multiple accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
-              <p class="mt-1 text-sm text-gray-500">Upload up to 12 JPG, PNG, or WebP images. The first uploaded image becomes the featured image.</p>
+              <p class="mt-1 text-sm text-gray-500">Upload up to 12 JPG, PNG, or WebP gallery images. These appear after the main image.</p>
               <x-input-error :messages="$errors->get('images')" class="mt-2" />
               <x-input-error :messages="$errors->get('images.*')" class="mt-2" />
             </div>

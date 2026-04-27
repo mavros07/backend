@@ -7,7 +7,9 @@ use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Services\Mail\OutboundMailService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -53,18 +55,30 @@ class UserVehicleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $this->validateVehicleData($request);
+        try {
+            $data = $this->validateVehicleData($request);
 
-        $vehicle = Vehicle::query()->create([
-            ...$data,
-            'user_id' => $request->user()->id,
-            'slug' => $this->uniqueSlug($data['title']),
-            'status' => 'draft',
-        ]);
+            $vehicle = DB::transaction(function () use ($request, $data) {
+                $vehicle = Vehicle::query()->create([
+                    ...$data,
+                    'user_id' => $request->user()->id,
+                    'slug' => $this->uniqueSlug($data['title']),
+                    'status' => 'draft',
+                ]);
 
-        $this->storeUploadedImages($request, $vehicle);
+                $this->storeUploadedImages($request, $vehicle);
+                return $vehicle;
+            });
 
-        return redirect()->route('dashboard.vehicles.edit', $vehicle);
+            return redirect()->route('dashboard.vehicles.edit', $vehicle);
+        } catch (QueryException $exception) {
+            if (str_contains(strtolower($exception->getMessage()), 'is_special')) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['is_special' => __('Listing schema is out of date. Run migrations and try again.')]);
+            }
+            throw $exception;
+        }
     }
 
     public function edit(Request $request, Vehicle $vehicle): View
@@ -82,18 +96,27 @@ class UserVehicleController extends Controller
     public function update(Request $request, Vehicle $vehicle): RedirectResponse
     {
         $this->authorizeVehicleAccess($request, $vehicle);
+        try {
+            $data = $this->validateVehicleData($request);
 
-        $data = $this->validateVehicleData($request);
+            DB::transaction(function () use ($request, $vehicle, $data) {
+                $vehicle->fill($data);
+                if ($vehicle->isDirty('title')) {
+                    $vehicle->slug = $this->uniqueSlug($data['title'], $vehicle->id);
+                }
+                $vehicle->save();
+                $this->storeUploadedImages($request, $vehicle);
+            });
 
-        $vehicle->fill($data);
-        if ($vehicle->isDirty('title')) {
-            $vehicle->slug = $this->uniqueSlug($data['title'], $vehicle->id);
+            return back()->with('status', 'Listing updated.');
+        } catch (QueryException $exception) {
+            if (str_contains(strtolower($exception->getMessage()), 'is_special')) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['is_special' => __('Listing schema is out of date. Run migrations and try again.')]);
+            }
+            throw $exception;
         }
-        $vehicle->save();
-
-        $this->storeUploadedImages($request, $vehicle);
-
-        return back()->with('status', 'Listing updated.');
     }
 
     public function submit(Request $request, Vehicle $vehicle): RedirectResponse

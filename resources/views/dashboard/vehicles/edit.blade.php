@@ -157,9 +157,16 @@
             </div>
 
             <div>
+              <x-input-label for="main_image" value="Replace Main Image" />
+              <input id="main_image" name="main_image" type="file" accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
+              <p class="mt-1 text-sm text-gray-500">Upload one image to become the new featured image. It will be inserted first in the gallery.</p>
+              <x-input-error :messages="$errors->get('main_image')" class="mt-2" />
+            </div>
+
+            <div>
               <x-input-label for="images" value="Add Gallery Images" />
               <input id="images" name="images[]" type="file" multiple accept=".jpg,.jpeg,.png,.webp" class="mt-1 block w-full text-sm text-gray-700" />
-              <p class="mt-1 text-sm text-gray-500">Upload more images here. The first image in the gallery is used as the featured image on inventory cards.</p>
+              <p class="mt-1 text-sm text-gray-500">Upload additional gallery images here. Existing order is preserved.</p>
               <x-input-error :messages="$errors->get('images')" class="mt-2" />
               <x-input-error :messages="$errors->get('images.*')" class="mt-2" />
             </div>
