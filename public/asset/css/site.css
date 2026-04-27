@@ -72,9 +72,14 @@ body {
 /* Inventory sidebar / modal: transparent fields, white label text; options use light surface in the native menu. */
 .inventory-filter-select,
 .inventory-filter-input {
-  background-color: transparent;
+  /* Some browser / Tailwind forms resets inject white backgrounds + inner shadows. */
+  background-color: transparent !important;
+  background: transparent !important;
   color: #f8fafc;
   border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .inventory-filter-select:focus,
 .inventory-filter-input:focus {
@@ -88,6 +93,23 @@ body {
 .inventory-filter-select option {
   background-color: #ffffff;
   color: #0f172a;
+}
+
+/* Search inputs often carry extra UA styling. */
+.inventory-filter-input[type="search"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+.inventory-filter-input[type="search"]::-webkit-search-decoration,
+.inventory-filter-input[type="search"]::-webkit-search-cancel-button,
+.inventory-filter-input[type="search"]::-webkit-search-results-button,
+.inventory-filter-input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+/* Make sure the “closed” select stays transparent too. */
+.inventory-filter-select {
+  background-image: none !important;
 }
 
 body.mobile-menu-open {
