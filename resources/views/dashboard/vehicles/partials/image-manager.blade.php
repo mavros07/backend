@@ -3,13 +3,13 @@
   $isAdminUser = auth()->user()?->hasRole('admin');
 @endphp
 
-<div id="image-preview-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4">
+<div id="image-preview-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-black/80 p-4">
   <button type="button" id="image-preview-close" class="absolute right-4 top-4 rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20">Close</button>
   <img id="image-preview-modal-image" src="" alt="" class="max-h-[90vh] max-w-[95vw] rounded-lg object-contain" />
 </div>
 
 @if($isAdminUser)
-  <div id="vehicle-media-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/70 p-4">
+  <div id="vehicle-media-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-black/70 p-4">
     <div class="w-full max-w-5xl rounded-lg bg-white shadow-xl">
       <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
         <h3 class="text-sm font-semibold text-gray-900">Select Media</h3>
@@ -50,7 +50,7 @@
     const modalClose = document.getElementById('image-preview-close');
     const mainPathInput = document.getElementById('main_image_path');
     const galleryPathsHolder = document.getElementById('gallery-paths-holder');
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const csrfToken = @json(csrf_token());
     let galleryFiles = [];
     let galleryPathItems = [];
 
@@ -114,7 +114,7 @@
         if (!path) {
           mainPreview.classList.add('hidden');
           mainPreview.innerHTML = '';
-          mainClearBtn.classList.add('hidden');
+          mainClearBtn.disabled = true;
           return;
         }
         mainPreview.classList.remove('hidden');
@@ -125,7 +125,7 @@
           }
           renderMain();
         }));
-        mainClearBtn.classList.remove('hidden');
+        mainClearBtn.disabled = false;
         return;
       }
       const url = URL.createObjectURL(file);
@@ -138,7 +138,7 @@
         mainInput.value = '';
         renderMain();
       }));
-      mainClearBtn.classList.remove('hidden');
+      mainClearBtn.disabled = false;
     }
 
     function renderGallery() {
@@ -146,7 +146,7 @@
       if (galleryFiles.length === 0 && pathUrls.length === 0) {
         galleryPreview.classList.add('hidden');
         galleryPreview.innerHTML = '';
-        galleryClearBtn.classList.add('hidden');
+        galleryClearBtn.disabled = true;
         return;
       }
 
@@ -167,13 +167,13 @@
           renderGallery();
         }));
       });
-      galleryClearBtn.classList.remove('hidden');
+      galleryClearBtn.disabled = false;
     }
 
     async function removeExistingImage(button) {
       const url = button.getAttribute('data-delete-url');
       const card = button.closest('[data-image-card]');
-      if (!url || !card || !confirm('Remove this image?')) {
+      if (!url || !card) {
         return;
       }
 
@@ -191,14 +191,15 @@
         });
 
         if (!response.ok) {
-          throw new Error('Failed to remove image');
+          const msg = 'Could not remove image (HTTP ' + String(response.status) + '). Refresh and try again.';
+          throw new Error(msg);
         }
 
         card.remove();
         relabelExistingGallery();
       } catch (error) {
         button.disabled = false;
-        alert('Could not remove image. Please refresh and try again.');
+        alert(error && error.message ? error.message : 'Could not remove image. Please refresh and try again.');
       }
     }
 
@@ -218,6 +219,9 @@
 
     mainInput.addEventListener('change', renderMain);
     mainClearBtn.addEventListener('click', () => {
+      if (mainClearBtn.disabled) {
+        return;
+      }
       mainInput.value = '';
       if (mainPathInput) {
         mainPathInput.value = '';
@@ -233,6 +237,9 @@
     });
 
     galleryClearBtn.addEventListener('click', () => {
+      if (galleryClearBtn.disabled) {
+        return;
+      }
       galleryFiles = [];
       galleryPathItems = [];
       syncGalleryInput();
@@ -288,6 +295,7 @@
       mediaInsert.disabled = true;
       mediaModal.classList.remove('hidden');
       mediaModal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
       fetchMediaItems();
     }
 
@@ -295,6 +303,7 @@
       mediaModal.classList.add('hidden');
       mediaModal.classList.remove('flex');
       mediaTarget = null;
+      document.body.style.overflow = '';
     }
 
     async function fetchMediaItems() {
