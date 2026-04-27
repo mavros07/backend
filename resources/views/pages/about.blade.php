@@ -46,7 +46,7 @@
 </style>
 
 <!-- Hero Section -->
-<section class="relative min-h-screen pt-20 flex items-center overflow-hidden">
+<section class="relative min-h-screen pt-0 flex items-center overflow-hidden">
     <div class="flex flex-col md:flex-row w-full h-full">
         <div class="w-full md:w-1/2 relative h-[500px] md:h-screen">
             <img alt="Hero Image" class="w-full h-full object-cover" src="{{ $heroImg }}"/>
@@ -144,7 +144,6 @@
 
 <!-- Media Gallery (Motors reference palette) -->
 @if($gallery->isNotEmpty())
-@php $galleryPages = $gallery->chunk(4)->values(); @endphp
 <section class="bg-[#232628] py-24 px-6 md:px-12 lg:px-24">
   <div class="max-w-7xl mx-auto w-full">
     <div class="text-center mb-16">
@@ -157,18 +156,14 @@
       </div>
     </div>
 
-    <div class="motors-carousel motors-carousel--gallery" data-simple-carousel data-carousel-type="gallery-pages">
+    <div class="motors-carousel motors-carousel--gallery" data-simple-carousel data-carousel-type="gallery" data-carousel-loop="1">
       <div class="motors-carousel-viewport overflow-hidden" data-carousel-viewport>
-        <div class="motors-carousel-track flex gap-0" data-carousel-track>
-          @foreach ($galleryPages as $page)
-            <div class="w-full shrink-0" data-carousel-slide>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
-                @foreach ($page as $img)
-                  <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="aspect-[4/3] overflow-hidden group cursor-pointer block bg-black/10">
-                    <img src="{{ $img }}" alt="{{ __('Gallery image') }}" data-gallery-image class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async" />
-                  </a>
-                @endforeach
-              </div>
+        <div class="motors-carousel-track flex gap-1" data-carousel-track>
+          @foreach ($gallery as $img)
+            <div class="w-full sm:w-1/3 lg:w-1/4 shrink-0 px-0.5" data-carousel-slide>
+              <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="aspect-[4/3] overflow-hidden group cursor-pointer block bg-black/10">
+                <img src="{{ $img }}" alt="{{ __('Gallery image') }}" data-gallery-image class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async" />
+              </a>
             </div>
           @endforeach
         </div>

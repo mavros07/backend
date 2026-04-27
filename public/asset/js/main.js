@@ -215,6 +215,7 @@
 
     roots.forEach(function (root) {
       var type = root.getAttribute('data-carousel-type') || '';
+      var loop = root.getAttribute('data-carousel-loop') === '1';
       var viewport = root.querySelector('[data-carousel-viewport]') || root;
       var track = root.querySelector('[data-carousel-track]');
       if (!track) return;
@@ -233,23 +234,27 @@
         var slideW = first.getBoundingClientRect().width || first.offsetWidth || 0;
         var gap = px(window.getComputedStyle(track).gap);
         var viewW = viewport.getBoundingClientRect().width || viewport.offsetWidth || 0;
-        var perView = Math.max(1, Math.floor((viewW + gap) / Math.max(1, (slideW + gap))));
-        if (type === 'testimonials') {
+        
+        var perView = 1;
+        if (type === 'gallery') {
+          if (window.innerWidth >= 1024) perView = 4;
+          else if (window.innerWidth >= 640) perView = 3;
+          else perView = 1;
+        } else if (type === 'testimonials') {
+          perView = 1;
+        } else if (type === 'gallery-pages') {
           perView = 1;
         }
-        if (type === 'gallery-pages') {
-          // Each slide is a full “page” containing a responsive 1/2/4 grid.
-          perView = 1;
-        }
+
         var maxIndex = Math.max(0, slides.length - perView);
         return { slideW: slideW, gap: gap, perView: perView, maxIndex: maxIndex };
       }
 
-      function buildDots(pageCount) {
+      function buildDots(count) {
         if (!dotsWrap) return [];
         dotsWrap.innerHTML = '';
         var dots = [];
-        for (var i = 0; i < pageCount; i++) {
+        for (var i = 0; i < count; i++) {
           var b = document.createElement('button');
           b.type = 'button';
           b.setAttribute('data-index', String(i));
@@ -258,13 +263,7 @@
           b.addEventListener('click', function (e) {
             e.preventDefault();
             var di = parseInt(this.getAttribute('data-index') || '0', 10);
-            if (isNaN(di)) return;
-            if (type === 'gallery-pages') {
-              // Dots represent individual images; each page contains up to 4 images.
-              goTo(Math.floor(di / 4));
-              return;
-            }
-            goTo(di);
+            if (!isNaN(di)) goTo(di);
           });
           dotsWrap.appendChild(b);
           dots.push(b);
@@ -275,15 +274,9 @@
       var dots = [];
 
       function setActive(i, maxIndex) {
-        if (prev) prev.disabled = i <= 0;
-        if (next) next.disabled = i >= maxIndex;
-        if (type === 'gallery-pages') {
-          // Highlight the dot for the first image in the active page.
-          var activeDot = clamp(i * 4, 0, dots.length - 1);
-          dots.forEach(function (d, di) {
-            d.setAttribute('data-active', di === activeDot ? '1' : '0');
-          });
-          return;
+        if (!loop) {
+          if (prev) prev.disabled = i <= 0;
+          if (next) next.disabled = i >= maxIndex;
         }
         dots.forEach(function (d, di) {
           d.setAttribute('data-active', di === i ? '1' : '0');
@@ -292,6 +285,10 @@
 
       function applyTransform(i) {
         var m = metrics();
+        if (loop) {
+          if (i < 0) i = m.maxIndex;
+          else if (i > m.maxIndex) i = 0;
+        }
         index = clamp(i, 0, m.maxIndex);
         var x = (m.slideW + m.gap) * index;
         track.style.transform = 'translate3d(' + (-x) + 'px,0,0)';
@@ -299,7 +296,6 @@
       }
 
       function goTo(i) { applyTransform(i); }
-
       function step(dir) { goTo(index + dir); }
 
       prev && prev.addEventListener('click', function (e) { e.preventDefault(); step(-1); });
@@ -307,50 +303,33 @@
 
       function rebuild() {
         var m = metrics();
-        if (type === 'gallery-pages') {
-          var imgCount = root.querySelectorAll('[data-gallery-image]').length;
-          dots = buildDots(Math.max(1, imgCount));
-        } else {
-          dots = buildDots(m.maxIndex + 1);
-        }
+        // For 'gallery' type, dots represent each valid starting slide
+        dots = buildDots(m.maxIndex + 1);
         applyTransform(index);
       }
 
-      // Touch swipe (Motors/Swiper-like feel on mobile)
+      // Touch swipe
       (function bindSwipe() {
-        var startX = 0;
-        var startY = 0;
-        var active = false;
-        var moved = false;
-
+        var startX = 0, startY = 0, active = false, moved = false;
         function onStart(e) {
           if (!e.touches || !e.touches[0]) return;
-          active = true;
-          moved = false;
-          startX = e.touches[0].clientX;
-          startY = e.touches[0].clientY;
+          active = true; moved = false;
+          startX = e.touches[0].clientX; startY = e.touches[0].clientY;
         }
-
         function onMove(e) {
           if (!active || !e.touches || !e.touches[0]) return;
-          var dx = e.touches[0].clientX - startX;
-          var dy = e.touches[0].clientY - startY;
-          if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
-            moved = true;
-          }
+          var dx = e.touches[0].clientX - startX, dy = e.touches[0].clientY - startY;
+          if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) moved = true;
         }
-
         function onEnd(e) {
           if (!active) return;
-          active = false;
-          if (!moved) return;
+          active = false; if (!moved) return;
           var t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
           if (!t) return;
           var dx = t.clientX - startX;
           if (Math.abs(dx) < 40) return;
           step(dx < 0 ? 1 : -1);
         }
-
         viewport.addEventListener('touchstart', onStart, { passive: true });
         viewport.addEventListener('touchmove', onMove, { passive: true });
         viewport.addEventListener('touchend', onEnd, { passive: true });
