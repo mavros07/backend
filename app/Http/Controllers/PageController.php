@@ -151,10 +151,13 @@ class PageController extends Controller
             'gallery_image_6' => '',
 
             'advantages_title' => 'Our Advantages',
+            'adv_1_icon' => 'sell',
             'adv_1_title' => 'Want to sell a car?',
             'adv_1_body' => 'Receive the best value for your trade-in. We handle the paperwork and make the process simple.',
-            'adv_2_title' => 'Looking for a new car?',
+            'adv_2_icon' => 'directions_car',
+            'adv_2_title' => 'Looking for a car?',
             'adv_2_body' => 'Our cars are delivered fully registered with all requirements completed. We can deliver wherever you are.',
+            'adv_3_icon' => 'home_repair_service',
             'adv_3_title' => 'Schedule service online',
             'adv_3_body' => 'Book service in minutes. Choose a time, tell us what you need, and we’ll take care of the rest.',
 

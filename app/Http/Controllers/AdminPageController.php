@@ -119,10 +119,13 @@ class AdminPageController extends Controller
                     ['name' => 'gallery_image_6', 'label' => 'Gallery image 6', 'type' => 'image', 'default' => '', 'group' => 'Gallery', 'preview' => 'thumbnail'],
 
                     ['name' => 'advantages_title', 'label' => 'Advantages title', 'type' => 'text', 'default' => 'Our Advantages', 'group' => 'Advantages'],
+                    ['name' => 'adv_1_icon', 'label' => 'Advantage 1 Material icon name', 'type' => 'text', 'default' => 'sell', 'group' => 'Advantages'],
                     ['name' => 'adv_1_title', 'label' => 'Advantage 1 title', 'type' => 'text', 'default' => 'Want to sell a car?', 'group' => 'Advantages'],
                     ['name' => 'adv_1_body', 'label' => 'Advantage 1 body', 'type' => 'textarea', 'default' => 'Receive the best value for your trade-in. We handle the paperwork and make the process simple.', 'group' => 'Advantages'],
-                    ['name' => 'adv_2_title', 'label' => 'Advantage 2 title', 'type' => 'text', 'default' => 'Looking for a new car?', 'group' => 'Advantages'],
+                    ['name' => 'adv_2_icon', 'label' => 'Advantage 2 Material icon name', 'type' => 'text', 'default' => 'directions_car', 'group' => 'Advantages'],
+                    ['name' => 'adv_2_title', 'label' => 'Advantage 2 title', 'type' => 'text', 'default' => 'Looking for a car?', 'group' => 'Advantages'],
                     ['name' => 'adv_2_body', 'label' => 'Advantage 2 body', 'type' => 'textarea', 'default' => 'Our cars are delivered fully registered with all requirements completed. We can deliver wherever you are.', 'group' => 'Advantages'],
+                    ['name' => 'adv_3_icon', 'label' => 'Advantage 3 Material icon name', 'type' => 'text', 'default' => 'home_repair_service', 'group' => 'Advantages'],
                     ['name' => 'adv_3_title', 'label' => 'Advantage 3 title', 'type' => 'text', 'default' => 'Schedule service online', 'group' => 'Advantages'],
                     ['name' => 'adv_3_body', 'label' => 'Advantage 3 body', 'type' => 'textarea', 'default' => 'Book service in minutes. Choose a time, tell us what you need, and we’ll take care of the rest.', 'group' => 'Advantages'],
 
