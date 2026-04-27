@@ -216,7 +216,7 @@ body {
   background: #5c5f61;
 }
 .motors-gallery-dots button[data-active="1"] {
-  background: #4e77ed;
+  background: #ffb129;
 }
 
 /* Breakpoints: match Motors behavior */

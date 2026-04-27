@@ -453,21 +453,22 @@
                       @php
                         $isThumbPreview = ($field['preview'] ?? '') === 'thumbnail';
                       @endphp
-                      <div class="js-media-field rounded-lg border border-gray-100 bg-slate-50/50 p-4 md:col-span-2">
-                        <span class="block text-sm font-medium text-gray-700">{{ $field['label'] }}</span>
-                        <p class="mt-1 text-xs text-gray-500">{{ __('Use the library to pick a file; the preview updates automatically. The path is stored on the server when you save the page.') }}</p>
-                        <div class="mt-3 flex flex-wrap gap-2">
+                      <div class="js-media-field rounded-lg border border-gray-100 bg-slate-50/40 p-4 {{ $isThumbPreview ? 'md:col-span-1' : 'md:col-span-2' }}">
+                        <span class="block text-sm font-semibold text-gray-800">{{ $field['label'] }}</span>
+                        
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
                           <button
                             type="button"
-                            class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 js-media-picker"
+                            class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 js-media-picker"
                             data-media-target="{{ $inputId }}"
-                          >{{ __('Select image') }}</button>
+                          >{{ __('Select') }}</button>
                           <button
                             type="button"
-                            class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 js-media-clear"
+                            class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm hover:bg-gray-50 js-media-clear"
                             data-clear-target="{{ $inputId }}"
                           >{{ __('Clear') }}</button>
                         </div>
+
                         <input
                           type="hidden"
                           name="sections[{{ $field['name'] }}]"
@@ -476,72 +477,45 @@
                           class="js-media-path-input"
                           autocomplete="off"
                         />
+
                         <div
-                          class="mt-3 rounded-md border border-dashed border-gray-300 bg-stone-50 p-3 shadow-inner @if($isThumbPreview) flex justify-center @endif"
+                          class="mt-3 overflow-hidden rounded-md border border-dashed border-gray-300 bg-white shadow-inner"
                           data-media-preview-wrap="{{ $inputId }}"
                         >
-                          @if ($isThumbPreview)
-                            <div class="relative flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
-                              <img
-                                src=""
-                                alt=""
-                                class="js-media-preview-img hidden h-full w-full object-cover"
-                              />
-                              <div class="js-media-preview-placeholder pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 bg-gradient-to-br from-gray-50 to-gray-100 p-2 text-center">
-                                <svg class="h-8 w-8 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
-                                <span class="text-[10px] font-medium text-gray-400">{{ __('No preview') }}</span>
-                              </div>
-                              <div class="js-media-preview-error absolute inset-0 hidden flex-col items-center justify-center gap-0.5 bg-amber-50/95 p-2 text-center">
-                                <span class="text-[10px] font-medium text-amber-900">{{ __('Could not load') }}</span>
-                              </div>
+                          <div class="relative flex items-center justify-center {{ $isThumbPreview ? 'h-32' : 'min-h-[10rem] max-h-[20rem]' }} w-full bg-gray-50">
+                            <img
+                              src=""
+                              alt=""
+                              class="js-media-preview-img hidden {{ $isThumbPreview ? 'h-full w-full object-cover' : 'max-h-full max-w-full object-contain' }}"
+                            />
+                            <div class="js-media-preview-placeholder pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 p-2 text-center">
+                              <svg class="h-6 w-6 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
+                              <span class="text-[10px] font-medium text-gray-400">{{ __('No image') }}</span>
                             </div>
-                          @else
-                            <div class="relative flex min-h-[10rem] max-h-[20rem] w-full items-center justify-center overflow-hidden rounded-md bg-white">
-                              <img
-                                src=""
-                                alt=""
-                                class="js-media-preview-img hidden max-h-[18rem] w-full object-contain"
-                              />
-                              <div class="js-media-preview-placeholder pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1 bg-gradient-to-br from-gray-50 to-gray-100 p-4 text-center">
-                                <svg class="h-10 w-10 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
-                                <span class="text-xs font-medium text-gray-400">{{ __('No preview yet — select an image') }}</span>
-                              </div>
-                              <div class="js-media-preview-error absolute inset-0 hidden flex-col items-center justify-center gap-1 bg-amber-50/95 p-4 text-center">
-                                <span class="text-xs font-medium text-amber-900">{{ __('Could not load preview') }}</span>
-                                <span class="text-[11px] text-amber-800">{{ __('Confirm the file exists under public/ or upload it via Media.') }}</span>
-                              </div>
+                            <div class="js-media-preview-error absolute inset-0 hidden flex-col items-center justify-center bg-red-50 p-2 text-center">
+                              <span class="text-[10px] font-medium text-red-900">{{ __('Load error') }}</span>
                             </div>
-                          @endif
-                        </div>
-                        <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1">
-                          <div class="min-w-0 flex-1">
-                            <span class="text-xs font-medium text-gray-500">{{ __('Stored path') }}</span>
-                            <code
-                              class="js-media-path-readout mt-0.5 block w-full max-w-full break-all rounded bg-white px-2 py-1.5 text-left text-[11px] leading-snug text-gray-800 ring-1 ring-gray-200"
-                              data-readout-for="{{ $inputId }}"
-                              data-empty-label="{{ __('No file selected') }}"
-                            ></code>
                           </div>
-                          <button
-                            type="button"
-                            class="js-media-copy-path shrink-0 self-start rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 sm:self-center"
-                            data-copy-from="{{ $inputId }}"
-                            data-label-copy="{{ __('Copy path') }}"
-                            data-label-copied="{{ __('Copied') }}"
-                          >{{ __('Copy path') }}</button>
                         </div>
-                        <details class="mt-3 rounded-md border border-gray-200 bg-white">
-                          <summary class="cursor-pointer select-none px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{{ __('Paste or edit path') }}</summary>
-                          <div class="border-t border-gray-100 p-3">
-                            <label for="{{ $inputId }}-manual" class="sr-only">{{ __('Image path') }}</label>
+
+                        <div class="mt-3">
+                          <code
+                            class="js-media-path-readout block truncate rounded border border-gray-100 bg-gray-50 px-2 py-1 text-[10px] text-gray-500"
+                            data-readout-for="{{ $inputId }}"
+                            data-empty-label="{{ __('No path set') }}"
+                          ></code>
+                        </div>
+
+                        <details class="mt-2">
+                          <summary class="cursor-pointer text-[10px] font-medium text-indigo-600 hover:text-indigo-800">{{ __('Edit path manually') }}</summary>
+                          <div class="mt-1">
                             <input
                               type="text"
                               id="{{ $inputId }}-manual"
                               value="{{ $value }}"
-                              class="js-media-manual-input block w-full rounded-md border-gray-300 font-mono text-xs shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                              class="js-media-manual-input block w-full rounded-md border-gray-300 py-1 text-[10px] shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                               autocomplete="off"
                             />
-                            <p class="mt-2 text-xs text-gray-500">{{ __('Relative to the site root, e.g.') }} <code class="rounded bg-gray-100 px-1 py-0.5">asset/images/media/photo.jpg</code></p>
                           </div>
                         </details>
                       </div>
