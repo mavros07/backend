@@ -57,14 +57,17 @@
       <div class="flex-1 space-y-6">
         @forelse ($vehicles as $vehicle)
           @php
-            $image = $vehicle->images->first();
-            $photo = $image ? \App\Support\VehicleImageUrl::url($image->path) : \App\Support\PlaceholderMedia::url($sections['fallback_image'] ?? 'asset/images/media/inventory-listing-fallback.jpg');
             $vehicleUrl = route('inventory.show', ['slug' => $vehicle->slug]);
+            $invFallback = \App\Support\PlaceholderMedia::url($sections['fallback_image'] ?? 'asset/images/media/inventory-listing-fallback.jpg');
           @endphp
           <article class="bg-card_bg overflow-hidden flex flex-col md:flex-row relative group">
             <div class="md:w-[320px] h-[240px] relative overflow-hidden shrink-0">
               <a href="{{ $vehicleUrl }}" class="block h-full w-full">
-                <img class="w-full h-full object-cover" alt="{{ $vehicle->title }}" src="{{ $photo }}" />
+                @include('partials.vehicle-hover-gallery', [
+                  'vehicle' => $vehicle,
+                  'fallback' => $invFallback,
+                  'imgClass' => 'w-full h-full object-cover',
+                ])
               </a>
               @if($vehicle->is_special)
                 <div class="sold-ribbon">Special</div>

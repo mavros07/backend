@@ -105,13 +105,13 @@
       </div>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         @forelse ($recentVehicles as $vehicle)
-          @php
-            $img = $vehicle->images->first();
-            $url = $img ? \App\Support\VehicleImageUrl::url($img->path) : \App\Support\PlaceholderMedia::url('asset/images/media/home-recent-fallback.jpg');
-          @endphp
           <a href="{{ route('inventory.show', ['slug' => $vehicle->slug]) }}" class="group block overflow-hidden rounded-sm border border-slate-500/50 bg-[#232628] shadow-md transition hover:shadow-xl">
             <div class="relative aspect-[16/9] overflow-hidden">
-              <img alt="{{ $vehicle->title }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" src="{{ $url }}"/>
+              @include('partials.vehicle-hover-gallery', [
+                'vehicle' => $vehicle,
+                'fallback' => \App\Support\PlaceholderMedia::url('asset/images/media/home-recent-fallback.jpg'),
+                'imgClass' => 'h-full w-full object-cover transition-transform duration-500 group-hover:scale-105',
+              ])
               @if ($vehicle->is_special)
                 <div class="pointer-events-none absolute -right-8 top-3 rotate-45 bg-[#3b63d6] px-10 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-md">{{ __('Special') }}</div>
               @endif

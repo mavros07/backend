@@ -112,7 +112,80 @@
     io.observe(root);
   }
 
+  /**
+   * Listing cards: scrub horizontally (mouse or touch) to preview gallery images — same idea as
+   * Motors “interactive hoverable” listings (e.g. Stylemix dealer demos).
+   */
+  function bindListingHoverGalleries() {
+    var wraps = document.querySelectorAll('[data-vehicle-hover-gallery]');
+    if (!wraps.length) return;
+
+    var reduceMotion =
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    wraps.forEach(function (wrap) {
+      var raw = wrap.getAttribute('data-images') || '[]';
+      var urls;
+      try {
+        urls = JSON.parse(raw);
+      } catch (e) {
+        return;
+      }
+      if (!Array.isArray(urls) || urls.length < 2) return;
+
+      var img = wrap.querySelector('[data-vehicle-hover-main]');
+      if (!img) return;
+
+      var n = urls.length;
+      var dots = wrap.querySelectorAll('[data-vehicle-hover-dot]');
+      var current = 0;
+
+      urls.forEach(function (u) {
+        var pre = new Image();
+        pre.src = u;
+      });
+
+      function setIndex(i) {
+        i = Math.max(0, Math.min(n - 1, i));
+        if (i === current) return;
+        current = i;
+        img.src = urls[i];
+        dots.forEach(function (dot, di) {
+          dot.setAttribute('data-active', di === i ? '1' : '0');
+        });
+      }
+
+      function clientXFromEvent(e) {
+        if (e.touches && e.touches[0]) return e.touches[0].clientX;
+        if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].clientX;
+        return e.clientX;
+      }
+
+      function onMove(e) {
+        if (reduceMotion) return;
+        var rect = wrap.getBoundingClientRect();
+        if (rect.width <= 0) return;
+        var x = clientXFromEvent(e) - rect.left;
+        var t = Math.max(0, Math.min(1, x / rect.width));
+        var idx = Math.min(n - 1, Math.floor(t * n));
+        setIndex(idx);
+      }
+
+      function reset() {
+        setIndex(0);
+      }
+
+      wrap.addEventListener('mousemove', onMove);
+      wrap.addEventListener('mouseleave', reset);
+      wrap.addEventListener('touchstart', onMove, { passive: true });
+      wrap.addEventListener('touchmove', onMove, { passive: true });
+      wrap.addEventListener('touchend', reset);
+      wrap.addEventListener('touchcancel', reset);
+    });
+  }
+
   bindContactTabs();
   bindHeaderScrollState();
   bindHomeStatsCountUp();
+  bindListingHoverGalleries();
 })();
