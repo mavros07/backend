@@ -57,6 +57,39 @@ body {
   border-radius: 10px;
 }
 
+/* Inventory filter column: scroll without showing a track (overflow still works). */
+.hide-scrollbar,
+.inventory-filter-sidebar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar,
+.inventory-filter-sidebar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Inventory sidebar / modal: transparent fields, white label text; options use light surface in the native menu. */
+.inventory-filter-select,
+.inventory-filter-input {
+  background-color: transparent;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+.inventory-filter-select:focus,
+.inventory-filter-input:focus {
+  outline: 2px solid rgba(78, 119, 237, 0.55);
+  outline-offset: 0;
+  border-color: rgba(78, 119, 237, 0.85);
+}
+.inventory-filter-input::placeholder {
+  color: rgba(148, 163, 184, 0.9);
+}
+.inventory-filter-select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
 body.mobile-menu-open {
   overflow: hidden;
 }

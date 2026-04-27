@@ -305,7 +305,6 @@ class PageController extends Controller
             'page' => $page,
             'sections' => $this->pageSections('inventory', [
                 'heading' => 'Vehicles For Sale',
-                'intro' => 'Browse approved listings. Vehicle cards are dynamic and come from the listings module.',
                 'fallback_image' => 'asset/images/media/inventory-listing-fallback.jpg',
             ]),
         ]);

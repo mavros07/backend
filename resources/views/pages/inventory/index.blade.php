@@ -12,8 +12,6 @@
       'fuel_type',
       'drive',
       'location',
-      'vin',
-      'exterior_color',
       'year_min',
       'year_max',
       'mileage_min',
@@ -26,22 +24,32 @@
     <section class="py-10 flex flex-col md:flex-row md:justify-between md:items-end border-b border-white/10 mb-8 gap-4">
       <div>
         <h1 class="text-2xl font-black font-headline uppercase tracking-tight">{{ $sections['heading'] ?? ($page?->title ?? 'Vehicles For Sale') }}</h1>
-        @if (!empty($sections['intro']) || !empty($page?->meta_description))
-          <p class="mt-2 text-sm text-slate-400 max-w-2xl">{{ $sections['intro'] ?? $page?->meta_description }}</p>
-        @endif
       </div>
-      <div class="flex items-center gap-6 flex-wrap">
+      <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-end">
+        <div class="relative w-full min-w-0 sm:max-w-[220px] sm:w-auto">
+          <span class="material-symbols-outlined pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-white/50">search</span>
+          <input
+            type="search"
+            id="inventory-search"
+            name="q"
+            form="inventory-filter-form"
+            value="{{ $filters['q'] ?? '' }}"
+            placeholder="{{ __('Search') }}"
+            autocomplete="off"
+            class="inventory-filter-input w-full rounded-sm py-2.5 pl-9 pr-3 text-xs font-semibold uppercase"
+          />
+        </div>
         <div class="flex items-center gap-3">
-          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sort by:</span>
-          <div class="relative">
-            <select id="inventory-sort" name="sort" form="inventory-filter-form" class="bg-white border border-white/20 text-slate-900 font-medium text-xs px-4 py-2 pr-8 rounded-sm focus:ring-0 cursor-pointer appearance-none">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">{{ __('Sort by') }}:</span>
+          <div class="relative min-w-[12rem]">
+            <select id="inventory-sort" name="sort" form="inventory-filter-form" class="inventory-filter-select w-full cursor-pointer rounded-sm py-2.5 pl-3 pr-8 text-xs font-medium">
               <option value="newest" @selected(($filters['sort'] ?? 'newest') === 'newest')>Date: newest first</option>
               <option value="price_low" @selected(($filters['sort'] ?? '') === 'price_low')>Price: low to high</option>
               <option value="price_high" @selected(($filters['sort'] ?? '') === 'price_high')>Price: high to low</option>
               <option value="year_new" @selected(($filters['sort'] ?? '') === 'year_new')>Year: newest</option>
               <option value="year_old" @selected(($filters['sort'] ?? '') === 'year_old')>Year: oldest</option>
             </select>
-            <span class="material-symbols-outlined absolute right-2 top-2 text-xs pointer-events-none">expand_more</span>
+            <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span>
           </div>
         </div>
       </div>
@@ -129,55 +137,52 @@
         @endif
       </div>
 
-      <aside class="hidden lg:block w-full lg:w-[280px] space-y-4 lg:sticky lg:top-6 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:py-[65px]">
-        <h2 class="text-xl font-bold font-headline uppercase mb-4">Search Options</h2>
+      <aside class="inventory-filter-sidebar hidden w-full space-y-4 lg:block lg:sticky lg:top-6 lg:max-h-[calc(100vh-2rem)] lg:w-[280px] lg:overflow-y-auto lg:py-[65px]">
+        <h2 class="mb-4 text-xl font-bold font-headline uppercase">{{ __('Search options') }}</h2>
         <form id="inventory-filter-form" method="get" action="{{ route('inventory.index') }}" class="space-y-2">
           <div class="relative">
-            <select name="condition" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-brand_blue transition-colors"><option value="">Condition</option><option value="new" @selected(($filters['condition'] ?? '')==='new')>New</option><option value="used" @selected(($filters['condition'] ?? '')==='used')>Used</option></select>
-            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+            <select name="condition" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase transition-colors"><option value="">Condition</option><option value="new" @selected(($filters['condition'] ?? '')==='new')>New</option><option value="used" @selected(($filters['condition'] ?? '')==='used')>Used</option></select>
+            <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span>
           </div>
           <div class="relative">
-            <select name="body_type" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-brand_blue transition-colors"><option value="">Body</option>@foreach(($filterOptions['body_types'] ?? collect()) as $bodyType)<option value="{{ $bodyType }}" @selected(($filters['body_type'] ?? '') === $bodyType)>{{ $bodyType }}</option>@endforeach</select>
-            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+            <select name="body_type" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase transition-colors"><option value="">Body</option>@foreach(($filterOptions['body_types'] ?? collect()) as $bodyType)<option value="{{ $bodyType }}" @selected(($filters['body_type'] ?? '') === $bodyType)>{{ $bodyType }}</option>@endforeach</select>
+            <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span>
           </div>
           <div class="relative">
-            <select name="make" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-brand_blue transition-colors"><option value="">Make</option>@foreach(($filterOptions['makes'] ?? collect()) as $make)<option value="{{ $make }}" @selected(($filters['make'] ?? '') === $make)>{{ $make }}</option>@endforeach</select>
-            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+            <select name="make" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase transition-colors"><option value="">Make</option>@foreach(($filterOptions['makes'] ?? collect()) as $make)<option value="{{ $make }}" @selected(($filters['make'] ?? '') === $make)>{{ $make }}</option>@endforeach</select>
+            <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span>
           </div>
           <div class="relative">
-            <select name="model" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-brand_blue transition-colors"><option value="">Model</option>@foreach(($filterOptions['models'] ?? collect()) as $model)<option value="{{ $model }}" @selected(($filters['model'] ?? '') === $model)>{{ $model }}</option>@endforeach</select>
-            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+            <select name="model" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase transition-colors"><option value="">Model</option>@foreach(($filterOptions['models'] ?? collect()) as $model)<option value="{{ $model }}" @selected(($filters['model'] ?? '') === $model)>{{ $model }}</option>@endforeach</select>
+            <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span>
           </div>
           <div class="relative">
-            <select name="transmission" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-brand_blue transition-colors"><option value="">Transmission</option>@foreach(($filterOptions['transmissions'] ?? collect()) as $transmission)<option value="{{ $transmission }}" @selected(($filters['transmission'] ?? '') === $transmission)>{{ $transmission }}</option>@endforeach</select>
-            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+            <select name="transmission" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase transition-colors"><option value="">Transmission</option>@foreach(($filterOptions['transmissions'] ?? collect()) as $transmission)<option value="{{ $transmission }}" @selected(($filters['transmission'] ?? '') === $transmission)>{{ $transmission }}</option>@endforeach</select>
+            <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span>
           </div>
           <div class="relative">
-            <select name="fuel_type" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-brand_blue transition-colors"><option value="">Fuel Type</option>@foreach(($filterOptions['fuel_types'] ?? collect()) as $fuel)<option value="{{ $fuel }}" @selected(($filters['fuel_type'] ?? '') === $fuel)>{{ $fuel }}</option>@endforeach</select>
-            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+            <select name="fuel_type" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase transition-colors"><option value="">Fuel Type</option>@foreach(($filterOptions['fuel_types'] ?? collect()) as $fuel)<option value="{{ $fuel }}" @selected(($filters['fuel_type'] ?? '') === $fuel)>{{ $fuel }}</option>@endforeach</select>
+            <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span>
           </div>
           <div class="relative">
-            <select name="drive" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-brand_blue transition-colors"><option value="">Drive</option>@foreach(($filterOptions['drives'] ?? collect()) as $drive)<option value="{{ $drive }}" @selected(($filters['drive'] ?? '') === $drive)>{{ $drive }}</option>@endforeach</select>
-            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
+            <select name="drive" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase transition-colors"><option value="">Drive</option>@foreach(($filterOptions['drives'] ?? collect()) as $drive)<option value="{{ $drive }}" @selected(($filters['drive'] ?? '') === $drive)>{{ $drive }}</option>@endforeach</select>
+            <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span>
           </div>
           <div class="relative">
-            <select name="exterior_color" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] font-bold uppercase px-4 py-3 appearance-none focus:border-brand_blue transition-colors"><option value="">Exterior Color</option>@foreach(($filterOptions['exterior_colors'] ?? collect()) as $color)<option value="{{ $color }}" @selected(($filters['exterior_color'] ?? '') === $color)>{{ $color }}</option>@endforeach</select>
-            <span class="material-symbols-outlined absolute right-3 top-3 text-xs pointer-events-none">expand_more</span>
-          </div>
-          <div class="relative"><input name="location" value="{{ $filters['location'] ?? '' }}" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] font-bold uppercase px-10 py-3 focus:ring-0 focus:border-brand_blue transition-colors" placeholder="Any location" type="text"/><span class="material-symbols-outlined absolute left-3 top-3 text-xs text-slate-600">location_on</span></div>
-          <div class="relative"><input name="vin" value="{{ $filters['vin'] ?? '' }}" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] px-4 py-3 focus:ring-0 focus:border-brand_blue" placeholder="VIN" type="text"/></div>
-          <div class="relative"><input name="q" value="{{ $filters['q'] ?? '' }}" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] px-4 py-3 focus:ring-0 focus:border-brand_blue" placeholder="Search" type="text"/></div>
-          <div class="grid grid-cols-2 gap-2">
-            <input name="year_min" value="{{ $filters['year_min'] ?? '' }}" type="number" placeholder="Year min" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] px-3 py-2" />
-            <input name="year_max" value="{{ $filters['year_max'] ?? '' }}" type="number" placeholder="Year max" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] px-3 py-2" />
+            <input name="location" value="{{ $filters['location'] ?? '' }}" class="inventory-filter-input w-full rounded-sm px-10 py-3 text-[11px] font-bold uppercase" placeholder="{{ __('Any location') }}" type="text" autocomplete="off" />
+            <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-white/50">location_on</span>
           </div>
           <div class="grid grid-cols-2 gap-2">
-            <input name="mileage_min" value="{{ $filters['mileage_min'] ?? '' }}" type="number" placeholder="Mileage min" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] px-3 py-2" />
-            <input name="mileage_max" value="{{ $filters['mileage_max'] ?? '' }}" type="number" placeholder="Mileage max" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] px-3 py-2" />
+            <input name="year_min" value="{{ $filters['year_min'] ?? '' }}" type="number" placeholder="{{ __('Year min') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" />
+            <input name="year_max" value="{{ $filters['year_max'] ?? '' }}" type="number" placeholder="{{ __('Year max') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" />
           </div>
           <div class="grid grid-cols-2 gap-2">
-            <input name="price_min" value="{{ $filters['price_min'] ?? '' }}" type="number" placeholder="Price min" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] px-3 py-2" />
-            <input name="price_max" value="{{ $filters['price_max'] ?? '' }}" type="number" placeholder="Price max" class="w-full bg-white border border-white/20 text-slate-900 text-[11px] px-3 py-2" />
+            <input name="mileage_min" value="{{ $filters['mileage_min'] ?? '' }}" type="number" placeholder="{{ __('Mileage min') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" />
+            <input name="mileage_max" value="{{ $filters['mileage_max'] ?? '' }}" type="number" placeholder="{{ __('Mileage max') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" />
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <input name="price_min" value="{{ $filters['price_min'] ?? '' }}" type="number" placeholder="{{ __('Price min') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" />
+            <input name="price_max" value="{{ $filters['price_max'] ?? '' }}" type="number" placeholder="{{ __('Price max') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" />
           </div>
           <button class="w-full bg-brand_blue hover:bg-brand_blue/90 text-white font-bold py-3 uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 mt-4" type="submit"><span class="material-symbols-outlined text-[16px]">search</span> Apply Filters</button>
           <a href="{{ route('inventory.index') }}" class="w-full bg-brand_blue hover:bg-brand_blue/90 text-white font-bold py-3 uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 mt-2"><span class="material-symbols-outlined text-[16px]">restart_alt</span> Reset All</a>
@@ -195,23 +200,27 @@
         <h3 class="text-sm font-semibold uppercase tracking-widest">Search Options</h3>
         <button id="mobile-filter-close" type="button" class="text-white/70 hover:text-white">✕</button>
       </div>
-      <div class="overflow-y-auto p-4">
+      <div class="hide-scrollbar overflow-y-auto p-4">
         <form id="inventory-filter-form-mobile" method="get" action="{{ route('inventory.index') }}" class="space-y-2">
           <input type="hidden" name="sort" value="{{ $filters['sort'] ?? 'newest' }}" />
-          <div class="relative"><select name="condition" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] font-bold uppercase text-slate-900 appearance-none"><option value="">Condition</option><option value="new" @selected(($filters['condition'] ?? '')==='new')>New</option><option value="used" @selected(($filters['condition'] ?? '')==='used')>Used</option></select><span class="material-symbols-outlined absolute right-3 top-3 text-xs text-slate-600 pointer-events-none">expand_more</span></div>
-          <div class="relative"><select name="body_type" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] font-bold uppercase text-slate-900 appearance-none"><option value="">Body</option>@foreach(($filterOptions['body_types'] ?? collect()) as $bodyType)<option value="{{ $bodyType }}" @selected(($filters['body_type'] ?? '') === $bodyType)>{{ $bodyType }}</option>@endforeach</select><span class="material-symbols-outlined absolute right-3 top-3 text-xs text-slate-600 pointer-events-none">expand_more</span></div>
-          <div class="relative"><select name="make" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] font-bold uppercase text-slate-900 appearance-none"><option value="">Make</option>@foreach(($filterOptions['makes'] ?? collect()) as $make)<option value="{{ $make }}" @selected(($filters['make'] ?? '') === $make)>{{ $make }}</option>@endforeach</select><span class="material-symbols-outlined absolute right-3 top-3 text-xs text-slate-600 pointer-events-none">expand_more</span></div>
-          <div class="relative"><select name="model" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] font-bold uppercase text-slate-900 appearance-none"><option value="">Model</option>@foreach(($filterOptions['models'] ?? collect()) as $model)<option value="{{ $model }}" @selected(($filters['model'] ?? '') === $model)>{{ $model }}</option>@endforeach</select><span class="material-symbols-outlined absolute right-3 top-3 text-xs text-slate-600 pointer-events-none">expand_more</span></div>
-          <div class="relative"><select name="transmission" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] font-bold uppercase text-slate-900 appearance-none"><option value="">Transmission</option>@foreach(($filterOptions['transmissions'] ?? collect()) as $transmission)<option value="{{ $transmission }}" @selected(($filters['transmission'] ?? '') === $transmission)>{{ $transmission }}</option>@endforeach</select><span class="material-symbols-outlined absolute right-3 top-3 text-xs text-slate-600 pointer-events-none">expand_more</span></div>
-          <div class="relative"><select name="fuel_type" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] font-bold uppercase text-slate-900 appearance-none"><option value="">Fuel Type</option>@foreach(($filterOptions['fuel_types'] ?? collect()) as $fuel)<option value="{{ $fuel }}" @selected(($filters['fuel_type'] ?? '') === $fuel)>{{ $fuel }}</option>@endforeach</select><span class="material-symbols-outlined absolute right-3 top-3 text-xs text-slate-600 pointer-events-none">expand_more</span></div>
-          <div class="relative"><select name="drive" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] font-bold uppercase text-slate-900 appearance-none"><option value="">Drive</option>@foreach(($filterOptions['drives'] ?? collect()) as $drive)<option value="{{ $drive }}" @selected(($filters['drive'] ?? '') === $drive)>{{ $drive }}</option>@endforeach</select><span class="material-symbols-outlined absolute right-3 top-3 text-xs text-slate-600 pointer-events-none">expand_more</span></div>
-          <div class="relative"><select name="exterior_color" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] font-bold uppercase text-slate-900 appearance-none"><option value="">Exterior Color</option>@foreach(($filterOptions['exterior_colors'] ?? collect()) as $color)<option value="{{ $color }}" @selected(($filters['exterior_color'] ?? '') === $color)>{{ $color }}</option>@endforeach</select><span class="material-symbols-outlined absolute right-3 top-3 text-xs text-slate-600 pointer-events-none">expand_more</span></div>
-          <input name="location" value="{{ $filters['location'] ?? '' }}" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] font-bold uppercase text-slate-900" placeholder="Any location" type="text"/>
-          <input name="vin" value="{{ $filters['vin'] ?? '' }}" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] text-slate-900" placeholder="VIN" type="text"/>
-          <input name="q" value="{{ $filters['q'] ?? '' }}" class="w-full rounded-sm border border-white/20 bg-white px-4 py-3 text-[11px] text-slate-900" placeholder="Search" type="text"/>
-          <div class="grid grid-cols-2 gap-2"><input name="year_min" value="{{ $filters['year_min'] ?? '' }}" type="number" placeholder="Year min" class="w-full rounded-sm border border-white/20 bg-white px-3 py-2 text-[11px] text-slate-900" /><input name="year_max" value="{{ $filters['year_max'] ?? '' }}" type="number" placeholder="Year max" class="w-full rounded-sm border border-white/20 bg-white px-3 py-2 text-[11px] text-slate-900" /></div>
-          <div class="grid grid-cols-2 gap-2"><input name="mileage_min" value="{{ $filters['mileage_min'] ?? '' }}" type="number" placeholder="Mileage min" class="w-full rounded-sm border border-white/20 bg-white px-3 py-2 text-[11px] text-slate-900" /><input name="mileage_max" value="{{ $filters['mileage_max'] ?? '' }}" type="number" placeholder="Mileage max" class="w-full rounded-sm border border-white/20 bg-white px-3 py-2 text-[11px] text-slate-900" /></div>
-          <div class="grid grid-cols-2 gap-2"><input name="price_min" value="{{ $filters['price_min'] ?? '' }}" type="number" placeholder="Price min" class="w-full rounded-sm border border-white/20 bg-white px-3 py-2 text-[11px] text-slate-900" /><input name="price_max" value="{{ $filters['price_max'] ?? '' }}" type="number" placeholder="Price max" class="w-full rounded-sm border border-white/20 bg-white px-3 py-2 text-[11px] text-slate-900" /></div>
+          <div class="relative">
+            <span class="material-symbols-outlined pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-white/50">search</span>
+            <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Search') }}" autocomplete="off" class="inventory-filter-input w-full rounded-sm py-2.5 pl-9 pr-3 text-xs font-semibold uppercase" />
+          </div>
+          <div class="relative"><select name="condition" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase"><option value="">Condition</option><option value="new" @selected(($filters['condition'] ?? '')==='new')>New</option><option value="used" @selected(($filters['condition'] ?? '')==='used')>Used</option></select><span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span></div>
+          <div class="relative"><select name="body_type" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase"><option value="">Body</option>@foreach(($filterOptions['body_types'] ?? collect()) as $bodyType)<option value="{{ $bodyType }}" @selected(($filters['body_type'] ?? '') === $bodyType)>{{ $bodyType }}</option>@endforeach</select><span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span></div>
+          <div class="relative"><select name="make" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase"><option value="">Make</option>@foreach(($filterOptions['makes'] ?? collect()) as $make)<option value="{{ $make }}" @selected(($filters['make'] ?? '') === $make)>{{ $make }}</option>@endforeach</select><span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span></div>
+          <div class="relative"><select name="model" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase"><option value="">Model</option>@foreach(($filterOptions['models'] ?? collect()) as $model)<option value="{{ $model }}" @selected(($filters['model'] ?? '') === $model)>{{ $model }}</option>@endforeach</select><span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span></div>
+          <div class="relative"><select name="transmission" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase"><option value="">Transmission</option>@foreach(($filterOptions['transmissions'] ?? collect()) as $transmission)<option value="{{ $transmission }}" @selected(($filters['transmission'] ?? '') === $transmission)>{{ $transmission }}</option>@endforeach</select><span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span></div>
+          <div class="relative"><select name="fuel_type" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase"><option value="">Fuel Type</option>@foreach(($filterOptions['fuel_types'] ?? collect()) as $fuel)<option value="{{ $fuel }}" @selected(($filters['fuel_type'] ?? '') === $fuel)>{{ $fuel }}</option>@endforeach</select><span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span></div>
+          <div class="relative"><select name="drive" class="inventory-filter-select w-full appearance-none rounded-sm px-4 py-3 text-[11px] font-bold uppercase"><option value="">Drive</option>@foreach(($filterOptions['drives'] ?? collect()) as $drive)<option value="{{ $drive }}" @selected(($filters['drive'] ?? '') === $drive)>{{ $drive }}</option>@endforeach</select><span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/60">expand_more</span></div>
+          <div class="relative">
+            <input name="location" value="{{ $filters['location'] ?? '' }}" class="inventory-filter-input w-full rounded-sm px-10 py-3 text-[11px] font-bold uppercase" placeholder="{{ __('Any location') }}" type="text" autocomplete="off" />
+            <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-white/50">location_on</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2"><input name="year_min" value="{{ $filters['year_min'] ?? '' }}" type="number" placeholder="{{ __('Year min') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" /><input name="year_max" value="{{ $filters['year_max'] ?? '' }}" type="number" placeholder="{{ __('Year max') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" /></div>
+          <div class="grid grid-cols-2 gap-2"><input name="mileage_min" value="{{ $filters['mileage_min'] ?? '' }}" type="number" placeholder="{{ __('Mileage min') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" /><input name="mileage_max" value="{{ $filters['mileage_max'] ?? '' }}" type="number" placeholder="{{ __('Mileage max') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" /></div>
+          <div class="grid grid-cols-2 gap-2"><input name="price_min" value="{{ $filters['price_min'] ?? '' }}" type="number" placeholder="{{ __('Price min') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" /><input name="price_max" value="{{ $filters['price_max'] ?? '' }}" type="number" placeholder="{{ __('Price max') }}" class="inventory-filter-input w-full rounded-sm px-3 py-2 text-[11px] font-bold uppercase" /></div>
           <div class="sticky bottom-0 bg-[#111316] pt-4 pb-2 space-y-2">
             <button class="w-full bg-brand_blue hover:bg-brand_blue/90 text-white font-bold py-3 uppercase text-[11px] tracking-widest" type="submit">Apply Filters</button>
             <a href="{{ route('inventory.index') }}" class="w-full block text-center bg-brand_blue hover:bg-brand_blue/90 text-white font-bold py-3 uppercase text-[11px] tracking-widest">Reset All</a>

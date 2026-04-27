@@ -68,10 +68,9 @@ class AdminPageController extends Controller
             'inventory' => [
                 'label' => 'Inventory',
                 'default_title' => 'Inventory',
-                'default_description' => 'Inventory page heading and intro copy.',
+                'default_description' => 'Inventory page heading and SEO. Listing cards are always loaded from approved vehicles.',
                 'fields' => [
-                    ['name' => 'heading', 'label' => 'Inventory Heading', 'type' => 'text', 'default' => 'Vehicles For Sale', 'group' => 'Page intro'],
-                    ['name' => 'intro', 'label' => 'Inventory Intro', 'type' => 'textarea', 'default' => 'Browse approved listings. Vehicle cards are dynamic and come from the listings module.', 'group' => 'Page intro'],
+                    ['name' => 'heading', 'label' => 'Inventory Heading', 'type' => 'text', 'default' => 'Vehicles For Sale', 'group' => 'Page header'],
                     ['name' => 'fallback_image', 'label' => 'Listing Card Fallback Image', 'type' => 'image', 'default' => 'asset/images/media/inventory-listing-fallback.jpg', 'group' => 'Media'],
                 ],
             ],
