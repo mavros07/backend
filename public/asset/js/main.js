@@ -113,8 +113,8 @@
   }
 
   /**
-   * Listing cards: scrub horizontally (mouse or touch) to preview gallery images — same idea as
-   * Motors “interactive hoverable” listings (e.g. Stylemix dealer demos).
+   * Listing cards: 2D hover/touch zones (row × column) map to gallery images — horizontal and
+   * vertical movement both change the photo, similar to Motors interactive listings.
    */
   function bindListingHoverGalleries() {
     var wraps = document.querySelectorAll('[data-vehicle-hover-gallery]');
@@ -155,20 +155,33 @@
         });
       }
 
-      function clientXFromEvent(e) {
-        if (e.touches && e.touches[0]) return e.touches[0].clientX;
-        if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].clientX;
-        return e.clientX;
+      function clientXYFromEvent(e) {
+        if (e.touches && e.touches[0]) {
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        if (e.changedTouches && e.changedTouches[0]) {
+          return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+      }
+
+      function indexFromPoint(x, y, w, h) {
+        var cols = Math.ceil(Math.sqrt(n));
+        var rows = Math.ceil(n / cols);
+        var cx = Math.min(cols - 1, Math.max(0, Math.floor((x / w) * cols)));
+        var cy = Math.min(rows - 1, Math.max(0, Math.floor((y / h) * rows)));
+        var idx = cy * cols + cx;
+        return Math.min(n - 1, idx);
       }
 
       function onMove(e) {
         if (reduceMotion) return;
         var rect = wrap.getBoundingClientRect();
-        if (rect.width <= 0) return;
-        var x = clientXFromEvent(e) - rect.left;
-        var t = Math.max(0, Math.min(1, x / rect.width));
-        var idx = Math.min(n - 1, Math.floor(t * n));
-        setIndex(idx);
+        if (rect.width <= 0 || rect.height <= 0) return;
+        var p = clientXYFromEvent(e);
+        var x = p.x - rect.left;
+        var y = p.y - rect.top;
+        setIndex(indexFromPoint(x, y, rect.width, rect.height));
       }
 
       function reset() {

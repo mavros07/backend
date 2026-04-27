@@ -13,7 +13,7 @@
   $multi = count($urls) > 1;
 @endphp
 <div
-  class="relative h-full w-full overflow-hidden {{ $multi ? 'cursor-ew-resize touch-pan-y' : '' }}"
+  class="relative h-full w-full overflow-hidden {{ $multi ? 'cursor-crosshair touch-manipulation' : '' }}"
   data-vehicle-hover-gallery
   data-images='@json($urls)'
 >
