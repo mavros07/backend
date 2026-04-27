@@ -56,6 +56,12 @@ class Vehicle extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** Same rule as dashboard “Staff listing” vs vendor: owner is console staff. */
+    public function isStaffListing(): bool
+    {
+        return $this->user?->hasRole('admin') ?? false;
+    }
+
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');

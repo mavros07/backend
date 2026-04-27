@@ -125,6 +125,13 @@
               <x-input-label for="is_special" value="{{ __('Special listing (shows “Special” ribbon on homepage cards)') }}" class="!mb-0" />
             </div>
 
+            @if(auth()->user()?->hasRole('admin'))
+              <div class="flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50/80 px-3 py-2">
+                <input id="approve_listing" name="approve_listing" type="checkbox" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(old('approve_listing')) />
+                <x-input-label for="approve_listing" value="{{ __('Approve immediately (live on public inventory)') }}" class="!mb-0" />
+              </div>
+            @endif
+
             <section class="rounded-lg border border-gray-200 p-4">
               <h3 class="text-base font-semibold text-gray-900">Images</h3>
               <p class="mt-1 text-sm text-gray-600">Use one featured image plus gallery images. Click any preview to open it larger.</p>

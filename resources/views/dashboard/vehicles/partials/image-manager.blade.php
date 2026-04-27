@@ -3,13 +3,15 @@
   $isAdminUser = auth()->user()?->hasRole('admin');
 @endphp
 
-<div id="image-preview-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-black/80 p-4">
+{{-- Render at end of <body> (see layouts.admin @stack('body-end')) so fixed overlays are not clipped by .admin-content-scroll --}}
+@push('body-end')
+<div id="image-preview-modal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/80 p-4">
   <button type="button" id="image-preview-close" class="absolute right-4 top-4 rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20">Close</button>
   <img id="image-preview-modal-image" src="" alt="" class="max-h-[90vh] max-w-[95vw] rounded-lg object-contain" />
 </div>
 
 @if($isAdminUser)
-  <div id="vehicle-media-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-black/70 p-4">
+  <div id="vehicle-media-modal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/70 p-4">
     <div class="w-full max-w-5xl rounded-lg bg-white shadow-xl">
       <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
         <h3 class="text-sm font-semibold text-gray-900">Select Media</h3>
@@ -405,3 +407,4 @@
     });
   })();
 </script>
+@endpush

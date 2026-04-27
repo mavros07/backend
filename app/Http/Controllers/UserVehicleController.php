@@ -11,8 +11,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Throwable;
 
 class UserVehicleController extends Controller
 {
@@ -71,6 +73,16 @@ class UserVehicleController extends Controller
                 return $vehicle;
             });
 
+            if ($request->user()->hasRole('admin') && $request->boolean('approve_listing')) {
+                $vehicle->refresh();
+                $vehicle->status = 'approved';
+                $vehicle->approved_at = now();
+                $vehicle->approved_by = $request->user()->id;
+                $vehicle->rejection_reason = null;
+                $vehicle->save();
+                $this->notifyOwnerListingApproved($vehicle);
+            }
+
             return redirect()->route('dashboard.vehicles.edit', $vehicle);
         } catch (QueryException $exception) {
             if (str_contains(strtolower($exception->getMessage()), 'is_special')) {
@@ -109,6 +121,19 @@ class UserVehicleController extends Controller
                 $this->storeUploadedImages($request, $vehicle);
             });
 
+            if (
+                $request->user()->hasRole('admin')
+                && $request->boolean('approve_listing')
+                && in_array($vehicle->status, ['pending', 'draft', 'rejected'], true)
+            ) {
+                $vehicle->status = 'approved';
+                $vehicle->approved_at = now();
+                $vehicle->approved_by = $request->user()->id;
+                $vehicle->rejection_reason = null;
+                $vehicle->save();
+                $this->notifyOwnerListingApproved($vehicle);
+            }
+
             return back()->with('status', 'Listing updated.');
         } catch (QueryException $exception) {
             if (str_contains(strtolower($exception->getMessage()), 'is_special')) {
@@ -135,14 +160,21 @@ class UserVehicleController extends Controller
 
         $to = (string) config('mail.outbound.admin_to');
         if ($to !== '') {
-            $subject = 'Listing submitted for approval';
-            $html = view('emails.listing-submitted', [
-                'user' => $request->user(),
-                'vehicle' => $vehicle,
-                'adminUrl' => route('dashboard.vehicles.index'),
-            ])->render();
+            try {
+                $subject = 'Listing submitted for approval';
+                $html = view('emails.listing-submitted', [
+                    'user' => $request->user(),
+                    'vehicle' => $vehicle,
+                    'adminUrl' => route('dashboard.vehicles.index'),
+                ])->render();
 
-            app(OutboundMailService::class)->send($to, 'Admin', $subject, $html);
+                app(OutboundMailService::class)->send($to, 'Admin', $subject, $html);
+            } catch (Throwable $e) {
+                Log::warning('Listing submitted but admin notification email failed', [
+                    'vehicle_id' => $vehicle->id,
+                    'exception' => $e,
+                ]);
+            }
         }
 
         return back();
@@ -189,5 +221,29 @@ class UserVehicleController extends Controller
         }
 
         abort_unless($vehicle->user_id === $request->user()->id, 403);
+    }
+
+    private function notifyOwnerListingApproved(Vehicle $vehicle): void
+    {
+        $vehicle->loadMissing('user');
+        if (empty($vehicle->user?->email) || $vehicle->isStaffListing()) {
+            return;
+        }
+
+        try {
+            $subject = 'Your listing was approved';
+            $html = view('emails.listing-approved', [
+                'user' => $vehicle->user,
+                'vehicle' => $vehicle,
+                'publicUrl' => route('inventory.show', ['slug' => $vehicle->slug]),
+            ])->render();
+
+            app(OutboundMailService::class)->send($vehicle->user->email, $vehicle->user->name ?? 'User', $subject, $html);
+        } catch (Throwable $e) {
+            Log::warning('Listing approved but owner notification email failed', [
+                'vehicle_id' => $vehicle->id,
+                'exception' => $e,
+            ]);
+        }
     }
 }
