@@ -100,6 +100,68 @@
         img.src = publicUrlFromPath(p);
       }
 
+      function syncRepeaterField(field) {
+        if (!field) return;
+        const input = field.querySelector('.js-repeater-input');
+        const wrap = field.querySelector('.js-repeater-items');
+        const template = field.querySelector('.js-repeater-item-template');
+        if (!input || !wrap || !template) return;
+
+        let data = [];
+        try {
+          data = JSON.parse(input.value || '[]');
+        } catch (e) {
+          data = [];
+        }
+        if (!Array.isArray(data)) data = [];
+
+        wrap.innerHTML = '';
+
+        const syncToInput = () => {
+          const items = wrap.querySelectorAll('.js-repeater-item');
+          const newData = Array.from(items).map(item => {
+            const row = {};
+            item.querySelectorAll('[data-name]').forEach(inp => {
+              row[inp.getAttribute('data-name')] = inp.value;
+            });
+            return row;
+          });
+          input.value = JSON.stringify(newData);
+        };
+
+        const addItem = (values = {}) => {
+          const clone = template.content.cloneNode(true);
+          const item = clone.querySelector('.js-repeater-item');
+          
+          Object.keys(values).forEach(key => {
+            const inp = item.querySelector(`[data-name="${key}"]`);
+            if (inp) inp.value = values[key];
+          });
+
+          item.querySelector('.js-repeater-remove').addEventListener('click', () => {
+            item.remove();
+            syncToInput();
+          });
+
+          item.querySelectorAll('[data-name]').forEach(inp => {
+            inp.addEventListener('input', syncToInput);
+          });
+
+          wrap.appendChild(item);
+        };
+
+        data.forEach(item => addItem(item));
+
+        const addBtn = field.querySelector('.js-repeater-add');
+        if (addBtn && !addBtn.dataset.bound) {
+          addBtn.dataset.bound = '1';
+          addBtn.addEventListener('click', () => {
+            addItem();
+            syncToInput();
+          });
+        }
+      }
+
       function syncGalleryField(inputId) {
         const input = document.getElementById(inputId);
         const previewWrap = document.querySelector(`[data-gallery-preview-wrap="${inputId}"]`);
@@ -339,6 +401,10 @@
         });
         ro.observe(shell);
       }
+
+      document.querySelectorAll('.js-repeater-field').forEach((field) => {
+        syncRepeaterField(field);
+      });
 
       document.querySelectorAll('.js-media-path-input').forEach((input) => {
         input.addEventListener('input', () => {
@@ -617,6 +683,42 @@
                             />
                           </div>
                         </details>
+                      </div>
+                     @elseif ($field['type'] === 'repeater')
+                      <div class="md:col-span-2 js-repeater-field bg-slate-50 p-6 rounded-xl border border-gray-200" data-field-name="{{ $field['name'] }}" data-schema='@json($field['schema'])'>
+                        <div class="flex items-center justify-between mb-4">
+                          <span class="block text-sm font-bold text-slate-800 uppercase tracking-tight">{{ $field['label'] }}</span>
+                          <button type="button" class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 js-repeater-add">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            {{ __('Add item') }}
+                          </button>
+                        </div>
+                        
+                        <input type="hidden" name="sections[{{ $field['name'] }}]" id="{{ $inputId }}" value="{{ $value }}" class="js-repeater-input" />
+                        
+                        <div class="space-y-4 js-repeater-items">
+                          {{-- Items injected by JS --}}
+                        </div>
+
+                        <template class="js-repeater-item-template">
+                          <div class="relative bg-white p-5 rounded-lg border border-gray-200 shadow-sm group js-repeater-item">
+                            <button type="button" class="absolute top-4 right-4 text-slate-400 hover:text-red-600 transition-colors js-repeater-remove" title="Remove">
+                              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                            <div class="grid grid-cols-1 gap-4 pr-10">
+                              @foreach($field['schema'] as $s)
+                                <div>
+                                  <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">{{ $s['label'] }}</label>
+                                  @if($s['type'] === 'textarea')
+                                    <textarea data-name="{{ $s['name'] }}" rows="2" class="w-full rounded-md border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                  @else
+                                    <input type="text" data-name="{{ $s['name'] }}" class="w-full rounded-md border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500" />
+                                  @endif
+                                </div>
+                              @endforeach
+                            </div>
+                          </div>
+                        </template>
                       </div>
                     @elseif ($field['type'] === 'gallery')
                       <div class="js-media-field rounded-lg border border-gray-100 bg-slate-50/40 p-4 md:col-span-2">

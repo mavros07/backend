@@ -29,10 +29,10 @@
 
 <main>
     <!-- Hero Section -->
-    <section class="relative h-[460px] min-h-[400px] flex items-center justify-center overflow-hidden bg-slate-900">
+    <section class="relative h-[560px] min-h-[500px] flex items-center justify-center overflow-hidden bg-slate-900 pt-20">
         <div class="absolute inset-0 z-0">
             <img class="w-full h-full object-cover opacity-40 mix-blend-luminosity" src="{{ $heroImg }}" alt="FAQ Hero"/>
-            <div class="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/80 to-page_bg"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-[#2e3133]/60 via-[#2e3133]/80 to-page_bg"></div>
         </div>
         <div class="relative z-10 text-center px-6">
             <p class="text-primary font-bold text-xs tracking-[0.2em] uppercase mb-4">{{ $sections['kicker'] ?? 'Need Help?' }}</p>
@@ -89,10 +89,14 @@
                                 <div class="h-[2px] w-12 bg-primary"></div>
                             </div>
                             <div class="space-y-4">
-                                @foreach([1, 2, 3] as $qIdx)
+                                @php
+                                    $faqsRaw = $sections['cat_'.$catIdx.'_faqs'] ?? '[]';
+                                    $faqs = json_decode($faqsRaw, true) ?: [];
+                                @endphp
+                                @foreach($faqs as $faq)
                                     @php 
-                                        $q = $sections['faq_'.$catIdx.'_'.$qIdx.'_q'] ?? '';
-                                        $a = $sections['faq_'.$catIdx.'_'.$qIdx.'_a'] ?? '';
+                                        $q = $faq['q'] ?? '';
+                                        $a = $faq['a'] ?? '';
                                     @endphp
                                     @if($q)
                                         <div class="accordion-item bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden" data-accordion-item>

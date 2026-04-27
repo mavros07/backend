@@ -13,7 +13,7 @@
   $socialLinkedin = $site['social_linkedin'] ?? '#';
   $socialYoutube = $site['social_youtube'] ?? '#';
   $compareCount = \App\Support\Compare::count();
-  $isHome = request()->routeIs('home');
+  $isHome = request()->routeIs('home') || request()->routeIs('faq') || request()->routeIs('about');
 @endphp
 
 {{-- Motors dealer-two inspired public header: https://motors.stylemixthemes.com/elementor-dealer-two/ --}}

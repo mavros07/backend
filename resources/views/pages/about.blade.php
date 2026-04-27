@@ -46,7 +46,7 @@
 </style>
 
 <!-- Hero Section -->
-<section class="relative min-h-screen pt-0 flex items-center overflow-hidden">
+<section class="relative min-h-[80vh] flex items-start overflow-hidden pt-24 md:pt-32">
     <div class="flex flex-col md:flex-row w-full h-full">
         <div class="w-full md:w-1/2 relative h-[500px] md:h-screen">
             <img alt="Hero Image" class="w-full h-full object-cover" src="{{ $heroImg }}"/>

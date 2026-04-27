@@ -146,29 +146,31 @@ class AdminPageController extends Controller
 
                     ['name' => 'cat_1_title', 'label' => 'Category 1 Title', 'type' => 'text', 'default' => 'Buying & Inventory', 'group' => 'Category 1: Buying'],
                     ['name' => 'cat_1_icon', 'label' => 'Category 1 Icon', 'type' => 'text', 'default' => 'directions_car', 'group' => 'Category 1: Buying'],
-                    ['name' => 'faq_1_1_q', 'label' => 'Q 1.1', 'type' => 'text', 'default' => 'Can I reserve a vehicle before visiting the dealership?', 'group' => 'Category 1: Buying'],
-                    ['name' => 'faq_1_1_a', 'label' => 'A 1.1', 'type' => 'textarea', 'default' => 'Yes. We offer a digital reservation service where you can place a fully refundable deposit on any vehicle for up to 48 hours.', 'group' => 'Category 1: Buying'],
-                    ['name' => 'faq_1_2_q', 'label' => 'Q 1.2', 'type' => 'text', 'default' => 'What kind of inspection do vehicles undergo?', 'group' => 'Category 1: Buying'],
-                    ['name' => 'faq_1_2_a', 'label' => 'A 1.2', 'type' => 'textarea', 'default' => 'Every vehicle in our inventory passes a rigorous 172-point Certification process by factory-trained technicians.', 'group' => 'Category 1: Buying'],
-                    ['name' => 'faq_1_3_q', 'label' => 'Q 1.3', 'type' => 'text', 'default' => 'Do you offer nationwide shipping?', 'group' => 'Category 1: Buying'],
-                    ['name' => 'faq_1_3_a', 'label' => 'A 1.3', 'type' => 'textarea', 'default' => 'Absolutely. We utilize specialized enclosed carriers to ship vehicles anywhere in the continental United States.', 'group' => 'Category 1: Buying'],
+                    ['name' => 'cat_1_faqs', 'label' => 'Category 1 FAQs', 'type' => 'repeater', 'group' => 'Category 1: Buying', 'schema' => [
+                        ['name' => 'q', 'label' => 'Question', 'type' => 'text'],
+                        ['name' => 'a', 'label' => 'Answer', 'type' => 'textarea'],
+                    ]],
 
                     ['name' => 'cat_2_title', 'label' => 'Category 2 Title', 'type' => 'text', 'default' => 'Financing & Trade', 'group' => 'Category 2: Finance'],
                     ['name' => 'cat_2_icon', 'label' => 'Category 2 Icon', 'type' => 'text', 'default' => 'payments', 'group' => 'Category 2: Finance'],
-                    ['name' => 'faq_2_1_q', 'label' => 'Q 2.1', 'type' => 'text', 'default' => 'How is my trade-in value determined?', 'group' => 'Category 2: Finance'],
-                    ['name' => 'faq_2_1_a', 'label' => 'A 2.1', 'type' => 'textarea', 'default' => 'We use real-time market data alongside a physical appraisal to provide the most competitive value.', 'group' => 'Category 2: Finance'],
-                    ['name' => 'faq_2_2_q', 'label' => 'Q 2.2', 'type' => 'text', 'default' => 'Do you work with luxury-specific lenders?', 'group' => 'Category 2: Finance'],
-                    ['name' => 'faq_2_2_a', 'label' => 'A 2.2', 'type' => 'textarea', 'default' => 'Yes, our finance department partners with premier financial institutions that understand high-value vehicle assets.', 'group' => 'Category 2: Finance'],
+                    ['name' => 'cat_2_faqs', 'label' => 'Category 2 FAQs', 'type' => 'repeater', 'group' => 'Category 2: Finance', 'schema' => [
+                        ['name' => 'q', 'label' => 'Question', 'type' => 'text'],
+                        ['name' => 'a', 'label' => 'Answer', 'type' => 'textarea'],
+                    ]],
 
                     ['name' => 'cat_3_title', 'label' => 'Category 3 Title', 'type' => 'text', 'default' => 'Performance Service', 'group' => 'Category 3: Service'],
                     ['name' => 'cat_3_icon', 'label' => 'Category 3 Icon', 'type' => 'text', 'default' => 'build_circle', 'group' => 'Category 3: Service'],
-                    ['name' => 'faq_3_1_q', 'label' => 'Q 3.1', 'type' => 'text', 'default' => 'What performance tuning services do you offer?', 'group' => 'Category 3: Service'],
-                    ['name' => 'faq_3_1_a', 'label' => 'A 3.1', 'type' => 'textarea', 'default' => 'From stage 1 ECU remapping to full exhaust systems and suspension setups, our specialists handle it all.', 'group' => 'Category 3: Service'],
+                    ['name' => 'cat_3_faqs', 'label' => 'Category 3 FAQs', 'type' => 'repeater', 'group' => 'Category 3: Service', 'schema' => [
+                        ['name' => 'q', 'label' => 'Question', 'type' => 'text'],
+                        ['name' => 'a', 'label' => 'Answer', 'type' => 'textarea'],
+                    ]],
 
                     ['name' => 'cat_4_title', 'label' => 'Category 4 Title', 'type' => 'text', 'default' => 'Selling to Apex', 'group' => 'Category 4: Selling'],
                     ['name' => 'cat_4_icon', 'label' => 'Category 4 Icon', 'type' => 'text', 'default' => 'sell', 'group' => 'Category 4: Selling'],
-                    ['name' => 'faq_4_1_q', 'label' => 'Q 4.1', 'type' => 'text', 'default' => 'What documents are needed to sell my car?', 'group' => 'Category 4: Selling'],
-                    ['name' => 'faq_4_1_a', 'label' => 'A 4.1', 'type' => 'textarea', 'default' => 'You\'ll need the title, valid ID, and maintenance records. Our team handles all transfer paperwork for you.', 'group' => 'Category 4: Selling'],
+                    ['name' => 'cat_4_faqs', 'label' => 'Category 4 FAQs', 'type' => 'repeater', 'group' => 'Category 4: Selling', 'schema' => [
+                        ['name' => 'q', 'label' => 'Question', 'type' => 'text'],
+                        ['name' => 'a', 'label' => 'Answer', 'type' => 'textarea'],
+                    ]],
 
                     ['name' => 'cta_title', 'label' => 'CTA Title', 'type' => 'text', 'default' => 'STILL SEEKING ANSWERS?', 'group' => 'CTA Section'],
                     ['name' => 'cta_body', 'label' => 'CTA Body', 'type' => 'textarea', 'default' => 'Our automotive concierges are available 7 days a week to assist with technical specifications or test drives.', 'group' => 'CTA Section'],
