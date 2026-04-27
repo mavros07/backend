@@ -103,30 +103,43 @@
 
   {{-- Media gallery (carousel strip) --}}
   @if ($gallery->isNotEmpty())
-    <section class="bg-[#232628] py-12 md:py-14">
-      <div class="mx-auto max-w-6xl px-6">
-        <div class="text-center">
-          <h2 class="font-headline text-3xl font-black uppercase tracking-tight text-white">{{ $sections['gallery_title'] ?? __('MEDIA GALLERY') }}</h2>
-          <div class="motors-colored-separator">
-            <div class="first-long"></div><div class="last-short"></div>
-          </div>
+    @php
+      $galleryPages = $gallery->chunk(4)->values();
+    @endphp
+    <section class="bg-[#2e3133] py-24 px-6 md:px-12 lg:px-24">
+      <div class="mx-auto w-full max-w-7xl">
+        <div class="text-center mb-16">
+          <h2 class="motors-orange-underline text-white font-headline text-3xl md:text-4xl font-extrabold tracking-tight uppercase">
+            {{ $sections['gallery_title'] ?? __('MEDIA GALLERY') }}
+          </h2>
         </div>
 
-        <div class="motors-carousel motors-carousel--gallery relative mt-8" data-simple-carousel data-carousel-type="gallery">
+        <div class="motors-carousel motors-carousel--gallery" data-simple-carousel data-carousel-type="gallery-pages">
           <div class="motors-carousel-viewport overflow-hidden" data-carousel-viewport>
-            <div class="motors-carousel-track flex gap-4" data-carousel-track>
-              @foreach ($gallery as $img)
-                <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="shrink-0" data-carousel-slide>
-                  <img src="{{ $img }}" alt="{{ __('Gallery image') }}" class="motors-gallery-img h-[110px] w-[220px] object-cover md:h-[130px] md:w-[260px]" loading="lazy" decoding="async" />
-                </a>
+            <div class="motors-carousel-track flex gap-0" data-carousel-track>
+              @foreach ($galleryPages as $page)
+                <div class="w-full shrink-0" data-carousel-slide>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+                    @foreach ($page as $img)
+                      <a href="{{ $img }}" target="_blank" rel="noopener noreferrer" class="aspect-[4/3] overflow-hidden group cursor-pointer block bg-black/10">
+                        <img src="{{ $img }}" alt="{{ __('Gallery image') }}" data-gallery-image class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async" />
+                      </a>
+                    @endforeach
+                  </div>
+                </div>
               @endforeach
             </div>
           </div>
 
-          <button type="button" class="motors-gallery-arrow motors-gallery-prev" data-carousel-prev aria-label="{{ __('Previous') }}">‹</button>
-          <button type="button" class="motors-gallery-arrow motors-gallery-next" data-carousel-next aria-label="{{ __('Next') }}">›</button>
-
-          <div class="motors-gallery-dots mt-5 flex justify-center gap-2" data-carousel-dots></div>
+          <div class="motors-gallery-controls flex items-center justify-center mt-12 gap-8">
+            <button type="button" class="motors-gallery-chevron" data-carousel-prev aria-label="{{ __('Previous') }}">
+              <span class="material-symbols-outlined text-3xl">chevron_left</span>
+            </button>
+            <div class="motors-gallery-dots flex items-center gap-3" data-carousel-dots></div>
+            <button type="button" class="motors-gallery-chevron" data-carousel-next aria-label="{{ __('Next') }}">
+              <span class="material-symbols-outlined text-3xl">chevron_right</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>

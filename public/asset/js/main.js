@@ -237,11 +237,9 @@
         if (type === 'testimonials') {
           perView = 1;
         }
-        if (type === 'gallery') {
-          // Motors “Media Gallery” shows 4 thumbnails on desktop, fewer on smaller screens.
-          if (viewW >= 1024) perView = 4;
-          else if (viewW >= 640) perView = 3;
-          else perView = 1;
+        if (type === 'gallery-pages') {
+          // Each slide is a full “page” containing a responsive 1/2/4 grid.
+          perView = 1;
         }
         var maxIndex = Math.max(0, slides.length - perView);
         return { slideW: slideW, gap: gap, perView: perView, maxIndex: maxIndex };
@@ -260,7 +258,13 @@
           b.addEventListener('click', function (e) {
             e.preventDefault();
             var di = parseInt(this.getAttribute('data-index') || '0', 10);
-            if (!isNaN(di)) goTo(di);
+            if (isNaN(di)) return;
+            if (type === 'gallery-pages') {
+              // Dots represent individual images; each page contains up to 4 images.
+              goTo(Math.floor(di / 4));
+              return;
+            }
+            goTo(di);
           });
           dotsWrap.appendChild(b);
           dots.push(b);
@@ -273,6 +277,14 @@
       function setActive(i, maxIndex) {
         if (prev) prev.disabled = i <= 0;
         if (next) next.disabled = i >= maxIndex;
+        if (type === 'gallery-pages') {
+          // Highlight the dot for the first image in the active page.
+          var activeDot = clamp(i * 4, 0, dots.length - 1);
+          dots.forEach(function (d, di) {
+            d.setAttribute('data-active', di === activeDot ? '1' : '0');
+          });
+          return;
+        }
         dots.forEach(function (d, di) {
           d.setAttribute('data-active', di === i ? '1' : '0');
         });
@@ -295,7 +307,12 @@
 
       function rebuild() {
         var m = metrics();
-        dots = buildDots(m.maxIndex + 1);
+        if (type === 'gallery-pages') {
+          var imgCount = root.querySelectorAll('[data-gallery-image]').length;
+          dots = buildDots(Math.max(1, imgCount));
+        } else {
+          dots = buildDots(m.maxIndex + 1);
+        }
         applyTransform(index);
       }
 
