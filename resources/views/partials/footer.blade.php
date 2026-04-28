@@ -7,12 +7,8 @@
   $socialYoutube = $site['social_youtube'] ?? '#';
   $dealerSalesHours = preg_split('/\r\n|\r|\n/', $site['dealer_sales_hours'] ?? "Monday - Friday: 09:00AM - 09:00PM\nSaturday: 09:00AM - 07:00PM\nSunday: Closed") ?: [];
 
-  $aboutPage = \App\Models\CmsPage::where('slug', 'about')->first();
-  $aboutGallery = [];
-  if ($aboutPage) {
-      $aboutGalleryStr = $aboutPage->sections->where('name', 'gallery')->first()?->content ?? '[]';
-      $aboutGallery = json_decode($aboutGalleryStr, true) ?? [];
-  }
+  $aboutGalleryStr = \App\Models\PageSection::query()->where('page', 'about')->where('section_key', 'gallery')->value('content') ?? '[]';
+  $aboutGallery = json_decode($aboutGalleryStr, true) ?? [];
   $footerGallery = array_slice($aboutGallery, 0, 4);
   $fallbacks = ['asset/images/media/footer-1.jpg', 'asset/images/media/footer-2.jpg', 'asset/images/media/footer-3.jpg', 'asset/images/media/footer-4.jpg'];
 @endphp
