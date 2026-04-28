@@ -6,6 +6,15 @@
   $socialLinkedin = $site['social_linkedin'] ?? '#';
   $socialYoutube = $site['social_youtube'] ?? '#';
   $dealerSalesHours = preg_split('/\r\n|\r|\n/', $site['dealer_sales_hours'] ?? "Monday - Friday: 09:00AM - 09:00PM\nSaturday: 09:00AM - 07:00PM\nSunday: Closed") ?: [];
+
+  $aboutPage = \App\Models\CmsPage::where('slug', 'about')->first();
+  $aboutGallery = [];
+  if ($aboutPage) {
+      $aboutGalleryStr = $aboutPage->sections->where('name', 'gallery')->first()?->content ?? '[]';
+      $aboutGallery = json_decode($aboutGalleryStr, true) ?? [];
+  }
+  $footerGallery = array_slice($aboutGallery, 0, 4);
+  $fallbacks = ['asset/images/media/footer-1.jpg', 'asset/images/media/footer-2.jpg', 'asset/images/media/footer-3.jpg', 'asset/images/media/footer-4.jpg'];
 @endphp
 
 <footer class="bg-[#1e2229] text-white pt-20 pb-10">
@@ -17,9 +26,12 @@
     <div class="space-y-6">
       <h4 class="text-white font-bold text-xs uppercase tracking-widest">Photo Gallery</h4>
       <div class="grid grid-cols-4 gap-2">
-        @foreach (['footer-1.jpg', 'footer-2.jpg', 'footer-3.jpg', 'footer-4.jpg'] as $img)
-          <img src="{{ \App\Support\PlaceholderMedia::url('asset/images/media/' . $img) }}" alt="" class="w-full h-12 object-cover rounded-sm bg-slate-700" loading="lazy" />
-        @endforeach
+        @for ($i = 0; $i < 4; $i++)
+          @php
+            $imgSrc = isset($footerGallery[$i]) ? \App\Support\VehicleImageUrl::url($footerGallery[$i]) : \App\Support\PlaceholderMedia::url($fallbacks[$i]);
+          @endphp
+          <img src="{{ $imgSrc }}" alt="Gallery Image {{ $i + 1 }}" class="w-full h-12 object-cover rounded-sm bg-slate-700" loading="lazy" />
+        @endfor
       </div>
     </div>
     <div class="space-y-6">
