@@ -34,6 +34,18 @@
       [data-site-header].is-home-header.is-scrolled [data-header-menu-button] { border-color: rgba(15, 23, 42, 0.2) !important; }
     </style>
   @endif
+  @if (request()->routeIs('about'))
+    <style>
+      [data-site-header].is-home-header [data-header-logo],
+      [data-site-header].is-home-header [data-header-icon],
+      [data-site-header].is-home-header [data-header-action-text],
+      [data-site-header].is-home-header [data-header-bag-count],
+      [data-site-header].is-home-header [data-header-menu-icon] { color: #111827 !important; }
+      [data-site-header].is-home-header [data-header-nav-link] { color: rgba(17, 24, 39, 0.92) !important; }
+      [data-site-header].is-home-header [data-header-nav-link]:hover { color: #111827 !important; }
+      [data-site-header].is-home-header [data-header-menu-button] { border-color: rgba(15, 23, 42, 0.2) !important; }
+    </style>
+  @endif
   <div class="h-10 border-b border-white/10 bg-[#232628]">
     <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
       <button type="button" class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.05em] text-white/70 hover:text-white">
