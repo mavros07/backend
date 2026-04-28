@@ -2,9 +2,8 @@
 
 @php
   $site = $site ?? [];
-  $address = $site['dealer_address'] ?? '1840 E Garvey Ave South West Covina, CA 91791';
-  $salesPhone = $site['dealer_sales_phone'] ?? '(888) 354-1781';
-  $hours = $site['dealer_sales_hours'] ?? "Mon - Fri: 09:00AM - 09:00PM\nSaturday: 09:00AM - 07:00PM\nSunday: Closed";
+  $site = $site ?? [];
+
   $heroImg = \App\Support\VehicleImageUrl::url($sections['hero_image'] ?? 'asset/images/media/contact-hero-bg.jpg');
 
   $mapAddress = $sections['map_address'] ?? '';
@@ -12,7 +11,7 @@
   $mapFallbackImage = \App\Support\VehicleImageUrl::url($sections['map_fallback_image'] ?? 'asset/images/media/contact-map.jpg');
   $googleMapsApiKey = config('services.google.maps_api_key', '');
 
-  $mapAddressPlain = trim(strip_tags(str_replace(['<br/>', '<br />', '<br>'], ', ', $address)));
+  $mapAddressPlain = trim(strip_tags(str_replace(['<br/>', '<br />', '<br>'], ', ', $sections['sales_address'] ?? '')));
   if (trim($mapAddress) !== '') {
       $mapAddressPlain = trim($mapAddress);
   }
@@ -98,6 +97,12 @@
 </div>
 
 @foreach(['parts','sales','renting'] as $panel)
+@php
+  $panelAddress = $sections[$panel . '_address'] ?? '';
+  $panelPhone = $sections[$panel . '_phone'] ?? '';
+  $panelHours = $sections[$panel . '_hours'] ?? '';
+  $panelTitle = ucfirst($panel);
+@endphp
 <div class="space-y-10 pt-4 {{ $loop->first ? '' : 'hidden' }}" data-contact-panel="{{ $panel }}">
 <div class="flex items-start gap-6">
 <div class="w-12 h-12 shrink-0 border-2 border-[#f9a825] rounded-full flex items-center justify-center text-[#f9a825]">
@@ -105,7 +110,7 @@
 </div>
 <div>
 <h4 class="font-bold text-[14px] text-slate-900 mb-1 uppercase">Address</h4>
-<p class="text-slate-500 text-[14px] leading-relaxed">{!! nl2br(e($address)) !!}</p>
+<p class="text-slate-500 text-[14px] leading-relaxed">{!! nl2br(e($panelAddress)) !!}</p>
 </div>
 </div>
 <div class="flex items-start gap-6">
@@ -113,8 +118,8 @@
 <span class="material-symbols-outlined text-2xl">call</span>
 </div>
 <div>
-<h4 class="font-bold text-[14px] text-slate-900 mb-1 uppercase">Sales Phone</h4>
-<p class="text-slate-500 text-[14px]">{{ $salesPhone }}</p>
+<h4 class="font-bold text-[14px] text-slate-900 mb-1 uppercase">{{ $panelTitle }} Phone</h4>
+<p class="text-slate-500 text-[14px]">{{ $panelPhone }}</p>
 </div>
 </div>
 <div class="flex items-start gap-6">
@@ -122,9 +127,9 @@
 <span class="material-symbols-outlined text-2xl">schedule</span>
 </div>
 <div>
-<h4 class="font-bold text-[14px] text-slate-900 mb-1 uppercase">Sales Hours</h4>
+<h4 class="font-bold text-[14px] text-slate-900 mb-1 uppercase">{{ $panelTitle }} Hours</h4>
 <div class="text-slate-500 text-[14px] space-y-1">
-{!! nl2br(e($hours)) !!}
+{!! nl2br(e($panelHours)) !!}
 </div>
 </div>
 </div>
@@ -133,7 +138,7 @@
 </div>
 
 <!-- Right Column: Map -->
-<div class="lg:col-span-8 h-[550px] relative rounded shadow-lg overflow-hidden grayscale contrast-125 border border-gray-100">
+<div class="lg:col-span-8 h-[550px] relative rounded shadow-lg overflow-hidden border border-gray-100">
   @if($mapUrl !== '')
     <iframe class="absolute inset-0 w-full h-full border-0" src="{{ $mapUrl }}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map Location"></iframe>
   @else

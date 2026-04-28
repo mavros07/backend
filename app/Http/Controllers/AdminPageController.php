@@ -85,6 +85,18 @@ class AdminPageController extends Controller
                     ['name' => 'map_address', 'label' => 'Map Location Address (optional, overrides default address)', 'type' => 'text', 'default' => '', 'group' => 'Media'],
                     ['name' => 'map_embed_url', 'label' => 'Google Maps Embed URL (optional)', 'type' => 'text', 'default' => '', 'group' => 'Media'],
                     ['name' => 'map_fallback_image', 'label' => 'Map Fallback Image', 'type' => 'image', 'default' => 'asset/images/media/contact-map.jpg', 'group' => 'Media', 'preview' => 'thumbnail'],
+
+                    ['name' => 'sales_address', 'label' => 'Sales Address', 'type' => 'textarea', 'default' => '1840 E Garvey Ave South West Covina, CA 91791', 'group' => 'Sales Department'],
+                    ['name' => 'sales_phone', 'label' => 'Sales Phone', 'type' => 'text', 'default' => '(888) 354-1781', 'group' => 'Sales Department'],
+                    ['name' => 'sales_hours', 'label' => 'Sales Hours', 'type' => 'textarea', 'default' => "Mon - Fri: 09:00AM - 09:00PM\nSaturday: 09:00AM - 07:00PM\nSunday: Closed", 'group' => 'Sales Department'],
+
+                    ['name' => 'parts_address', 'label' => 'Parts Address', 'type' => 'textarea', 'default' => '1840 E Garvey Ave South West Covina, CA 91791', 'group' => 'Parts Department'],
+                    ['name' => 'parts_phone', 'label' => 'Parts Phone', 'type' => 'text', 'default' => '(888) 354-1782', 'group' => 'Parts Department'],
+                    ['name' => 'parts_hours', 'label' => 'Parts Hours', 'type' => 'textarea', 'default' => "Mon - Fri: 09:00AM - 09:00PM\nSaturday: 09:00AM - 07:00PM\nSunday: Closed", 'group' => 'Parts Department'],
+
+                    ['name' => 'renting_address', 'label' => 'Renting Address', 'type' => 'textarea', 'default' => '1840 E Garvey Ave South West Covina, CA 91791', 'group' => 'Renting Department'],
+                    ['name' => 'renting_phone', 'label' => 'Renting Phone', 'type' => 'text', 'default' => '(888) 354-1783', 'group' => 'Renting Department'],
+                    ['name' => 'renting_hours', 'label' => 'Renting Hours', 'type' => 'textarea', 'default' => "Mon - Fri: 09:00AM - 09:00PM\nSaturday: 09:00AM - 07:00PM\nSunday: Closed", 'group' => 'Renting Department'],
                 ],
             ],
             'about' => [

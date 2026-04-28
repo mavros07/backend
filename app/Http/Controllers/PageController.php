@@ -198,6 +198,15 @@ class PageController extends Controller
                 'map_address' => '',
                 'map_embed_url' => '',
                 'map_fallback_image' => 'asset/images/media/contact-map.jpg',
+                'sales_address' => SiteSetting::getValue('dealer_address', '1840 E Garvey Ave South West Covina, CA 91791'),
+                'sales_phone' => SiteSetting::getValue('dealer_sales_phone', '(888) 354-1781'),
+                'sales_hours' => SiteSetting::getValue('dealer_sales_hours', "Mon - Fri: 09:00AM - 09:00PM\nSaturday: 09:00AM - 07:00PM\nSunday: Closed"),
+                'parts_address' => SiteSetting::getValue('dealer_address', '1840 E Garvey Ave South West Covina, CA 91791'),
+                'parts_phone' => '(888) 354-1782',
+                'parts_hours' => "Mon - Fri: 09:00AM - 09:00PM\nSaturday: 09:00AM - 07:00PM\nSunday: Closed",
+                'renting_address' => SiteSetting::getValue('dealer_address', '1840 E Garvey Ave South West Covina, CA 91791'),
+                'renting_phone' => '(888) 354-1783',
+                'renting_hours' => "Mon - Fri: 09:00AM - 09:00PM\nSaturday: 09:00AM - 07:00PM\nSunday: Closed",
             ]),
         ]);
     }
