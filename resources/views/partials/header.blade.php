@@ -102,7 +102,7 @@
         @endif
       </a>
 
-      <nav class="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-5 xl:flex xl:px-4" aria-label="{{ __('Primary') }}">
+      <nav class="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-4 xl:flex xl:px-2 w-max" aria-label="{{ __('Primary') }}">
         @foreach ([
           ['route' => 'home', 'label' => __('Home')],
           ['route' => 'inventory.index', 'label' => __('Inventory')],
@@ -125,7 +125,7 @@
                 $active = str_contains(urldecode(request()->fullUrl()), urldecode($url));
             }
           @endphp
-          <a href="{{ $url }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors {{ $active ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">
+          <a href="{{ $url }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ $active ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">
             <span>{{ $item['label'] }}</span>
           </a>
         @endforeach
