@@ -146,28 +146,28 @@ class AdminPageController extends Controller
 
                     ['name' => 'cat_1_title', 'label' => 'Category 1 Title', 'type' => 'text', 'default' => 'Buying & Inventory', 'group' => 'Category 1: Buying'],
                     ['name' => 'cat_1_icon', 'label' => 'Category 1 Icon', 'type' => 'text', 'default' => 'directions_car', 'group' => 'Category 1: Buying'],
-                    ['name' => 'cat_1_faqs', 'label' => 'Category 1 FAQs', 'type' => 'repeater', 'group' => 'Category 1: Buying', 'schema' => [
+                    ['name' => 'cat_1_faqs', 'label' => 'Category 1 FAQs', 'type' => 'repeater', 'default' => '[]', 'group' => 'Category 1: Buying', 'schema' => [
                         ['name' => 'q', 'label' => 'Question', 'type' => 'text'],
                         ['name' => 'a', 'label' => 'Answer', 'type' => 'textarea'],
                     ]],
 
                     ['name' => 'cat_2_title', 'label' => 'Category 2 Title', 'type' => 'text', 'default' => 'Financing & Trade', 'group' => 'Category 2: Finance'],
                     ['name' => 'cat_2_icon', 'label' => 'Category 2 Icon', 'type' => 'text', 'default' => 'payments', 'group' => 'Category 2: Finance'],
-                    ['name' => 'cat_2_faqs', 'label' => 'Category 2 FAQs', 'type' => 'repeater', 'group' => 'Category 2: Finance', 'schema' => [
+                    ['name' => 'cat_2_faqs', 'label' => 'Category 2 FAQs', 'type' => 'repeater', 'default' => '[]', 'group' => 'Category 2: Finance', 'schema' => [
                         ['name' => 'q', 'label' => 'Question', 'type' => 'text'],
                         ['name' => 'a', 'label' => 'Answer', 'type' => 'textarea'],
                     ]],
 
                     ['name' => 'cat_3_title', 'label' => 'Category 3 Title', 'type' => 'text', 'default' => 'Performance Service', 'group' => 'Category 3: Service'],
                     ['name' => 'cat_3_icon', 'label' => 'Category 3 Icon', 'type' => 'text', 'default' => 'build_circle', 'group' => 'Category 3: Service'],
-                    ['name' => 'cat_3_faqs', 'label' => 'Category 3 FAQs', 'type' => 'repeater', 'group' => 'Category 3: Service', 'schema' => [
+                    ['name' => 'cat_3_faqs', 'label' => 'Category 3 FAQs', 'type' => 'repeater', 'default' => '[]', 'group' => 'Category 3: Service', 'schema' => [
                         ['name' => 'q', 'label' => 'Question', 'type' => 'text'],
                         ['name' => 'a', 'label' => 'Answer', 'type' => 'textarea'],
                     ]],
 
                     ['name' => 'cat_4_title', 'label' => 'Category 4 Title', 'type' => 'text', 'default' => 'Selling to Apex', 'group' => 'Category 4: Selling'],
                     ['name' => 'cat_4_icon', 'label' => 'Category 4 Icon', 'type' => 'text', 'default' => 'sell', 'group' => 'Category 4: Selling'],
-                    ['name' => 'cat_4_faqs', 'label' => 'Category 4 FAQs', 'type' => 'repeater', 'group' => 'Category 4: Selling', 'schema' => [
+                    ['name' => 'cat_4_faqs', 'label' => 'Category 4 FAQs', 'type' => 'repeater', 'default' => '[]', 'group' => 'Category 4: Selling', 'schema' => [
                         ['name' => 'q', 'label' => 'Question', 'type' => 'text'],
                         ['name' => 'a', 'label' => 'Answer', 'type' => 'textarea'],
                     ]],
