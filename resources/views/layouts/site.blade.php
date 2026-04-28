@@ -53,6 +53,33 @@
   </head>
 
   <body class="bg-page_bg font-body text-on_surface selection:bg-brand_blue/20 {{ $bodyClass ?? '' }}">
+    <!-- Global Loading Screen -->
+    <div id="global-loader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#1E2229] transition-opacity duration-700 ease-in-out">
+      <div class="relative flex items-center justify-center">
+        <!-- Spinner -->
+        <svg class="h-20 w-20 animate-spin text-brand_orange" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span class="absolute material-symbols-outlined text-white text-3xl">directions_car</span>
+      </div>
+      <!-- Fading Site Name -->
+      <div class="mt-8 animate-pulse text-center font-headline text-2xl font-black italic tracking-widest text-white uppercase">
+        {{ config('app.name', 'REV AUTO') }}
+      </div>
+    </div>
+    <script>
+      window.addEventListener('load', function() {
+        const loader = document.getElementById('global-loader');
+        if (loader) {
+          loader.classList.add('opacity-0');
+          setTimeout(() => {
+              loader.style.display = 'none';
+          }, 700);
+        }
+      });
+    </script>
+
     @include('partials.header')
     {{-- Header is sticky (dealer-style top strip + nav); no artificial pt-* needed — avoids hero/content hiding under a fixed bar --}}
     <main id="main">
