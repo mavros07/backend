@@ -280,8 +280,8 @@ class AdminPageController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        // About is section-fields only: never persist arbitrary HTML dumps.
-        if ($slug === 'about') {
+        // About + listing-detail are section-fields only: never persist arbitrary HTML dumps.
+        if (in_array($slug, ['about', 'listing-detail'], true)) {
             $data['content_html'] = '';
         }
 

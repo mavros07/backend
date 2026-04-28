@@ -783,7 +783,7 @@
         </div>
       @endif
 
-      @unless($slug === 'about')
+      @unless(in_array($slug, ['about', 'listing-detail'], true))
         <details class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           <summary class="cursor-pointer select-none border-b border-gray-100 bg-gray-50/80 px-5 py-4">
             <div class="flex items-center justify-between gap-4">

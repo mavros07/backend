@@ -244,6 +244,11 @@
           perView = 1;
         } else if (type === 'gallery-pages') {
           perView = 1;
+        } else if (type === 'similar-cars') {
+          if (window.innerWidth >= 1280) perView = 4;
+          else if (window.innerWidth >= 1024) perView = 3;
+          else if (window.innerWidth >= 640) perView = 2;
+          else perView = 1;
         }
 
         var maxIndex = Math.max(0, slides.length - perView);
@@ -341,6 +346,69 @@
     });
   }
 
+  function bindVehicleDetailGallery() {
+    var roots = document.querySelectorAll('[data-vehicle-detail-gallery]');
+    if (!roots.length) return;
+    roots.forEach(function (root) {
+      var main = root.querySelector('[data-vehicle-detail-main]');
+      var thumbs = root.querySelectorAll('[data-vehicle-detail-thumb]');
+      if (!main || !thumbs.length) return;
+      thumbs.forEach(function (thumb, idx) {
+        thumb.addEventListener('click', function () {
+          var full = thumb.getAttribute('data-full');
+          if (!full) return;
+          main.setAttribute('src', full);
+          thumbs.forEach(function (t, i) { t.classList.toggle('is-active', i === idx); });
+        });
+      });
+    });
+  }
+
+  function bindFinanceCalculators() {
+    var roots = document.querySelectorAll('[data-finance-calculator]');
+    if (!roots.length) return;
+    roots.forEach(function (root) {
+      var priceEl = root.querySelector('[data-finance-input="price"]');
+      var downEl = root.querySelector('[data-finance-input="down"]');
+      var rateEl = root.querySelector('[data-finance-input="rate"]');
+      var termEl = root.querySelector('[data-finance-input="term"]');
+      var outEl = root.querySelector('[data-finance-result]');
+      var totalInterestEl = root.querySelector('[data-finance-total-interest]');
+      var totalAmountEl = root.querySelector('[data-finance-total-amount]');
+      var calcBtn = root.querySelector('[data-finance-calc-btn]');
+      if (!priceEl || !downEl || !rateEl || !termEl || !outEl) return;
+
+      function toNum(v) { var n = parseFloat(String(v || '0')); return isNaN(n) ? 0 : n; }
+      function money(v) { return '$' + Math.max(0, v).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
+
+      priceEl.value = root.getAttribute('data-price') || '0';
+      downEl.value = root.getAttribute('data-down') || '0';
+      rateEl.value = root.getAttribute('data-rate') || '4.9';
+      termEl.value = root.getAttribute('data-term') || '60';
+
+      function calc() {
+        var principal = Math.max(0, toNum(priceEl.value) - toNum(downEl.value));
+        var annualRate = Math.max(0, toNum(rateEl.value));
+        var months = Math.max(1, parseInt(termEl.value || '0', 10) || 1);
+        var monthlyRate = annualRate / 100 / 12;
+        var payment = 0;
+        if (monthlyRate <= 0) payment = principal / months;
+        else payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+        var totalAmount = payment * months;
+        var totalInterest = totalAmount - principal;
+        outEl.textContent = money(payment);
+        if (totalInterestEl) totalInterestEl.textContent = money(totalInterest);
+        if (totalAmountEl) totalAmountEl.textContent = money(totalAmount);
+      }
+
+      [priceEl, downEl, rateEl, termEl].forEach(function (el) {
+        el.addEventListener('input', calc);
+      });
+      if (calcBtn) calcBtn.addEventListener('click', calc);
+      calc();
+    });
+  }
+
   function bindAccordions() {
     var items = document.querySelectorAll('[data-accordion-item]');
     if (!items.length) return;
@@ -381,4 +449,6 @@
   bindHomeStatsCountUp();
   bindListingHoverGalleries();
   bindSimpleCarousels();
+  bindVehicleDetailGallery();
+  bindFinanceCalculators();
 })();

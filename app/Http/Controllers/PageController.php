@@ -461,7 +461,7 @@ class PageController extends Controller
         $user = $request->user();
 
         $vehicle = Vehicle::query()
-            ->with('images')
+            ->with(['images', 'user'])
             ->where('slug', $slug)
             ->when(!($user && $user->hasRole('admin')), function ($query) use ($user) {
                 $query->where(function ($visibility) use ($user) {
@@ -473,6 +473,57 @@ class PageController extends Controller
                 });
             })
             ->firstOrFail();
+
+        $sellerProfile = $vehicle->isStaffListing()
+            ? [
+                'name' => SiteSetting::getValue('site_name', config('app.name')),
+                'email' => SiteSetting::getValue('dealer_email', config('mail.from.address')),
+                'phone' => SiteSetting::getValue('dealer_phone', SiteSetting::getValue('dealer_sales_phone', '')),
+                'address' => SiteSetting::getValue('dealer_address', ''),
+                'map_location' => $vehicle->map_location ?: $vehicle->location,
+            ]
+            : [
+                'name' => $vehicle->user?->name ?: 'Dealer',
+                'email' => $vehicle->contact_email ?: $vehicle->user?->email,
+                'phone' => $vehicle->contact_phone ?: SiteSetting::getValue('dealer_phone', ''),
+                'address' => $vehicle->contact_address ?: $vehicle->location,
+                'map_location' => $vehicle->map_location ?: $vehicle->contact_address ?: $vehicle->location,
+            ];
+
+        $similarVehicles = Vehicle::query()
+            ->with('images')
+            ->where('status', 'approved')
+            ->whereKeyNot($vehicle->id)
+            ->where(function ($query) use ($vehicle) {
+                if ($vehicle->make && $vehicle->model) {
+                    $query->where(function ($q) use ($vehicle) {
+                        $q->where('make', $vehicle->make)->where('model', $vehicle->model);
+                    })->orWhere('make', $vehicle->make);
+                    return;
+                }
+                if ($vehicle->make) {
+                    $query->where('make', $vehicle->make);
+                    return;
+                }
+                $query->whereNotNull('id');
+            })
+            ->orderByDesc('approved_at')
+            ->orderByDesc('id')
+            ->take(12)
+            ->get();
+
+        if ($similarVehicles->count() < 6) {
+            $fallback = Vehicle::query()
+                ->with('images')
+                ->where('status', 'approved')
+                ->whereKeyNot($vehicle->id)
+                ->whereNotIn('id', $similarVehicles->pluck('id'))
+                ->orderByDesc('approved_at')
+                ->orderByDesc('id')
+                ->take(6 - $similarVehicles->count())
+                ->get();
+            $similarVehicles = $similarVehicles->concat($fallback)->values();
+        }
 
         $siteName = config('app.name');
         $plainDesc = $vehicle->description
@@ -495,11 +546,12 @@ class PageController extends Controller
             'ogImage' => $ogImage,
             'slug' => $slug,
             'vehicle' => $vehicle,
+            'sellerProfile' => $sellerProfile,
+            'similarVehicles' => $similarVehicles,
             'isFavorited' => $isFavorited,
             'page' => $page,
             'sections' => $this->pageSections('listing-detail', [
                 'heading' => 'Vehicle Detail',
-                'intro' => 'Vehicle details and gallery are dynamic from listing data.',
             ]),
         ]);
     }

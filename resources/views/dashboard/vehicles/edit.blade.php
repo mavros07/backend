@@ -151,6 +151,97 @@
               <x-input-error :messages="$errors->get('description')" class="mt-2" />
             </div>
 
+            <section class="rounded-lg border border-gray-200 p-4 space-y-4">
+              <h3 class="text-base font-semibold text-gray-900">Detail page configuration</h3>
+
+              <div>
+                <x-input-label for="overview" value="Vehicle overview (long-form text)" />
+                <textarea id="overview" name="overview" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" rows="5">{{ old('overview', $vehicle->overview) }}</textarea>
+                <x-input-error :messages="$errors->get('overview')" class="mt-2" />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <x-input-label for="msrp" value="MSRP" />
+                  <x-text-input id="msrp" name="msrp" type="number" class="mt-1 block w-full" value="{{ old('msrp', $vehicle->msrp) }}" />
+                  <x-input-error :messages="$errors->get('msrp')" class="mt-2" />
+                </div>
+                <div>
+                  <x-input-label for="video_url" value="Video URL (optional)" />
+                  <x-text-input id="video_url" name="video_url" type="url" class="mt-1 block w-full" value="{{ old('video_url', $vehicle->video_url) }}" />
+                  <x-input-error :messages="$errors->get('video_url')" class="mt-2" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <x-input-label for="city_mpg" value="City MPG" />
+                  <x-text-input id="city_mpg" name="city_mpg" type="number" class="mt-1 block w-full" value="{{ old('city_mpg', $vehicle->city_mpg) }}" />
+                </div>
+                <div>
+                  <x-input-label for="hwy_mpg" value="Highway MPG" />
+                  <x-text-input id="hwy_mpg" name="hwy_mpg" type="number" class="mt-1 block w-full" value="{{ old('hwy_mpg', $vehicle->hwy_mpg) }}" />
+                </div>
+                <div>
+                  <x-input-label for="finance_interest_rate" value="Finance rate (%)" />
+                  <x-text-input id="finance_interest_rate" name="finance_interest_rate" type="number" step="0.01" class="mt-1 block w-full" value="{{ old('finance_interest_rate', $vehicle->finance_interest_rate) }}" />
+                </div>
+                <div>
+                  <x-input-label for="finance_term_months" value="Finance term (months)" />
+                  <x-text-input id="finance_term_months" name="finance_term_months" type="number" class="mt-1 block w-full" value="{{ old('finance_term_months', $vehicle->finance_term_months) }}" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <x-input-label for="finance_price" value="Finance vehicle price" />
+                  <x-text-input id="finance_price" name="finance_price" type="number" class="mt-1 block w-full" value="{{ old('finance_price', $vehicle->finance_price) }}" />
+                </div>
+                <div>
+                  <x-input-label for="finance_down_payment" value="Finance down payment" />
+                  <x-text-input id="finance_down_payment" name="finance_down_payment" type="number" class="mt-1 block w-full" value="{{ old('finance_down_payment', $vehicle->finance_down_payment) }}" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <x-input-label for="contact_phone" value="Contact phone (listing detail)" />
+                  <x-text-input id="contact_phone" name="contact_phone" type="text" class="mt-1 block w-full" value="{{ old('contact_phone', $vehicle->contact_phone) }}" />
+                </div>
+                <div>
+                  <x-input-label for="contact_email" value="Contact email (listing detail)" />
+                  <x-text-input id="contact_email" name="contact_email" type="email" class="mt-1 block w-full" value="{{ old('contact_email', $vehicle->contact_email) }}" />
+                </div>
+                <div class="sm:col-span-2">
+                  <x-input-label for="contact_address" value="Contact address" />
+                  <x-text-input id="contact_address" name="contact_address" type="text" class="mt-1 block w-full" value="{{ old('contact_address', $vehicle->contact_address) }}" />
+                </div>
+                <div class="sm:col-span-2">
+                  <x-input-label for="map_location" value="Map location / pin address" />
+                  <x-text-input id="map_location" name="map_location" type="text" class="mt-1 block w-full" value="{{ old('map_location', $vehicle->map_location) }}" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <x-input-label for="engine_layout" value="Tech spec: engine layout" />
+                  <x-text-input id="engine_layout" name="engine_layout" type="text" class="mt-1 block w-full" value="{{ old('engine_layout', $vehicle->engine_layout) }}" />
+                </div>
+                <div>
+                  <x-input-label for="top_track_speed" value="Tech spec: top track speed" />
+                  <x-text-input id="top_track_speed" name="top_track_speed" type="text" class="mt-1 block w-full" value="{{ old('top_track_speed', $vehicle->top_track_speed) }}" />
+                </div>
+                <div>
+                  <x-input-label for="zero_to_sixty" value="Tech spec: 0-70 / 0-60 time" />
+                  <x-text-input id="zero_to_sixty" name="zero_to_sixty" type="text" class="mt-1 block w-full" value="{{ old('zero_to_sixty', $vehicle->zero_to_sixty) }}" />
+                </div>
+                <div>
+                  <x-input-label for="number_of_gears" value="Tech spec: number of gears" />
+                  <x-text-input id="number_of_gears" name="number_of_gears" type="text" class="mt-1 block w-full" value="{{ old('number_of_gears', $vehicle->number_of_gears) }}" />
+                </div>
+              </div>
+            </section>
+
             <div class="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50/80 px-3 py-2">
               <input id="is_special" name="is_special" type="checkbox" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(old('is_special', $vehicle->is_special)) />
               <x-input-label for="is_special" value="{{ __('Special listing (shows “Special” ribbon on homepage cards)') }}" class="!mb-0" />

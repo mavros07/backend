@@ -23,19 +23,43 @@ trait InteractsWithVehicleForms
             'make' => ['nullable', 'string', 'max:255'],
             'model' => ['nullable', 'string', 'max:255'],
             'price' => ['nullable', 'integer', 'min:0'],
+            'msrp' => ['nullable', 'integer', 'min:0'],
             'mileage' => ['nullable', 'integer', 'min:0'],
+            'city_mpg' => ['nullable', 'integer', 'min:0', 'max:200'],
+            'hwy_mpg' => ['nullable', 'integer', 'min:0', 'max:200'],
             'transmission' => ['nullable', 'string', 'max:255'],
             'fuel_type' => ['nullable', 'string', 'max:255'],
             'drive' => ['nullable', 'string', 'max:255'],
             'body_type' => ['nullable', 'string', 'max:255'],
             'condition' => ['nullable', Rule::in(['new', 'used'])],
             'engine_size' => ['nullable', 'string', 'max:64'],
+            'engine_layout' => ['nullable', 'string', 'max:100'],
+            'top_track_speed' => ['nullable', 'string', 'max:100'],
+            'zero_to_sixty' => ['nullable', 'string', 'max:100'],
+            'number_of_gears' => ['nullable', 'string', 'max:100'],
             'location' => ['nullable', 'string', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:64'],
+            'contact_address' => ['nullable', 'string', 'max:255'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
+            'map_location' => ['nullable', 'string', 'max:255'],
+            'overview' => ['nullable', 'string', 'max:50000'],
+            'video_url' => ['nullable', 'url', 'max:2048'],
+            'finance_price' => ['nullable', 'integer', 'min:0'],
+            'finance_interest_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'finance_term_months' => ['nullable', 'integer', 'min:1', 'max:600'],
+            'finance_down_payment' => ['nullable', 'integer', 'min:0'],
             'features_text' => ['nullable', 'string', 'max:10000'],
             'exterior_color' => ['nullable', 'string', 'max:255'],
             'interior_color' => ['nullable', 'string', 'max:255'],
             'vin' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:50000'],
+            'tech_specs' => ['nullable', 'array'],
+            'tech_specs.engine_layout' => ['nullable', 'string', 'max:100'],
+            'tech_specs.engine_volume' => ['nullable', 'string', 'max:100'],
+            'tech_specs.drive_type' => ['nullable', 'string', 'max:100'],
+            'tech_specs.top_speed' => ['nullable', 'string', 'max:100'],
+            'tech_specs.zero_to_70' => ['nullable', 'string', 'max:100'],
+            'tech_specs.transmission_gears' => ['nullable', 'string', 'max:100'],
             'main_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'main_image_path' => ['nullable', 'string', 'max:2048', 'regex:/^(https?:\/\/|\/?(asset|storage)\/).+/i'],
             'images' => ['sometimes', 'array', 'max:12'],
@@ -48,6 +72,22 @@ trait InteractsWithVehicleForms
 
         $data['features'] = $this->parseFeatures($data['features_text'] ?? null);
         unset($data['features_text']);
+
+        $rawTechSpecs = [
+            'engine_layout' => (string) ($data['tech_specs']['engine_layout'] ?? $data['engine_layout'] ?? ''),
+            'engine_volume' => (string) ($data['tech_specs']['engine_volume'] ?? $data['engine_size'] ?? ''),
+            'drive_type' => (string) ($data['tech_specs']['drive_type'] ?? $data['drive'] ?? ''),
+            'top_speed' => (string) ($data['tech_specs']['top_speed'] ?? $data['top_track_speed'] ?? ''),
+            'zero_to_70' => (string) ($data['tech_specs']['zero_to_70'] ?? $data['zero_to_sixty'] ?? ''),
+            'transmission_gears' => (string) ($data['tech_specs']['transmission_gears'] ?? $data['number_of_gears'] ?? ''),
+        ];
+        $data['tech_specs'] = collect($rawTechSpecs)
+            ->map(fn ($value) => trim($value))
+            ->filter(fn ($value) => $value !== '')
+            ->all();
+        if ($data['tech_specs'] === []) {
+            $data['tech_specs'] = null;
+        }
 
         return $data;
     }
