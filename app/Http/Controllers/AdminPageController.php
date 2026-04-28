@@ -82,7 +82,9 @@ class AdminPageController extends Controller
                     ['name' => 'heading', 'label' => 'Contact Heading', 'type' => 'text', 'default' => 'Contact Us', 'group' => 'Page intro'],
                     ['name' => 'intro', 'label' => 'Contact Intro', 'type' => 'textarea', 'default' => 'Reach our team using the form below.', 'group' => 'Page intro'],
                     ['name' => 'hero_image', 'label' => 'Hero / Header Image', 'type' => 'image', 'default' => 'asset/images/media/contact-hero-bg.jpg', 'group' => 'Media', 'preview' => 'thumbnail'],
-                    ['name' => 'map_image', 'label' => 'Map Image', 'type' => 'image', 'default' => 'asset/images/media/contact-map.jpg', 'group' => 'Media', 'preview' => 'thumbnail'],
+                    ['name' => 'map_address', 'label' => 'Map Location Address (optional, overrides default address)', 'type' => 'text', 'default' => '', 'group' => 'Media'],
+                    ['name' => 'map_embed_url', 'label' => 'Google Maps Embed URL (optional)', 'type' => 'text', 'default' => '', 'group' => 'Media'],
+                    ['name' => 'map_fallback_image', 'label' => 'Map Fallback Image', 'type' => 'image', 'default' => 'asset/images/media/contact-map.jpg', 'group' => 'Media', 'preview' => 'thumbnail'],
                 ],
             ],
             'about' => [

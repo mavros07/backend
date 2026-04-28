@@ -195,7 +195,9 @@ class PageController extends Controller
                 'heading' => 'Contact Us',
                 'intro' => 'Reach our team using the form below.',
                 'hero_image' => 'asset/images/media/contact-hero-bg.jpg',
-                'map_image' => 'asset/images/media/contact-map.jpg',
+                'map_address' => '',
+                'map_embed_url' => '',
+                'map_fallback_image' => 'asset/images/media/contact-map.jpg',
             ]),
         ]);
     }
