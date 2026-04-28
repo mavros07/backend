@@ -106,19 +106,26 @@
         @foreach ([
           ['route' => 'home', 'label' => __('Home')],
           ['route' => 'inventory.index', 'label' => __('Inventory')],
+          ['url' => route('inventory.index', ['condition' => 'used', 'location' => 'nigeria']), 'label' => __('Nigerian Used')],
+          ['url' => route('inventory.index', ['condition' => 'used', 'location' => 'united states']), 'label' => __('Foreign Used')],
           ['route' => 'about', 'label' => __('About')],
           ['route' => 'faq', 'label' => __('FAQ')],
           ['route' => 'contact', 'label' => __('Contact')],
         ] as $item)
           @php
-            $r = $item['route'];
-            $active = match ($r) {
-              'home' => request()->routeIs('home'),
-              'inventory.index' => request()->routeIs('inventory.*'),
-              default => request()->routeIs($r),
-            };
+            $r = $item['route'] ?? null;
+            $url = $item['url'] ?? route($r);
+            if ($r) {
+                $active = match ($r) {
+                  'home' => request()->routeIs('home'),
+                  'inventory.index' => request()->routeIs('inventory.*') && !request()->has('location'),
+                  default => request()->routeIs($r),
+                };
+            } else {
+                $active = str_contains(urldecode(request()->fullUrl()), urldecode($url));
+            }
           @endphp
-          <a href="{{ route($r) }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors {{ $active ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">
+          <a href="{{ $url }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors {{ $active ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">
             <span>{{ $item['label'] }}</span>
           </a>
         @endforeach
@@ -158,12 +165,17 @@
     @foreach ([
       ['route' => 'home', 'label' => __('Home')],
       ['route' => 'inventory.index', 'label' => __('Inventory')],
+      ['url' => route('inventory.index', ['condition' => 'used', 'location' => 'nigeria']), 'label' => __('Nigerian Used')],
+      ['url' => route('inventory.index', ['condition' => 'used', 'location' => 'united states']), 'label' => __('Foreign Used')],
       ['route' => 'about', 'label' => __('About')],
       ['route' => 'faq', 'label' => __('FAQ')],
       ['route' => 'compare', 'label' => __('Compare')],
       ['route' => 'contact', 'label' => __('Contact')],
     ] as $item)
-      <a href="{{ route($item['route']) }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ $item['label'] }}</a>
+      @php
+        $url = $item['url'] ?? route($item['route']);
+      @endphp
+      <a href="{{ $url }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ $item['label'] }}</a>
     @endforeach
     <div class="mt-5 border-t border-white/10 pt-4 text-xs text-white/70">
       <p class="line-clamp-2">{{ $address }}</p>

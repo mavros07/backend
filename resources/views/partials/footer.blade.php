@@ -69,7 +69,6 @@
     <div class="flex items-center gap-6 mt-4 md:mt-0">
       <a class="hover:text-white transition-colors" href="#">Privacy Policy</a>
       <a class="hover:text-white transition-colors" href="#">Terms of Service</a>
-      <a href="{{ route('admin.dashboard') }}" class="bg-lime-600 text-white px-4 py-2 rounded-sm font-bold">BACK-END DEMO</a>
     </div>
   </div>
 </footer>
