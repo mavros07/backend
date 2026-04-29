@@ -183,6 +183,23 @@
         role.classList.toggle('text-indigo-600', isFirst);
         role.classList.toggle('text-gray-500', !isFirst);
       });
+      updateClearButtonsState();
+    }
+
+    function getExistingImageCards() {
+      return Array.from(document.querySelectorAll('[data-image-card]'));
+    }
+
+    function updateClearButtonsState() {
+      const existingCards = getExistingImageCards();
+      const hasExisting = existingCards.length > 0;
+      const hasExistingMany = existingCards.length > 1;
+      const hasPendingMainSelection = !!(mainInput.files && mainInput.files[0]) || !!((mainPathInput?.value || '').trim());
+      const hasPendingGallerySelection = galleryFiles.length > 0 || galleryPathItems.length > 0;
+
+      mainClearBtn.disabled = !(hasPendingMainSelection || hasExisting);
+      galleryClearBtn.disabled = !(hasPendingGallerySelection || hasExistingMany);
+      galleryClearBtn.classList.toggle('hidden', !hasPendingGallerySelection && !hasExistingMany);
     }
 
     mainInput.addEventListener('change', renderMain);
@@ -190,11 +207,21 @@
       if (mainClearBtn.disabled) {
         return;
       }
+      const existingCards = getExistingImageCards();
+      if ((!mainInput.files || !mainInput.files[0]) && !((mainPathInput?.value || '').trim()) && existingCards.length > 0) {
+        const featuredClearBtn = existingCards[0]?.querySelector('[data-clear-existing-image]');
+        if (featuredClearBtn) {
+          markExistingImageForRemoval(featuredClearBtn);
+        }
+        updateClearButtonsState();
+        return;
+      }
       mainInput.value = '';
       if (mainPathInput) {
         mainPathInput.value = '';
       }
       renderMain();
+      updateClearButtonsState();
     });
 
     galleryInput.addEventListener('change', () => {
@@ -208,11 +235,26 @@
       if (galleryClearBtn.disabled) {
         return;
       }
+      const hasPendingGallerySelection = galleryFiles.length > 0 || galleryPathItems.length > 0;
+      if (!hasPendingGallerySelection) {
+        const existingCards = getExistingImageCards();
+        if (existingCards.length > 1) {
+          existingCards.forEach((card) => {
+            const btn = card.querySelector('[data-clear-existing-image]');
+            if (btn) {
+              markExistingImageForRemoval(btn);
+            }
+          });
+        }
+        updateClearButtonsState();
+        return;
+      }
       galleryFiles = [];
       galleryPathItems = [];
       syncGalleryInput();
       renderGalleryPathInputs();
       renderGallery();
+      updateClearButtonsState();
     });
 
     document.querySelectorAll('[data-preview-image]').forEach((img) => {
@@ -234,6 +276,7 @@
 
     renderMain();
     renderGallery();
+    updateClearButtonsState();
 
     if (!isAdminUser) {
       return;
