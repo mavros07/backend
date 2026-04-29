@@ -234,6 +234,37 @@ class UserVehicleController extends Controller
         return back()->with('status', 'Image removed.');
     }
 
+    public function destroyImageById(Request $request, Vehicle $vehicle): RedirectResponse|JsonResponse
+    {
+        $this->authorizeVehicleAccess($request, $vehicle);
+        $data = $request->validate([
+            'image_id' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $image = $vehicle->images()->whereKey((int) $data['image_id'])->first();
+        if (! $image) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Image not found on this listing.',
+                ], 404);
+            }
+            return back()->withErrors(['image' => 'Image not found on this listing.']);
+        }
+
+        $image->delete();
+        $this->resequenceImages($vehicle);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'Image removed.',
+            ]);
+        }
+
+        return back()->with('status', 'Image removed.');
+    }
+
     private function authorizeVehicleAccess(Request $request, Vehicle $vehicle): void
     {
         if ($request->user()->hasRole('admin')) {

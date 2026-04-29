@@ -110,6 +110,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/vehicles/{vehicle}/images/{image}', [UserVehicleController::class, 'destroyImage'])->name('dashboard.vehicles.images.destroy');
         // Some hosting/WAF setups block DELETE requests; accept POST as well.
         Route::post('/vehicles/{vehicle}/images/{image}', [UserVehicleController::class, 'destroyImage'])->name('dashboard.vehicles.images.destroy.post');
+        Route::post('/vehicles/{vehicle}/images/remove', [UserVehicleController::class, 'destroyImageById'])->name('dashboard.vehicles.images.remove');
     });
 });
 
