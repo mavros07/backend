@@ -152,6 +152,9 @@
     async function removeExistingImage(button) {
       const url = button.getAttribute('data-delete-url');
       const card = button.closest('[data-image-card]');
+      // #region agent log
+      fetch('http://127.0.0.1:7904/ingest/579ee33d-9dc3-42ff-b919-75cad92d026b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c47fa5'},body:JSON.stringify({sessionId:'c47fa5',runId:'remove-image',hypothesisId:'H1',location:'image-manager.blade.php:removeExistingImage:start',message:'Remove clicked',data:{url:url||null,hasCard:!!card,pathname:window.location.pathname},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       if (!url || !card) {
         return;
       }
@@ -162,6 +165,9 @@
         const params = new URLSearchParams();
         params.set('_token', csrfToken);
         params.set('_method', 'DELETE');
+        // #region agent log
+        fetch('http://127.0.0.1:7904/ingest/579ee33d-9dc3-42ff-b919-75cad92d026b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c47fa5'},body:JSON.stringify({sessionId:'c47fa5',runId:'remove-image',hypothesisId:'H2',location:'image-manager.blade.php:removeExistingImage:beforeFetch',message:'Sending unlink request',data:{url,method:'POST',spoof:'DELETE',tokenPresent:!!csrfToken},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
 
         const response = await fetch(url, {
           method: 'POST',
@@ -173,6 +179,9 @@
           body: params,
           credentials: 'same-origin',
         });
+        // #region agent log
+        fetch('http://127.0.0.1:7904/ingest/579ee33d-9dc3-42ff-b919-75cad92d026b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c47fa5'},body:JSON.stringify({sessionId:'c47fa5',runId:'remove-image',hypothesisId:'H3',location:'image-manager.blade.php:removeExistingImage:afterFetch',message:'Unlink response received',data:{url,responseUrl:response.url,status:response.status,ok:response.ok},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
 
         if (!response.ok) {
           const msg = 'Could not remove image (HTTP ' + String(response.status) + '). Refresh and try again.';
@@ -182,6 +191,9 @@
         card.remove();
         relabelExistingGallery();
       } catch (error) {
+        // #region agent log
+        fetch('http://127.0.0.1:7904/ingest/579ee33d-9dc3-42ff-b919-75cad92d026b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c47fa5'},body:JSON.stringify({sessionId:'c47fa5',runId:'remove-image',hypothesisId:'H4',location:'image-manager.blade.php:removeExistingImage:catch',message:'Unlink request failed',data:{errorMessage:(error&&error.message)?String(error.message):'unknown'},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         button.disabled = false;
         alert(error && error.message ? error.message : 'Could not remove image. Please refresh and try again.');
       }

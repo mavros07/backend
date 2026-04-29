@@ -193,6 +193,29 @@ class UserVehicleController extends Controller
 
     public function destroyImage(Request $request, Vehicle $vehicle, VehicleImage $image): RedirectResponse|JsonResponse
     {
+        // #region agent log
+        try {
+            $payload = json_encode([
+                'sessionId' => 'c47fa5',
+                'runId' => 'remove-image',
+                'hypothesisId' => 'H5',
+                'location' => 'UserVehicleController.php:destroyImage:entry',
+                'message' => 'Controller reached for image unlink',
+                'data' => [
+                    'vehicleId' => (int) $vehicle->id,
+                    'imageId' => (int) $image->id,
+                    'path' => (string) $request->path(),
+                    'method' => (string) $request->method(),
+                ],
+                'timestamp' => (int) round(microtime(true) * 1000),
+            ], JSON_UNESCAPED_SLASHES);
+            if (is_string($payload)) {
+                @file_put_contents(base_path('debug-c47fa5.log'), $payload . PHP_EOL, FILE_APPEND);
+            }
+        } catch (\Throwable) {
+            // swallow debug logging errors
+        }
+        // #endregion
         $this->authorizeVehicleAccess($request, $vehicle);
         abort_unless($image->vehicle_id === $vehicle->id, 404);
 
