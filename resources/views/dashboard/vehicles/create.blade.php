@@ -238,7 +238,7 @@
                     @else
                       <button type="button" onclick="document.getElementById('main_image').click()" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Upload image</button>
                     @endif
-                    <button type="button" id="main-image-clear" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled>Clear</button>
+                    <button type="button" id="main-image-clear" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled>Clear selection</button>
                   </div>
                   <x-input-error :messages="$errors->get('main_image')" class="mt-2" />
                   <x-input-error :messages="$errors->get('main_image_path')" class="mt-2" />
@@ -256,7 +256,7 @@
                     @else
                       <button type="button" onclick="document.getElementById('images').click()" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Upload images</button>
                     @endif
-                    <button type="button" id="gallery-clear-all" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled>Clear</button>
+                    <button type="button" id="gallery-clear-all" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled>Clear selection</button>
                   </div>
                   <x-input-error :messages="$errors->get('images')" class="mt-2" />
                   <x-input-error :messages="$errors->get('images.*')" class="mt-2" />
