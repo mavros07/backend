@@ -325,12 +325,10 @@
                           <button
                             type="button"
                             class="text-sm text-red-700 hover:underline"
-                            data-remove-image
+                            data-clear-existing-image
                             data-image-id="{{ $image->id }}"
-                            data-delete-url="{{ route('dashboard.vehicles.images.destroy.post', [$vehicle, $image]) }}"
-                            data-remove-url="{{ route('dashboard.vehicles.images.remove', $vehicle) }}"
                           >
-                            Remove
+                            Clear
                           </button>
                         </div>
                       </div>

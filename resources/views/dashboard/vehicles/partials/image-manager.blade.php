@@ -29,7 +29,6 @@
     const modalClose = document.getElementById('image-preview-close');
     const mainPathInput = document.getElementById('main_image_path');
     const galleryPathsHolder = document.getElementById('gallery-paths-holder');
-    const csrfToken = @json(csrf_token());
     let galleryFiles = [];
     let galleryPathItems = [];
 
@@ -149,55 +148,27 @@
       galleryClearBtn.disabled = false;
     }
 
-    async function removeExistingImage(button) {
-      const url = button.getAttribute('data-remove-url') || button.getAttribute('data-delete-url');
+    function markExistingImageForRemoval(button) {
       const imageId = Number(button.getAttribute('data-image-id') || '0');
       const card = button.closest('[data-image-card]');
-      // #region agent log
-      fetch('http://127.0.0.1:7904/ingest/579ee33d-9dc3-42ff-b919-75cad92d026b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c47fa5'},body:JSON.stringify({sessionId:'c47fa5',runId:'remove-image',hypothesisId:'H1',location:'image-manager.blade.php:removeExistingImage:start',message:'Remove clicked',data:{url:url||null,imageId,hasCard:!!card,pathname:window.location.pathname},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-      if (!url || !card || !Number.isFinite(imageId) || imageId <= 0) {
+      if (!card || !Number.isFinite(imageId) || imageId <= 0) {
         return;
       }
-
-      button.disabled = true;
-      try {
-        // Use POST for maximum compatibility with hosting/WAF rules that block DELETE.
-        const params = new URLSearchParams();
-        params.set('_token', csrfToken);
-        params.set('image_id', String(imageId));
-        // #region agent log
-        fetch('http://127.0.0.1:7904/ingest/579ee33d-9dc3-42ff-b919-75cad92d026b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c47fa5'},body:JSON.stringify({sessionId:'c47fa5',runId:'remove-image',hypothesisId:'H2',location:'image-manager.blade.php:removeExistingImage:beforeFetch',message:'Sending unlink request',data:{url,method:'POST',imageId,tokenPresent:!!csrfToken},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
-
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-          },
-          body: params,
-          credentials: 'same-origin',
-        });
-        // #region agent log
-        fetch('http://127.0.0.1:7904/ingest/579ee33d-9dc3-42ff-b919-75cad92d026b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c47fa5'},body:JSON.stringify({sessionId:'c47fa5',runId:'remove-image',hypothesisId:'H3',location:'image-manager.blade.php:removeExistingImage:afterFetch',message:'Unlink response received',data:{url,responseUrl:response.url,status:response.status,ok:response.ok},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
-
-        if (!response.ok) {
-          const msg = 'Could not remove image (HTTP ' + String(response.status) + '). Refresh and try again.';
-          throw new Error(msg);
-        }
-
-        card.remove();
-        relabelExistingGallery();
-      } catch (error) {
-        // #region agent log
-        fetch('http://127.0.0.1:7904/ingest/579ee33d-9dc3-42ff-b919-75cad92d026b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'c47fa5'},body:JSON.stringify({sessionId:'c47fa5',runId:'remove-image',hypothesisId:'H4',location:'image-manager.blade.php:removeExistingImage:catch',message:'Unlink request failed',data:{errorMessage:(error&&error.message)?String(error.message):'unknown'},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
-        button.disabled = false;
-        alert(error && error.message ? error.message : 'Could not remove image. Please refresh and try again.');
+      const form = button.closest('form');
+      if (!form) {
+        return;
       }
+      const hiddenName = 'remove_image_ids[]';
+      const already = form.querySelector('input[name="' + hiddenName + '"][value="' + imageId + '"]');
+      if (!already) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = hiddenName;
+        input.value = String(imageId);
+        form.appendChild(input);
+      }
+      card.remove();
+      relabelExistingGallery();
     }
 
     function relabelExistingGallery() {
@@ -249,8 +220,8 @@
     });
 
     if (supportsExistingGalleryDelete) {
-      document.querySelectorAll('[data-remove-image]').forEach((button) => {
-        button.addEventListener('click', () => removeExistingImage(button));
+      document.querySelectorAll('[data-clear-existing-image]').forEach((button) => {
+        button.addEventListener('click', () => markExistingImageForRemoval(button));
       });
     }
 

@@ -110,13 +110,23 @@ class UserVehicleController extends Controller
         $this->authorizeVehicleAccess($request, $vehicle);
         try {
             $data = $this->validateVehicleData($request);
+            $removeImageIds = collect($data['remove_image_ids'] ?? [])
+                ->map(fn ($id) => (int) $id)
+                ->filter(fn ($id) => $id > 0)
+                ->values()
+                ->all();
+            unset($data['remove_image_ids']);
 
-            DB::transaction(function () use ($request, $vehicle, $data) {
+            DB::transaction(function () use ($request, $vehicle, $data, $removeImageIds) {
                 $vehicle->fill($data);
                 if ($vehicle->isDirty('title')) {
                     $vehicle->slug = $this->uniqueSlug($data['title'], $vehicle->id);
                 }
                 $vehicle->save();
+                if ($removeImageIds !== []) {
+                    $vehicle->images()->whereIn('id', $removeImageIds)->delete();
+                    $this->resequenceImages($vehicle);
+                }
                 $this->storeUploadedImages($request, $vehicle);
             });
 
@@ -193,65 +203,11 @@ class UserVehicleController extends Controller
 
     public function destroyImage(Request $request, Vehicle $vehicle, VehicleImage $image): RedirectResponse|JsonResponse
     {
-        // #region agent log
-        try {
-            $payload = json_encode([
-                'sessionId' => 'c47fa5',
-                'runId' => 'remove-image',
-                'hypothesisId' => 'H5',
-                'location' => 'UserVehicleController.php:destroyImage:entry',
-                'message' => 'Controller reached for image unlink',
-                'data' => [
-                    'vehicleId' => (int) $vehicle->id,
-                    'imageId' => (int) $image->id,
-                    'path' => (string) $request->path(),
-                    'method' => (string) $request->method(),
-                ],
-                'timestamp' => (int) round(microtime(true) * 1000),
-            ], JSON_UNESCAPED_SLASHES);
-            if (is_string($payload)) {
-                @file_put_contents(base_path('debug-c47fa5.log'), $payload . PHP_EOL, FILE_APPEND);
-            }
-        } catch (\Throwable) {
-            // swallow debug logging errors
-        }
-        // #endregion
         $this->authorizeVehicleAccess($request, $vehicle);
         abort_unless($image->vehicle_id === $vehicle->id, 404);
 
         // Editor "remove" detaches image from this listing only.
         // It must not delete the underlying media asset/site file.
-        $image->delete();
-        $this->resequenceImages($vehicle);
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'ok' => true,
-                'message' => 'Image removed.',
-            ]);
-        }
-
-        return back()->with('status', 'Image removed.');
-    }
-
-    public function destroyImageById(Request $request, Vehicle $vehicle): RedirectResponse|JsonResponse
-    {
-        $this->authorizeVehicleAccess($request, $vehicle);
-        $data = $request->validate([
-            'image_id' => ['required', 'integer', 'min:1'],
-        ]);
-
-        $image = $vehicle->images()->whereKey((int) $data['image_id'])->first();
-        if (! $image) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'ok' => false,
-                    'message' => 'Image not found on this listing.',
-                ], 404);
-            }
-            return back()->withErrors(['image' => 'Image not found on this listing.']);
-        }
-
         $image->delete();
         $this->resequenceImages($vehicle);
 

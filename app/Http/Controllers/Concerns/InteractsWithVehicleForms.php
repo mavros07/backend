@@ -70,6 +70,8 @@ trait InteractsWithVehicleForms
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'gallery_image_paths' => ['sometimes', 'array', 'max:12'],
             'gallery_image_paths.*' => ['string', 'max:2048', 'regex:/^(https?:\/\/|\/?(asset|storage)\/).+/i'],
+            'remove_image_ids' => ['sometimes', 'array', 'max:100'],
+            'remove_image_ids.*' => ['integer', 'min:1'],
         ]);
 
         $data['is_special'] = $request->boolean('is_special');
