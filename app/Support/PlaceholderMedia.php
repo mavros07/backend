@@ -35,6 +35,15 @@ final class PlaceholderMedia
         }
 
         if (self::publicFileExists($relativePath)) {
+            if (str_starts_with($relativePath, 'storage/')) {
+                $publicPath = public_path($relativePath);
+                if (! File::exists($publicPath)) {
+                    $diskPath = ltrim(substr($relativePath, strlen('storage/')), '/');
+
+                    return route('media.storage.show', ['path' => $diskPath], false);
+                }
+            }
+
             return asset($relativePath);
         }
 

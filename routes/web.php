@@ -17,6 +17,7 @@ use App\Http\Controllers\AdminSiteSettingsController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\VendorSettingsController;
 use App\Http\Controllers\CurrencyPreferenceController;
+use App\Http\Controllers\PublicStorageMediaController;
 use App\Models\AdminAuditTrail;
 use App\Models\SiteTrafficEvent;
 use App\Models\User;
@@ -63,6 +64,9 @@ Route::post('/currency/select', [CurrencyPreferenceController::class, 'update'])
 Route::post('/compare/add/{vehicle}', [CompareController::class, 'add'])->name('compare.add');
 Route::post('/compare/remove/{vehicle}', [CompareController::class, 'remove'])->name('compare.remove');
 Route::post('/compare/clear', [CompareController::class, 'clear'])->name('compare.clear');
+Route::get('/media/storage/{path}', [PublicStorageMediaController::class, 'show'])
+    ->where('path', '.*')
+    ->name('media.storage.show');
 
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();

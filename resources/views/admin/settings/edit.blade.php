@@ -43,7 +43,9 @@
               <input type="file" name="logo_file" id="logo_file" accept=".jpg,.jpeg,.png,.webp,.svg" class="mt-1 block w-full rounded-md border border-zinc-300 bg-white text-sm shadow-sm file:mr-3 file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200"/>
               <input type="text" name="logo_path" id="logo_path" value="{{ old('logo_path', $settings['logo_path']) }}" placeholder="Optional manual path (storage/...)" class="mt-2 block w-full rounded-md border-zinc-300 font-mono text-xs shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
               @if (!empty(old('logo_path', $settings['logo_path'])))
-                <img src="{{ \App\Support\VehicleImageUrl::url(old('logo_path', $settings['logo_path'])) }}" alt="" class="mt-2 h-12 w-auto max-w-[200px] object-contain"/>
+                <img id="logo-preview-live" src="{{ \App\Support\VehicleImageUrl::url(old('logo_path', $settings['logo_path'])) }}" alt="" class="mt-2 h-12 w-auto max-w-[200px] object-contain"/>
+              @else
+                <img id="logo-preview-live" src="" alt="" class="mt-2 hidden h-12 w-auto max-w-[200px] object-contain"/>
               @endif
             </div>
             <div>
@@ -51,7 +53,9 @@
               <input type="file" name="logo_light_file" id="logo_light_file" accept=".jpg,.jpeg,.png,.webp,.svg" class="mt-1 block w-full rounded-md border border-zinc-300 bg-white text-sm shadow-sm file:mr-3 file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200"/>
               <input type="text" name="logo_light_path" id="logo_light_path" value="{{ old('logo_light_path', $settings['logo_light_path']) }}" placeholder="Optional manual path (storage/...)" class="mt-2 block w-full rounded-md border-zinc-300 font-mono text-xs shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
               @if (!empty(old('logo_light_path', $settings['logo_light_path'])))
-                <img src="{{ \App\Support\VehicleImageUrl::url(old('logo_light_path', $settings['logo_light_path'])) }}" alt="" class="mt-2 h-12 w-auto max-w-[200px] rounded bg-zinc-800 object-contain p-2"/>
+                <img id="logo-light-preview-live" src="{{ \App\Support\VehicleImageUrl::url(old('logo_light_path', $settings['logo_light_path'])) }}" alt="" class="mt-2 h-12 w-auto max-w-[200px] rounded bg-zinc-800 object-contain p-2"/>
+              @else
+                <img id="logo-light-preview-live" src="" alt="" class="mt-2 hidden h-12 w-auto max-w-[200px] rounded bg-zinc-800 object-contain p-2"/>
               @endif
             </div>
             <div>
@@ -59,7 +63,9 @@
               <input type="file" name="favicon_file" id="favicon_file" accept=".ico,.png,.jpg,.jpeg,.webp" class="mt-1 block w-full rounded-md border border-zinc-300 bg-white text-sm shadow-sm file:mr-3 file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200"/>
               <input type="text" name="favicon_path" id="favicon_path" value="{{ old('favicon_path', $settings['favicon_path']) }}" placeholder="Optional manual path (storage/...)" class="mt-2 block w-full rounded-md border-zinc-300 font-mono text-xs shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
               @if (!empty(old('favicon_path', $settings['favicon_path'])))
-                <img src="{{ \App\Support\VehicleImageUrl::url(old('favicon_path', $settings['favicon_path'])) }}" alt="" class="mt-2 h-12 w-12 object-contain"/>
+                <img id="favicon-preview-live" src="{{ \App\Support\VehicleImageUrl::url(old('favicon_path', $settings['favicon_path'])) }}" alt="" class="mt-2 h-12 w-12 object-contain"/>
+              @else
+                <img id="favicon-preview-live" src="" alt="" class="mt-2 hidden h-12 w-12 object-contain"/>
               @endif
             </div>
           </div>
@@ -193,4 +199,30 @@
       </div>
     </form>
   </div>
+  <script>
+    (() => {
+      const wirePreview = (fileId, imgId) => {
+        const fileInput = document.getElementById(fileId);
+        const img = document.getElementById(imgId);
+        if (!fileInput || !img) return;
+
+        fileInput.addEventListener('change', () => {
+          const file = fileInput.files && fileInput.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            if (ev && ev.target && typeof ev.target.result === 'string') {
+              img.src = ev.target.result;
+              img.classList.remove('hidden');
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      };
+
+      wirePreview('logo_file', 'logo-preview-live');
+      wirePreview('logo_light_file', 'logo-light-preview-live');
+      wirePreview('favicon_file', 'favicon-preview-live');
+    })();
+  </script>
 </x-app-layout>
