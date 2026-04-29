@@ -1,8 +1,8 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
+        <div class="flex min-h-16 flex-wrap items-center justify-between gap-y-2 py-2 sm:h-16 sm:flex-nowrap sm:py-0">
+            <div class="flex min-w-0 flex-1 flex-wrap items-center gap-y-2 sm:flex-nowrap">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
@@ -11,13 +11,17 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden flex-wrap gap-x-6 gap-y-1 sm:-my-px sm:ms-10 sm:flex sm:items-center">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
                     <x-nav-link :href="route('dashboard.vehicles.index')" :active="request()->routeIs('dashboard.vehicles.*')">
                         {{ __('My Vehicles') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('dashboard.vendor-settings.edit')" :active="request()->routeIs('dashboard.vendor-settings.*')">
+                        {{ __('Seller profile') }}
                     </x-nav-link>
 
                     <x-nav-link :href="route('inventory.index')" :active="request()->routeIs('inventory.*')">
@@ -83,6 +87,10 @@
                 {{ __('My Vehicles') }}
             </x-responsive-nav-link>
 
+            <x-responsive-nav-link :href="route('dashboard.vendor-settings.edit')" :active="request()->routeIs('dashboard.vendor-settings.*')">
+                {{ __('Seller profile') }}
+            </x-responsive-nav-link>
+
             <x-responsive-nav-link :href="route('inventory.index')" :active="request()->routeIs('inventory.*')">
                 {{ __('Public Inventory') }}
             </x-responsive-nav-link>
@@ -96,6 +104,10 @@
             </div>
 
             <div class="mt-3 space-y-1">
+                <x-responsive-nav-link :href="route('dashboard.vendor-settings.edit')">
+                    {{ __('Seller profile') }}
+                </x-responsive-nav-link>
+
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>

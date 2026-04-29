@@ -2,7 +2,6 @@
 
 @php
   $site = $site ?? [];
-  $site = $site ?? [];
 
   $heroImg = \App\Support\VehicleImageUrl::url($sections['hero_image'] ?? 'asset/images/media/contact-hero-bg.jpg');
 
@@ -73,8 +72,8 @@
 </div>
 <div class="md:col-span-2 flex flex-col md:flex-row items-center justify-between gap-6 mt-8">
 <label class="flex items-center gap-3 cursor-pointer">
-<input class="w-4 h-4 border-none bg-[#ebf1f7] text-[#4e77ed] rounded-sm focus:ring-0" type="checkbox"/>
-<span class="text-[13px] text-slate-500">Subscribe and Get latest updates and offers by Email</span>
+<input name="newsletter_subscribe" value="1" class="w-4 h-4 border-none bg-[#ebf1f7] text-[#4e77ed] rounded-sm focus:ring-0" type="checkbox" @checked(old('newsletter_subscribe'))/>
+<span class="text-[13px] text-slate-500">{{ $site['newsletter_note'] ?? __('Subscribe and get latest updates and offers by email.') }}</span>
 </label>
 <button class="bg-[#4e77ed] text-white px-14 py-4 font-bold text-sm rounded shadow-lg hover:brightness-110 transition-all uppercase tracking-widest" type="submit">
                         SUBMIT

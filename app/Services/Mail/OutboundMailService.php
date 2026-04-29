@@ -9,7 +9,7 @@ use RuntimeException;
  * Outbound mail: ZeptoMail API first (when configured), then PHPMailer SMTP backup.
  * All settings come from .env via config/mail.php (Resmenu-style chain).
  */
-final class OutboundMailService
+class OutboundMailService
 {
     private readonly ZeptoMailApiService $zepto;
 

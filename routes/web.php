@@ -13,6 +13,9 @@ use App\Http\Controllers\TemporaryAdminController;
 use App\Http\Controllers\AdminPageController;
 use App\Http\Controllers\AdminMediaController;
 use App\Http\Controllers\AdminAnalyticsController;
+use App\Http\Controllers\AdminSiteSettingsController;
+use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\VendorSettingsController;
 use App\Models\AdminAuditTrail;
 use App\Models\SiteTrafficEvent;
 use App\Models\User;
@@ -42,6 +45,9 @@ Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::post('/contact', [ContactController::class, 'submit'])->middleware('throttle:5,1')->name('contact.submit');
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
+    ->middleware('throttle:10,1')
+    ->name('newsletter.subscribe');
 Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 Route::get('/inventory', [PageController::class, 'inventory'])->name('inventory.index');
 Route::post('/inventory/{slug}/inquiry', [VehicleInquiryController::class, 'store'])
@@ -87,6 +93,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::prefix('dashboard')->group(function () {
+        Route::get('/seller-profile', [VendorSettingsController::class, 'edit'])->name('dashboard.vendor-settings.edit');
+        Route::put('/seller-profile', [VendorSettingsController::class, 'update'])->name('dashboard.vendor-settings.update');
+
         Route::get('/vehicles', [UserVehicleController::class, 'index'])->name('dashboard.vehicles.index');
         Route::get('/vehicles/create', [UserVehicleController::class, 'create'])->name('dashboard.vehicles.create');
         Route::post('/vehicles', [UserVehicleController::class, 'store'])->name('dashboard.vehicles.store');
@@ -219,6 +228,9 @@ Route::middleware(['auth', 'role:admin', 'admin.audit'])->prefix('admin')->group
     Route::delete('/media/{media}', [AdminMediaController::class, 'destroy'])->name('admin.media.destroy');
     Route::post('/media/bulk-delete', [AdminMediaController::class, 'bulkDestroy'])->name('admin.media.bulk-destroy');
     Route::get('/api/media', [AdminMediaController::class, 'list'])->name('admin.media.list');
+
+    Route::get('/settings', [AdminSiteSettingsController::class, 'edit'])->name('admin.settings.edit');
+    Route::put('/settings', [AdminSiteSettingsController::class, 'update'])->name('admin.settings.update');
 });
 
 require __DIR__.'/auth.php';

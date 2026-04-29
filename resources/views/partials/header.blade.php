@@ -1,17 +1,20 @@
 @php
   $site = $site ?? [];
-  $brandName = config('app.name', 'Site');
+  $brandName = ! empty(trim((string) ($site['site_display_name'] ?? ''))) ? trim((string) $site['site_display_name']) : config('app.name', 'Site');
   $logoPath = $site['logo_path'] ?? $site['logo_url'] ?? null;
-  $hoursLabel = $site['dealer_hours_label'] ?? __('Work Hours');
-  $hoursLines = preg_split('/\r\n|\r|\n/', $site['dealer_sales_hours'] ?? "Mon – Fri: 09:00AM – 09:00PM\nSaturday: 09:00AM – 07:00PM\nSunday: Closed") ?: [];
-  $hoursSnippet = $hoursLines[0] ?? '';
-  $address = $site['dealer_address'] ?? '1840 E Garvey Ave South West Covina, CA 91791';
-  $phone = $site['dealer_phone'] ?? $site['dealer_sales_phone'] ?? '+1 212-226-3126';
-  $currencyLabel = $site['currency_label'] ?? __('Currency (USD)');
-  $socialFacebook = $site['social_facebook'] ?? '#';
-  $socialInstagram = $site['social_instagram'] ?? '#';
-  $socialLinkedin = $site['social_linkedin'] ?? '#';
-  $socialYoutube = $site['social_youtube'] ?? '#';
+  $hoursLabel = trim((string) ($site['dealer_hours_label'] ?? '')) ?: __('Work Hours');
+  $hoursLines = preg_split('/\r\n|\r|\n/', (string) ($site['dealer_sales_hours'] ?? '')) ?: [];
+  $hoursSnippet = trim((string) ($hoursLines[0] ?? ''));
+  $address = trim((string) ($site['dealer_address'] ?? ''));
+  $phone = trim((string) ($site['dealer_phone'] ?? ''));
+  if ($phone === '') {
+      $phone = trim((string) ($site['dealer_sales_phone'] ?? ''));
+  }
+  $currencyLabel = trim((string) ($site['currency_label'] ?? '')) ?: __('Currency (USD)');
+  $socialFacebook = trim((string) ($site['social_facebook'] ?? ''));
+  $socialInstagram = trim((string) ($site['social_instagram'] ?? ''));
+  $socialLinkedin = trim((string) ($site['social_linkedin'] ?? ''));
+  $socialYoutube = trim((string) ($site['social_youtube'] ?? ''));
   $compareCount = \App\Support\Compare::count();
   $isHome = request()->routeIs('home') || request()->routeIs('faq') || request()->routeIs('about');
 @endphp
@@ -54,14 +57,18 @@
       </button>
 
       <div class="hidden xl:flex items-center gap-6 text-[11px] font-semibold tracking-[0.01em] text-white/90">
-        <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone) }}" class="inline-flex items-center gap-1.5 text-white/90 hover:text-white">
-          <span class="material-symbols-outlined text-[17px] text-[#1280DF]">call</span>
-          <span>{{ $phone }}</span>
-        </a>
-        <span class="inline-flex min-w-0 items-center gap-1.5 text-white/80">
-          <span class="material-symbols-outlined text-[17px] text-[#1280DF]">location_on</span>
-          <span class="truncate max-w-[370px]">{{ $address }}</span>
-        </span>
+        @if ($phone !== '')
+          <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone) }}" class="inline-flex items-center gap-1.5 text-white/90 hover:text-white">
+            <span class="material-symbols-outlined text-[17px] text-[#1280DF]">call</span>
+            <span>{{ $phone }}</span>
+          </a>
+        @endif
+        @if ($address !== '')
+          <span class="inline-flex min-w-0 items-center gap-1.5 text-white/80">
+            <span class="material-symbols-outlined text-[17px] text-[#1280DF]">location_on</span>
+            <span class="truncate max-w-[370px]">{{ $address }}</span>
+          </span>
+        @endif
         @if ($hoursSnippet !== '')
           <span class="inline-flex items-center gap-1.5 text-white/90">
             <span class="material-symbols-outlined text-[17px] text-[#1280DF]">schedule</span>
@@ -177,9 +184,15 @@
       @endphp
       <a href="{{ $url }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ $item['label'] }}</a>
     @endforeach
-    <div class="mt-5 border-t border-white/10 pt-4 text-xs text-white/70">
-      <p class="line-clamp-2">{{ $address }}</p>
-      <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone) }}" class="mt-2 inline-flex text-sm font-semibold text-[#4ea3ff] hover:text-white">{{ $phone }}</a>
-    </div>
+    @if ($address !== '' || $phone !== '')
+      <div class="mt-5 border-t border-white/10 pt-4 text-xs text-white/70">
+        @if ($address !== '')
+          <p class="line-clamp-2">{{ $address }}</p>
+        @endif
+        @if ($phone !== '')
+          <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone) }}" class="mt-2 inline-flex text-sm font-semibold text-[#4ea3ff] hover:text-white">{{ $phone }}</a>
+        @endif
+      </div>
+    @endif
   </nav>
 </div>

@@ -1,26 +1,50 @@
 @php
   $site = $site ?? [];
-  $copyrightName = $site['copyright_line'] ?? config('app.name', 'REV AUTO GROUP');
-  $socialFacebook = $site['social_facebook'] ?? '#';
-  $socialInstagram = $site['social_instagram'] ?? '#';
-  $socialLinkedin = $site['social_linkedin'] ?? '#';
-  $socialYoutube = $site['social_youtube'] ?? '#';
-  $dealerSalesHours = preg_split('/\r\n|\r|\n/', $site['dealer_sales_hours'] ?? "Monday - Friday: 09:00AM - 09:00PM\nSaturday: 09:00AM - 07:00PM\nSunday: Closed") ?: [];
+  $splitHours = static fn (string $raw): array => preg_split('/\r\n|\r|\n/', $raw) ?: [];
+  $copyrightName = ! empty(trim((string) ($site['copyright_line'] ?? ''))) ? trim((string) $site['copyright_line']) : config('app.name', 'REV AUTO GROUP');
+  $footerTagline = trim((string) ($site['footer_tagline'] ?? ''));
+  $socialFacebook = trim((string) ($site['social_facebook'] ?? ''));
+  $socialInstagram = trim((string) ($site['social_instagram'] ?? ''));
+  $socialLinkedin = trim((string) ($site['social_linkedin'] ?? ''));
+  $socialYoutube = trim((string) ($site['social_youtube'] ?? ''));
+  $salesHoursLines = $splitHours((string) ($site['dealer_sales_hours'] ?? ''));
+  $serviceHoursLines = $splitHours((string) ($site['dealer_service_hours'] ?? ''));
+  $partsHoursLines = $splitHours((string) ($site['dealer_parts_hours'] ?? ''));
+
+  $blogTitle = trim((string) ($site['footer_blog_title'] ?? __('Latest Blog Posts')));
+  $blogRaw = $site['footer_blog_entries_json'] ?? '[]';
+  $blogEntries = json_decode((string) $blogRaw, true);
+  if (! is_array($blogEntries)) {
+      $blogEntries = [];
+  }
 
   $aboutGalleryStr = \App\Models\PageSection::query()->where('page', 'about')->where('section_key', 'gallery')->value('content') ?? '[]';
   $aboutGallery = json_decode($aboutGalleryStr, true) ?? [];
   $footerGallery = array_slice($aboutGallery, 0, 4);
   $fallbacks = ['asset/images/media/footer-1.jpg', 'asset/images/media/footer-2.jpg', 'asset/images/media/footer-3.jpg', 'asset/images/media/footer-4.jpg'];
+
+  $newsletterEnabled = ($site['newsletter_enabled'] ?? '0') === '1';
+  $newsletterNote = trim((string) ($site['newsletter_note'] ?? ''));
+  $privacyUrl = trim((string) ($site['footer_privacy_url'] ?? ''));
+  $termsUrl = trim((string) ($site['footer_terms_url'] ?? ''));
+  if ($privacyUrl === '') {
+      $privacyUrl = '#';
+  }
+  if ($termsUrl === '') {
+      $termsUrl = '#';
+  }
 @endphp
 
 <footer class="bg-[#1e2229] text-white pt-20 pb-10">
   <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
     <div class="space-y-6">
       <h4 class="text-brand_blue font-bold text-xs uppercase tracking-widest">{{ $copyrightName }}</h4>
-      <p class="text-slate-400 text-[13px] leading-relaxed">Premium automotive retail experience. Redefining the way you browse and buy luxury vehicles with curated inventory and bespoke service.</p>
+      @if ($footerTagline !== '')
+        <p class="text-slate-400 text-[13px] leading-relaxed">{{ $footerTagline }}</p>
+      @endif
     </div>
     <div class="space-y-6">
-      <h4 class="text-white font-bold text-xs uppercase tracking-widest">Photo Gallery</h4>
+      <h4 class="text-white font-bold text-xs uppercase tracking-widest">{{ __('Photo Gallery') }}</h4>
       <div class="grid grid-cols-4 gap-2">
         @for ($i = 0; $i < 4; $i++)
           @php
@@ -31,52 +55,99 @@
       </div>
     </div>
     <div class="space-y-6">
-      <h4 class="text-white font-bold text-xs uppercase tracking-widest">Latest Blog Posts</h4>
-      <div class="space-y-4">
-        <div>
-          <p class="text-slate-300 text-[13px] font-medium">The Tesla Model S isn't the first truly autonomous car on the road...</p>
-          <p class="text-brand_blue text-[11px] mt-1 font-bold">NO COMMENTS</p>
+      <h4 class="text-white font-bold text-xs uppercase tracking-widest">{{ $blogTitle }}</h4>
+      @if (count($blogEntries) > 0)
+        <div class="space-y-4">
+          @foreach ($blogEntries as $entry)
+            @if (! is_array($entry))
+              @continue
+            @endif
+            @php
+              $bt = trim((string) ($entry['title'] ?? ''));
+              $burl = trim((string) ($entry['url'] ?? $entry['href'] ?? ''));
+              $bmeta = trim((string) ($entry['meta'] ?? ''));
+            @endphp
+            @if ($bt === '' && $burl === '')
+              @continue
+            @endif
+            <div>
+              @if ($burl !== '')
+                <a href="{{ $burl }}" class="block text-slate-300 text-[13px] font-medium hover:text-white">{{ $bt !== '' ? $bt : $burl }}</a>
+              @else
+                <p class="text-slate-300 text-[13px] font-medium">{{ $bt }}</p>
+              @endif
+              @if ($bmeta !== '')
+                <p class="text-brand_blue text-[11px] mt-1 font-bold">{{ $bmeta }}</p>
+              @endif
+            </div>
+          @endforeach
         </div>
-      </div>
+      @endif
     </div>
     <div class="space-y-6">
-      <h4 class="text-white font-bold text-xs uppercase tracking-widest">Social Network</h4>
-      <div class="flex gap-4">
-        <a href="{{ $socialFacebook }}" class="w-10 h-10 bg-slate-700 rounded flex items-center justify-center hover:bg-brand_blue transition-colors"><span class="material-symbols-outlined text-sm">share</span></a>
-        <a href="{{ $socialInstagram }}" class="w-10 h-10 bg-slate-700 rounded flex items-center justify-center hover:bg-brand_blue transition-colors"><span class="material-symbols-outlined text-sm">camera_alt</span></a>
-        <a href="{{ $socialLinkedin }}" class="w-10 h-10 bg-slate-700 rounded flex items-center justify-center hover:bg-brand_blue transition-colors"><span class="material-symbols-outlined text-sm">group</span></a>
-        <a href="{{ $socialYoutube }}" class="w-10 h-10 bg-slate-700 rounded flex items-center justify-center hover:bg-brand_blue transition-colors"><span class="material-symbols-outlined text-sm">play_arrow</span></a>
+      <h4 class="text-white font-bold text-xs uppercase tracking-widest">{{ __('Social Network') }}</h4>
+      <div class="flex flex-wrap gap-4">
+        @foreach (['facebook' => $socialFacebook, 'instagram' => $socialInstagram, 'linkedin' => $socialLinkedin, 'youtube' => $socialYoutube] as $net => $url)
+          @if ($url !== '' && $url !== '#')
+            <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-slate-700 rounded flex items-center justify-center hover:bg-brand_blue transition-colors" aria-label="{{ ucfirst($net) }}">
+              <span class="material-symbols-outlined text-sm">
+                @if ($net === 'facebook')
+                  share
+                @elseif ($net === 'instagram')
+                  camera_alt
+                @elseif ($net === 'linkedin')
+                  group
+                @else
+                  play_arrow
+                @endif
+              </span>
+            </a>
+          @endif
+        @endforeach
       </div>
     </div>
   </div>
 
   <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 py-10 border-y border-slate-700 mb-10">
     <div>
-      <h4 class="font-bold text-xs uppercase mb-6 tracking-widest">Subscribe</h4>
-      <div class="flex">
-        <input class="bg-white text-slate-900 border-none px-4 py-3 text-[13px] w-full rounded-l-sm" placeholder="Enter your email..." type="email" />
-        <button class="bg-brand_orange text-white px-4 flex items-center justify-center rounded-r-sm"><span class="material-symbols-outlined">send</span></button>
-      </div>
+      <h4 class="font-bold text-xs uppercase mb-6 tracking-widest">{{ __('Subscribe') }}</h4>
+      @if ($newsletterEnabled)
+        <form method="post" action="{{ route('newsletter.subscribe') }}" class="space-y-2">
+          @csrf
+          <div class="flex">
+            <input name="email" value="{{ old('email') }}" class="bg-white text-slate-900 border-none px-4 py-3 text-[13px] w-full rounded-l-sm" placeholder="{{ __('Enter your email...') }}" type="email" autocomplete="email" required />
+            <button type="submit" class="bg-brand_orange text-white px-4 flex items-center justify-center rounded-r-sm shrink-0" aria-label="{{ __('Subscribe') }}"><span class="material-symbols-outlined">send</span></button>
+          </div>
+          @if ($newsletterNote !== '')
+            <p class="text-[11px] text-slate-500">{{ $newsletterNote }}</p>
+          @endif
+          @error('newsletter_email')
+            <p class="text-[11px] text-red-400">{{ $message }}</p>
+          @enderror
+        </form>
+      @else
+        <p class="text-[12px] text-slate-500">{{ __('Newsletter signup is not enabled.') }}</p>
+      @endif
     </div>
     <div>
-      <h4 class="font-bold text-xs uppercase mb-6 tracking-widest">Sales Hours</h4>
-      <div class="text-[12px] text-slate-400 space-y-1">@foreach ($dealerSalesHours as $line)<p>{{ $line }}</p>@endforeach</div>
+      <h4 class="font-bold text-xs uppercase mb-6 tracking-widest">{{ __('Sales Hours') }}</h4>
+      <div class="text-[12px] text-slate-400 space-y-1">@foreach ($salesHoursLines as $line)<p>{{ $line }}</p>@endforeach</div>
     </div>
     <div>
-      <h4 class="font-bold text-xs uppercase mb-6 tracking-widest">Service Hours</h4>
-      <div class="text-[12px] text-slate-400 space-y-1">@foreach ($dealerSalesHours as $line)<p>{{ $line }}</p>@endforeach</div>
+      <h4 class="font-bold text-xs uppercase mb-6 tracking-widest">{{ __('Service Hours') }}</h4>
+      <div class="text-[12px] text-slate-400 space-y-1">@foreach ($serviceHoursLines as $line)<p>{{ $line }}</p>@endforeach</div>
     </div>
     <div>
-      <h4 class="font-bold text-xs uppercase mb-6 tracking-widest">Parts Hours</h4>
-      <div class="text-[12px] text-slate-400 space-y-1">@foreach ($dealerSalesHours as $line)<p>{{ $line }}</p>@endforeach</div>
+      <h4 class="font-bold text-xs uppercase mb-6 tracking-widest">{{ __('Parts Hours') }}</h4>
+      <div class="text-[12px] text-slate-400 space-y-1">@foreach ($partsHoursLines as $line)<p>{{ $line }}</p>@endforeach</div>
     </div>
   </div>
 
   <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-[11px] text-slate-500 font-bold uppercase tracking-widest">
-    <p>&copy; {{ date('Y') }} {{ $copyrightName }}. All Rights Reserved.</p>
+    <p>&copy; {{ date('Y') }} {{ $copyrightName }}. {{ __('All Rights Reserved.') }}</p>
     <div class="flex items-center gap-6 mt-4 md:mt-0">
-      <a class="hover:text-white transition-colors" href="#">Privacy Policy</a>
-      <a class="hover:text-white transition-colors" href="#">Terms of Service</a>
+      <a class="hover:text-white transition-colors" href="{{ $privacyUrl }}">{{ __('Privacy Policy') }}</a>
+      <a class="hover:text-white transition-colors" href="{{ $termsUrl }}">{{ __('Terms of Service') }}</a>
     </div>
   </div>
 </footer>

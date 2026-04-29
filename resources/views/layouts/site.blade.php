@@ -3,7 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $title ?? config('app.name') }}</title>
+    @php
+      $site = $site ?? [];
+      $siteDisplayName = ! empty(trim((string) ($site['site_display_name'] ?? ''))) ? trim((string) $site['site_display_name']) : config('app.name');
+    @endphp
+    <title>@if(!empty($title ?? null)){{ $title }} | @endif{{ $siteDisplayName }}</title>
     @if (!empty($metaDescription))
       <meta name="description" content="{{ $metaDescription }}" />
     @endif
@@ -49,6 +53,9 @@
       };
     </script>
     <link rel="stylesheet" href="{{ asset('asset/css/site.css') }}" />
+    @if (!empty($site['favicon_path'] ?? ''))
+      <link rel="icon" href="{{ \App\Support\VehicleImageUrl::url($site['favicon_path']) }}" />
+    @endif
     @stack('head')
   </head>
 
@@ -65,7 +72,7 @@
       </div>
       <!-- Fading Site Name -->
       <div class="mt-8 animate-pulse text-center font-headline text-2xl font-black italic tracking-widest text-white uppercase">
-        {{ config('app.name', 'REV AUTO') }}
+        {{ strtoupper($siteDisplayName) }}
       </div>
     </div>
     <script>

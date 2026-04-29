@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Services\Auth\EmailOtpService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,14 +19,24 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
-        $response = $this->post('/register', [
+        $this->mock(EmailOtpService::class, function ($mock) {
+            $mock->shouldReceive('issueForRegistration')->once()->andReturn(true);
+            $mock->shouldReceive('verifyRegistration')->once()->andReturn(true);
+        });
+
+        $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'Str0ng!Pass99',
             'password_confirmation' => 'Str0ng!Pass99',
-        ]);
+        ])->assertRedirect(route('register.verify.show', absolute: false));
+
+        $this->assertGuest();
+
+        $this->post('/register/verify', [
+            'code' => '000000',
+        ])->assertRedirect(route('dashboard', absolute: false));
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
     }
 }

@@ -1,5 +1,5 @@
 @php
-    $brandName = trim((string) ($site['site_name'] ?? config('app.name', 'Laravel')));
+    $brandName = ! empty(trim((string) ($site['site_display_name'] ?? ''))) ? trim((string) $site['site_display_name']) : config('app.name', 'Laravel');
     $logoPath = $site['logo_path'] ?? $site['logo_url'] ?? null;
 @endphp
 <!DOCTYPE html>
@@ -9,7 +9,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ $brandName }} — {{ __('Account') }}</title>
+        <style>[x-cloak]{display:none!important}</style>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

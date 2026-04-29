@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\SiteSettingDefaults;
 use App\Services\Mail\OutboundMailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class ContactController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'message' => ['required', 'string', 'max:5000'],
+            'newsletter_subscribe' => ['nullable', 'boolean'],
         ]);
 
         $data = [
@@ -27,7 +29,7 @@ class ContactController extends Controller
             'message' => $validated['message'],
         ];
 
-        $to = (string) config('mail.outbound.admin_to');
+        $to = SiteSettingDefaults::resolvedNotifyEmail();
 
         $subject = 'New contact form submission';
         $html = view('emails.contact', $data)->render();
@@ -35,7 +37,7 @@ class ContactController extends Controller
         try {
             $mailer->send(
                 $to,
-                'Admin',
+                SiteSettingDefaults::resolvedNotifyRecipientName(),
                 $subject,
                 $html,
                 $data['email'],
@@ -51,6 +53,10 @@ class ContactController extends Controller
             return back()
                 ->withInput()
                 ->withErrors(['email' => 'Could not send message. Please try again later.']);
+        }
+
+        if ($request->boolean('newsletter_subscribe')) {
+            NewsletterController::notifyIfEnabled($mailer, $validated['email']);
         }
 
         return back()->with('status', 'Message sent.');

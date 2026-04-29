@@ -7,6 +7,7 @@ use App\Models\PageSection;
 use App\Models\SiteSetting;
 use App\Models\Vehicle;
 use App\Support\Compare;
+use App\Support\SiteSettingDefaults;
 use App\Support\VehicleImageUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -461,7 +462,7 @@ class PageController extends Controller
         $user = $request->user();
 
         $vehicle = Vehicle::query()
-            ->with(['images', 'user'])
+            ->with(['images', 'user.vendorProfile'])
             ->where('slug', $slug)
             ->when(!($user && $user->hasRole('admin')), function ($query) use ($user) {
                 $query->where(function ($visibility) use ($user) {
@@ -474,21 +475,36 @@ class PageController extends Controller
             })
             ->firstOrFail();
 
-        $sellerProfile = $vehicle->isStaffListing()
-            ? [
-                'name' => SiteSetting::getValue('site_name', config('app.name')),
-                'email' => SiteSetting::getValue('dealer_email', config('mail.from.address')),
-                'phone' => SiteSetting::getValue('dealer_phone', SiteSetting::getValue('dealer_sales_phone', '')),
-                'address' => SiteSetting::getValue('dealer_address', ''),
+        $siteMerged = SiteSettingDefaults::mergeWithDatabase(SiteSetting::allKeyed());
+
+        if ($vehicle->isStaffListing()) {
+            $sellerProfile = [
+                'name' => trim((string) ($siteMerged['site_display_name'] ?? '')) ?: (string) config('app.name'),
+                'email' => trim((string) ($siteMerged['dealer_public_email'] ?? '')) ?: (string) config('mail.from.address'),
+                'phone' => trim((string) ($siteMerged['dealer_phone'] ?? '')) ?: trim((string) ($siteMerged['dealer_sales_phone'] ?? '')),
+                'address' => (string) ($siteMerged['dealer_address'] ?? ''),
                 'map_location' => $vehicle->map_location ?: $vehicle->location,
-            ]
-            : [
-                'name' => $vehicle->user?->name ?: 'Dealer',
-                'email' => $vehicle->contact_email ?: $vehicle->user?->email,
-                'phone' => $vehicle->contact_phone ?: SiteSetting::getValue('dealer_phone', ''),
-                'address' => $vehicle->contact_address ?: $vehicle->location,
-                'map_location' => $vehicle->map_location ?: $vehicle->contact_address ?: $vehicle->location,
             ];
+        } else {
+            $vp = $vehicle->user?->vendorProfile;
+            if ($vp && $vp->show_on_listings) {
+                $sellerProfile = [
+                    'name' => trim((string) ($vp->business_name ?? '')) ?: ($vehicle->user?->name ?: 'Dealer'),
+                    'email' => trim((string) ($vp->public_email ?? '')) ?: ($vehicle->contact_email ?: $vehicle->user?->email),
+                    'phone' => trim((string) ($vp->public_phone ?? '')) ?: ($vehicle->contact_phone ?: trim((string) ($siteMerged['dealer_phone'] ?? ''))),
+                    'address' => trim((string) ($vp->public_address ?? '')) ?: ($vehicle->contact_address ?: $vehicle->location),
+                    'map_location' => trim((string) ($vp->map_location ?? '')) ?: ($vehicle->map_location ?: $vehicle->contact_address ?: $vehicle->location),
+                ];
+            } else {
+                $sellerProfile = [
+                    'name' => $vehicle->user?->name ?: 'Dealer',
+                    'email' => $vehicle->contact_email ?: $vehicle->user?->email,
+                    'phone' => $vehicle->contact_phone ?: SiteSetting::getValue('dealer_phone', ''),
+                    'address' => $vehicle->contact_address ?: $vehicle->location,
+                    'map_location' => $vehicle->map_location ?: $vehicle->contact_address ?: $vehicle->location,
+                ];
+            }
+        }
 
         $similarVehicles = Vehicle::query()
             ->with('images')

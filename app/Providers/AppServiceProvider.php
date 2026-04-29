@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\SiteSetting;
+use App\Support\SiteSettingDefaults;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -31,15 +32,15 @@ class AppServiceProvider extends ServiceProvider
                 ->symbols();
         });
 
-        $site = [];
+        $fromDb = [];
         try {
             if (Schema::hasTable('site_settings')) {
-                $site = SiteSetting::allKeyed();
+                $fromDb = SiteSetting::allKeyed();
             }
         } catch (\Throwable) {
-            $site = [];
+            $fromDb = [];
         }
 
-        View::share('site', $site);
+        View::share('site', SiteSettingDefaults::mergeWithDatabase($fromDb));
     }
 }

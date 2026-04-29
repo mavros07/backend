@@ -4,22 +4,55 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Auth\LoginOtpChallengeController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\RegisterOtpController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\UnifiedAuthController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
+Route::middleware(['guest', 'throttle:30,1'])->group(function () {
+    Route::get('/login/otp-challenge', [LoginOtpChallengeController::class, 'create'])
+        ->middleware('login.otp.pending')
+        ->name('login.otp.show');
+    Route::post('/login/otp-challenge', [LoginOtpChallengeController::class, 'store'])
+        ->middleware(['login.otp.pending', 'throttle:12,1'])
+        ->name('login.otp.store');
+    Route::post('/login/otp-challenge/resend', [LoginOtpChallengeController::class, 'resend'])
+        ->middleware(['login.otp.pending', 'throttle:6,1'])
+        ->name('login.otp.resend');
+    Route::post('/login/otp-challenge/cancel', [LoginOtpChallengeController::class, 'cancel'])
+        ->middleware('login.otp.pending')
+        ->name('login.otp.cancel');
+});
+
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
+    Route::get('register', [UnifiedAuthController::class, 'show'])->name('register');
+    Route::get('login', [UnifiedAuthController::class, 'show'])->name('login');
+
+    Route::get('auth/google/redirect', [GoogleAuthController::class, 'redirect'])
+        ->middleware('throttle:20,1')
+        ->name('auth.google.redirect');
+    Route::get('auth/google/callback', [GoogleAuthController::class, 'callback'])
+        ->middleware('throttle:20,1')
+        ->name('auth.google.callback');
 
     Route::post('register', [RegisteredUserController::class, 'store'])
         ->middleware('throttle:5,1');
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+    Route::get('register/verify', [RegisterOtpController::class, 'create'])
+        ->middleware('pending.registration')
+        ->name('register.verify.show');
+    Route::post('register/verify', [RegisterOtpController::class, 'store'])
+        ->middleware(['pending.registration', 'throttle:12,1'])
+        ->name('register.verify.store');
+    Route::post('register/verify/resend', [RegisterOtpController::class, 'resend'])
+        ->middleware(['pending.registration', 'throttle:6,1'])
+        ->name('register.verify.resend');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store'])
         ->middleware('throttle:10,1');

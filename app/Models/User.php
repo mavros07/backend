@@ -5,11 +5,13 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Services\Mail\OutboundMailService;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -25,6 +27,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'google_id',
+        'avatar',
+        'email_login_otp_enabled',
+        'email_verified_at',
     ];
 
     /**
@@ -47,6 +53,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'email_login_otp_enabled' => 'boolean',
         ];
     }
 
@@ -61,5 +68,35 @@ class User extends Authenticatable
     public function favoriteVehicles(): BelongsToMany
     {
         return $this->belongsToMany(Vehicle::class, 'vehicle_favorites')->withTimestamps();
+    }
+
+    public function vendorProfile(): HasOne
+    {
+        return $this->hasOne(VendorProfile::class);
+    }
+
+    /**
+     * Send the password reset notification using the outbound mailer and branded template.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $url = url(route('password.reset', [
+            'token' => $token,
+            'email' => $this->getEmailForPasswordReset(),
+        ], false));
+
+        $html = view('emails.password-reset', [
+            'user' => $this,
+            'resetUrl' => $url,
+        ])->render();
+
+        app(OutboundMailService::class)->send(
+            $this->email,
+            (string) $this->name,
+            __('Reset your password'),
+            $html,
+            $this->email,
+            (string) $this->name
+        );
     }
 }

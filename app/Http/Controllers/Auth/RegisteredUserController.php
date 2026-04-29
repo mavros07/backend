@@ -4,30 +4,19 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
+use App\Services\Auth\EmailOtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
-
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
-     */
-    public function create(): View
-    {
-        return view('auth.register');
-    }
-
-    /**
-     * Handle an incoming registration request.
+     * Handle an incoming registration request (step 1: send OTP, do not create user yet).
      *
      * @throws ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, EmailOtpService $otp): RedirectResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -35,16 +24,31 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
+        $token = Str::random(48);
+        $request->session()->put('pending_registration', [
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
         ]);
+        $request->session()->put('pending_registration_otp_token', $token);
 
-        event(new Registered($user));
+        try {
+            if (! $otp->issueForRegistration($token, $data['email'], $data['name'])) {
+                $request->session()->forget(['pending_registration', 'pending_registration_otp_token']);
 
-        Auth::login($user);
+                return back()
+                    ->withInput()
+                    ->withErrors(['email' => __('Please wait before requesting another code.')]);
+            }
+        } catch (\Throwable $e) {
+            report($e);
+            $request->session()->forget(['pending_registration', 'pending_registration_otp_token']);
 
-        return redirect(route('dashboard', absolute: false));
+            return back()
+                ->withInput()
+                ->withErrors(['email' => __('Could not send verification email. Check mail configuration and try again.')]);
+        }
+
+        return redirect()->route('register.verify.show');
     }
 }

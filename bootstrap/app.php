@@ -19,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
             'admin.audit' => \App\Http\Middleware\TrackAdminAuditTrail::class,
+            'login.otp.pending' => \App\Http\Middleware\EnsureLoginOtpPending::class,
+            'pending.registration' => \App\Http\Middleware\EnsurePendingRegistration::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

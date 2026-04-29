@@ -1,0 +1,188 @@
+<x-app-layout>
+  <x-slot name="header">
+    <div>
+      <div class="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">{{ __('Admin') }}</div>
+      <div class="text-xl font-bold tracking-tight text-zinc-900">{{ __('Site settings') }}</div>
+    </div>
+  </x-slot>
+
+  <div class="mx-auto max-w-5xl space-y-8">
+    <p class="text-sm text-zinc-600">{{ __('Branding, footer, top bar, and contact/newsletter routing. Paths for images may be pasted from ') }}<a href="{{ route('admin.media.index') }}" class="font-semibold text-indigo-600 hover:text-indigo-500">{{ __('Media library') }}</a>.</p>
+
+    @if (session('status'))
+      <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">{{ session('status') }}</div>
+    @endif
+
+    @if ($errors->any())
+      <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+        <ul class="list-disc pl-5">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+      </div>
+    @endif
+
+    <form action="{{ route('admin.settings.update') }}" method="post" class="space-y-8">
+      @csrf
+      @method('PUT')
+
+      <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div class="border-b border-zinc-100 bg-zinc-50 px-6 py-4">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-700">{{ __('General & branding') }}</h2>
+        </div>
+        <div class="space-y-4 px-6 py-5">
+          <div>
+            <label for="site_display_name" class="block text-sm font-medium text-zinc-700">{{ __('Site display name') }}</label>
+            <input type="text" name="site_display_name" id="site_display_name" value="{{ old('site_display_name', $settings['site_display_name']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"/>
+            <p class="mt-1 text-xs text-zinc-500">{{ __('Shown in titles and loaders when set; defaults to APP name.') }}</p>
+          </div>
+          <div>
+            <label for="copyright_line" class="block text-sm font-medium text-zinc-700">{{ __('Copyright / brand line (footer)') }}</label>
+            <input type="text" name="copyright_line" id="copyright_line" value="{{ old('copyright_line', $settings['copyright_line']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"/>
+          </div>
+          <div class="grid gap-4 md:grid-cols-3">
+            <div>
+              <label for="logo_path" class="block text-sm font-medium text-zinc-700">{{ __('Logo path') }}</label>
+              <input type="text" name="logo_path" id="logo_path" value="{{ old('logo_path', $settings['logo_path']) }}" placeholder="storage/..." class="mt-1 block w-full rounded-md border-zinc-300 font-mono text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+              @if (!empty(old('logo_path', $settings['logo_path'])))
+                <img src="{{ \App\Support\VehicleImageUrl::url(old('logo_path', $settings['logo_path'])) }}" alt="" class="mt-2 h-12 w-auto max-w-[200px] object-contain"/>
+              @endif
+            </div>
+            <div>
+              <label for="logo_light_path" class="block text-sm font-medium text-zinc-700">{{ __('Logo light variant (optional)') }}</label>
+              <input type="text" name="logo_light_path" id="logo_light_path" value="{{ old('logo_light_path', $settings['logo_light_path']) }}" class="mt-1 block w-full rounded-md border-zinc-300 font-mono text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+              @if (!empty(old('logo_light_path', $settings['logo_light_path'])))
+                <img src="{{ \App\Support\VehicleImageUrl::url(old('logo_light_path', $settings['logo_light_path'])) }}" alt="" class="mt-2 h-12 w-auto max-w-[200px] rounded bg-zinc-800 object-contain p-2"/>
+              @endif
+            </div>
+            <div>
+              <label for="favicon_path" class="block text-sm font-medium text-zinc-700">{{ __('Favicon path') }}</label>
+              <input type="text" name="favicon_path" id="favicon_path" value="{{ old('favicon_path', $settings['favicon_path']) }}" class="mt-1 block w-full rounded-md border-zinc-300 font-mono text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+              @if (!empty(old('favicon_path', $settings['favicon_path'])))
+                <img src="{{ \App\Support\VehicleImageUrl::url(old('favicon_path', $settings['favicon_path'])) }}" alt="" class="mt-2 h-12 w-12 object-contain"/>
+              @endif
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div class="border-b border-zinc-100 bg-zinc-50 px-6 py-4">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-700">{{ __('Top bar') }}</h2>
+        </div>
+        <div class="grid gap-4 px-6 py-5 md:grid-cols-2">
+          <div>
+            <label for="currency_label" class="block text-sm font-medium text-zinc-700">{{ __('Currency label') }}</label>
+            <input type="text" name="currency_label" id="currency_label" value="{{ old('currency_label', $settings['currency_label']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+          </div>
+          <div>
+            <label for="dealer_hours_label" class="block text-sm font-medium text-zinc-700">{{ __('Hours label') }}</label>
+            <input type="text" name="dealer_hours_label" id="dealer_hours_label" value="{{ old('dealer_hours_label', $settings['dealer_hours_label']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+          </div>
+          <div class="md:col-span-2">
+            <label for="dealer_address" class="block text-sm font-medium text-zinc-700">{{ __('Address') }}</label>
+            <input type="text" name="dealer_address" id="dealer_address" value="{{ old('dealer_address', $settings['dealer_address']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+          </div>
+          <div>
+            <label for="dealer_phone" class="block text-sm font-medium text-zinc-700">{{ __('Main phone') }}</label>
+            <input type="text" name="dealer_phone" id="dealer_phone" value="{{ old('dealer_phone', $settings['dealer_phone']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+          </div>
+          <div>
+            <label for="dealer_sales_phone" class="block text-sm font-medium text-zinc-700">{{ __('Sales phone (optional)') }}</label>
+            <input type="text" name="dealer_sales_phone" id="dealer_sales_phone" value="{{ old('dealer_sales_phone', $settings['dealer_sales_phone']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+          </div>
+          <div class="grid gap-4 md:col-span-2 md:grid-cols-2">
+            @foreach ([['social_facebook', 'Facebook'], ['social_instagram', 'Instagram'], ['social_linkedin', 'LinkedIn'], ['social_youtube', 'YouTube / video']] as [$key, $label])
+              <div>
+                <label for="{{ $key }}" class="block text-sm font-medium text-zinc-700">{{ $label }} URL</label>
+                <input type="text" name="{{ $key }}" id="{{ $key }}" value="{{ old($key, $settings[$key]) }}" class="mt-1 block w-full rounded-md border-zinc-300 font-mono text-sm shadow-sm"/>
+              </div>
+            @endforeach
+          </div>
+        </div>
+      </section>
+
+      <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div class="border-b border-zinc-100 bg-zinc-50 px-6 py-4">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-700">{{ __('Hours') }}</h2>
+        </div>
+        <div class="space-y-4 px-6 py-5">
+          @foreach ([
+            ['dealer_sales_hours', __('Sales hours')],
+            ['dealer_service_hours', __('Service hours')],
+            ['dealer_parts_hours', __('Parts hours')],
+          ] as [$fld, $lbl])
+            <div>
+              <label for="{{ $fld }}" class="block text-sm font-medium text-zinc-700">{{ $lbl }}</label>
+              <textarea name="{{ $fld }}" id="{{ $fld }}" rows="4" class="mt-1 block w-full rounded-md border-zinc-300 font-mono text-sm shadow-sm">{{ old($fld, $settings[$fld]) }}</textarea>
+              <p class="mt-1 text-xs text-zinc-500">{{ __('One line per row.') }}</p>
+            </div>
+          @endforeach
+        </div>
+      </section>
+
+      <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div class="border-b border-zinc-100 bg-zinc-50 px-6 py-4">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-700">{{ __('Footer') }}</h2>
+        </div>
+        <div class="space-y-4 px-6 py-5">
+          <div>
+            <label for="footer_tagline" class="block text-sm font-medium text-zinc-700">{{ __('Tagline paragraph') }}</label>
+            <textarea name="footer_tagline" id="footer_tagline" rows="3" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm">{{ old('footer_tagline', $settings['footer_tagline']) }}</textarea>
+          </div>
+          <div>
+            <label for="footer_blog_title" class="block text-sm font-medium text-zinc-700">{{ __('Blog / highlights column title') }}</label>
+            <input type="text" name="footer_blog_title" id="footer_blog_title" value="{{ old('footer_blog_title', $settings['footer_blog_title']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+          </div>
+          <div>
+            <label for="footer_blog_entries_json" class="block text-sm font-medium text-zinc-700">{{ __('Blog highlights (JSON array)') }}</label>
+            <textarea name="footer_blog_entries_json" id="footer_blog_entries_json" rows="10" placeholder='[{"title":"Example","url":"/faq","meta":"NO COMMENTS"}]' class="mt-1 block w-full rounded-md border-zinc-300 font-mono text-xs shadow-sm">{{ old('footer_blog_entries_json', $settings['footer_blog_entries_json']) }}</textarea>
+            <p class="mt-1 text-xs text-zinc-500">{{ __('Objects: title, optional url or href, optional meta. Empty array hides entries.') }}</p>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div>
+              <label for="footer_privacy_url" class="block text-sm font-medium text-zinc-700">{{ __('Privacy policy URL') }}</label>
+              <input type="text" name="footer_privacy_url" id="footer_privacy_url" value="{{ old('footer_privacy_url', $settings['footer_privacy_url']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+            </div>
+            <div>
+              <label for="footer_terms_url" class="block text-sm font-medium text-zinc-700">{{ __('Terms of service URL') }}</label>
+              <input type="text" name="footer_terms_url" id="footer_terms_url" value="{{ old('footer_terms_url', $settings['footer_terms_url']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div class="border-b border-zinc-100 bg-zinc-50 px-6 py-4">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-700">{{ __('Newsletter & contact') }}</h2>
+        </div>
+        <div class="space-y-4 px-6 py-5">
+          <label class="flex items-center gap-3">
+            <input type="checkbox" name="newsletter_enabled" value="1" @checked(old('newsletter_enabled', $settings['newsletter_enabled']) === '1') class="rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500"/>
+            <span class="text-sm text-zinc-800">{{ __('Enable footer newsletter form') }}</span>
+          </label>
+          <div>
+            <label for="newsletter_note" class="block text-sm font-medium text-zinc-700">{{ __('Footer newsletter helper text') }}</label>
+            <input type="text" name="newsletter_note" id="newsletter_note" value="{{ old('newsletter_note', $settings['newsletter_note']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+          </div>
+          <div>
+            <label for="dealer_public_email" class="block text-sm font-medium text-zinc-700">{{ __('Public dealer email (staff listings)') }}</label>
+            <input type="email" name="dealer_public_email" id="dealer_public_email" value="{{ old('dealer_public_email', $settings['dealer_public_email'] ?? '') }}" placeholder="{{ config('mail.from.address') }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+            <p class="mt-1 text-xs text-zinc-500">{{ __('Shown on vehicle detail when the listing is staff-owned. Separate from admin notification email.') }}</p>
+          </div>
+          <div>
+            <label for="contact_notify_email" class="block text-sm font-medium text-zinc-700">{{ __('Contact & newsletter notifications email') }}</label>
+            <input type="email" name="contact_notify_email" id="contact_notify_email" value="{{ old('contact_notify_email', $settings['contact_notify_email']) }}" placeholder="{{ config('mail.outbound.admin_to') }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+            <p class="mt-1 text-xs text-zinc-500">{{ __('Overrides MAIL_TO_ADMIN when set.') }}</p>
+          </div>
+          <div>
+            <label for="contact_from_name" class="block text-sm font-medium text-zinc-700">{{ __('Outbound “to” display name for contact mails') }}</label>
+            <input type="text" name="contact_from_name" id="contact_from_name" value="{{ old('contact_from_name', $settings['contact_from_name']) }}" placeholder="Admin" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+          </div>
+        </div>
+      </section>
+
+      <div class="flex justify-end gap-3">
+        <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50">{{ __('Cancel') }}</a>
+        <button type="submit" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">{{ __('Save settings') }}</button>
+      </div>
+    </form>
+  </div>
+</x-app-layout>
