@@ -62,6 +62,14 @@
         }
       }
       .admin-content-scroll { flex: 1 1 0%; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
     </style>
     @stack('scripts')
     @include('partials.vite-assets')
@@ -123,7 +131,7 @@
           </button>
         </div>
 
-        <nav class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overflow-x-hidden px-3 py-4" aria-label="{{ __('Admin') }}">
+        <nav class="hide-scrollbar flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overflow-x-hidden px-3 py-4" aria-label="{{ __('Admin') }}">
           @foreach ($navItems as $item)
             @php $active = request()->routeIs($item['match']); @endphp
             <a
@@ -222,7 +230,7 @@
           </a>
         </header>
 
-        <main class="admin-content-scroll min-w-0 bg-gradient-to-b from-zinc-100 to-zinc-50 overscroll-contain overflow-x-auto">
+        <main class="admin-content-scroll hide-scrollbar min-w-0 bg-gradient-to-b from-zinc-100 to-zinc-50 overscroll-contain overflow-x-auto">
           <div class="mx-auto max-w-[1600px] min-w-0 px-4 py-8 sm:px-6 lg:px-10">
             {{ $slot }}
           </div>

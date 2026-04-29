@@ -275,6 +275,10 @@
       shiftAnchor = null;
       mediaInsert.disabled = true;
       mediaInsert.textContent = 'Use selected image';
+      mediaModal.style.position = 'fixed';
+      mediaModal.style.inset = 'auto';
+      mediaModal.style.zIndex = '220';
+      updateMediaModalSizing();
       mediaModal.classList.remove('hidden');
       mediaModal.classList.add('flex');
       document.body.style.overflow = 'hidden';
@@ -287,6 +291,31 @@
       mediaTarget = null;
       mediaSelected = [];
       document.body.style.overflow = '';
+    }
+
+    function updateMediaModalSizing() {
+      const panel = document.getElementById('media-modal-panel');
+      if (!mediaModal || !panel) return;
+      const shell = document.querySelector('.admin-main-shell');
+      const shellRect = shell?.getBoundingClientRect();
+      const hasShellRect = !!(shellRect && shellRect.width > 0 && shellRect.height > 0);
+
+      if (hasShellRect) {
+        mediaModal.style.top = `${Math.round(shellRect.top)}px`;
+        mediaModal.style.left = `${Math.round(shellRect.left)}px`;
+        mediaModal.style.width = `${Math.round(shellRect.width)}px`;
+        mediaModal.style.height = `${Math.round(shellRect.height)}px`;
+      } else {
+        mediaModal.style.top = '0';
+        mediaModal.style.left = '0';
+        mediaModal.style.width = '100vw';
+        mediaModal.style.height = '100vh';
+      }
+
+      mediaModal.style.paddingLeft = '16px';
+      mediaModal.style.paddingRight = '16px';
+      const usable = Math.max(480, (hasShellRect ? shellRect.width : window.innerWidth) - 32);
+      panel.style.maxWidth = `min(72rem, ${Math.round(usable)}px)`;
     }
 
     async function fetchMediaItems() {
@@ -374,6 +403,9 @@
     });
     mediaModal.addEventListener('click', (event) => {
       if (event.target === mediaModal) closeMediaPicker();
+    });
+    window.addEventListener('resize', () => {
+      if (!mediaModal.classList.contains('hidden')) updateMediaModalSizing();
     });
 
     document.getElementById('main-image-library')?.addEventListener('click', () => openMediaPicker('main'));
