@@ -161,6 +161,7 @@
         // Use POST for maximum compatibility with hosting/WAF rules that block DELETE.
         const params = new URLSearchParams();
         params.set('_token', csrfToken);
+        params.set('_method', 'DELETE');
 
         const response = await fetch(url, {
           method: 'POST',

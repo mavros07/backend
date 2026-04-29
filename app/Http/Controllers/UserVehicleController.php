@@ -12,7 +12,6 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Throwable;
 
@@ -197,10 +196,8 @@ class UserVehicleController extends Controller
         $this->authorizeVehicleAccess($request, $vehicle);
         abort_unless($image->vehicle_id === $vehicle->id, 404);
 
-        $rel = $this->relativeStoragePathForDelete($image->path);
-        if ($rel !== null) {
-            Storage::disk('public')->delete($rel);
-        }
+        // Editor "remove" detaches image from this listing only.
+        // It must not delete the underlying media asset/site file.
         $image->delete();
         $this->resequenceImages($vehicle);
 

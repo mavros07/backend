@@ -104,9 +104,8 @@
                   class="rounded border border-gray-300 px-2 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-50"
                   data-copy-url="{{ $item['url'] }}"
                 >Copy URL</button>
-                <form method="post" action="{{ route('admin.media.destroy', ['media' => $item['id']]) }}" onsubmit="return confirm('Delete this image? This cannot be undone.');">
+                <form method="post" action="{{ route('admin.media.destroy.post', ['media' => $item['id']]) }}" onsubmit="return confirm('Delete this image? This cannot be undone.');">
                   @csrf
-                  @method('DELETE')
                   <button type="submit" class="rounded border border-red-300 px-2 py-1 text-[11px] font-medium text-red-700 hover:bg-red-50">Delete</button>
                 </form>
               </div>
@@ -144,9 +143,8 @@
                 <td class="px-3 py-2">
                   <div class="flex justify-end gap-2">
                     <button type="button" class="rounded border border-gray-300 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50" data-copy-url="{{ $item['url'] }}">Copy URL</button>
-                    <form method="post" action="{{ route('admin.media.destroy', ['media' => $item['id']]) }}" onsubmit="return confirm('Delete this image? This cannot be undone.');">
+                    <form method="post" action="{{ route('admin.media.destroy.post', ['media' => $item['id']]) }}" onsubmit="return confirm('Delete this image? This cannot be undone.');">
                       @csrf
-                      @method('DELETE')
                       <button type="submit" class="rounded border border-red-300 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50">Delete</button>
                     </form>
                   </div>

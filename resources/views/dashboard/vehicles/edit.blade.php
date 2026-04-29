@@ -326,7 +326,7 @@
                             type="button"
                             class="text-sm text-red-700 hover:underline"
                             data-remove-image
-                            data-delete-url="{{ route('dashboard.vehicles.images.destroy', [$vehicle, $image]) }}"
+                            data-delete-url="{{ route('dashboard.vehicles.images.destroy.post', [$vehicle, $image]) }}"
                           >
                             Remove
                           </button>
