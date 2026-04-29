@@ -259,6 +259,8 @@
     const mediaSearch = document.getElementById('media-search');
     const mediaInsert = document.getElementById('media-modal-insert');
     const mediaUploadForm = document.getElementById('media-upload-form');
+    const mediaUploadSubmit = document.getElementById('media-upload-submit');
+    const mediaUploadStatus = document.getElementById('media-upload-status');
     const mediaListUrl = @json(route('admin.media.list'));
     let mediaItems = [];
     let mediaTarget = null;
@@ -420,18 +422,45 @@
       }
       const formData = new FormData(mediaUploadForm);
       const token = mediaUploadForm.querySelector('input[name="_token"]')?.value || '';
-      const response = await fetch(mediaUploadForm.action, {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
-        body: formData,
-      });
-      if (!response.ok) {
-        alert('Upload failed. Please try again.');
-        return;
+      if (mediaUploadSubmit) mediaUploadSubmit.disabled = true;
+      if (uploadInput) uploadInput.disabled = true;
+      mediaUploadForm.setAttribute('aria-busy', 'true');
+      if (mediaUploadStatus) {
+        mediaUploadStatus.classList.remove('hidden');
+        const t = mediaUploadStatus.querySelector('.media-upload-status-text');
+        if (t) t.textContent = 'Uploading...';
       }
-      mediaUploadForm.reset();
-      await fetchMediaItems();
+
+      try {
+        const response = await fetch(mediaUploadForm.action, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
+          body: formData,
+        });
+        if (!response.ok) {
+          if (mediaUploadStatus) {
+            const t = mediaUploadStatus.querySelector('.media-upload-status-text');
+            if (t) t.textContent = 'Upload failed';
+          }
+          alert('Upload failed. Please try again.');
+          return;
+        }
+
+        if (mediaUploadStatus) {
+          const t = mediaUploadStatus.querySelector('.media-upload-status-text');
+          if (t) t.textContent = 'Upload complete';
+        }
+        mediaUploadForm.reset();
+        await fetchMediaItems();
+      } finally {
+        if (mediaUploadSubmit) mediaUploadSubmit.disabled = false;
+        if (uploadInput) uploadInput.disabled = false;
+        mediaUploadForm.removeAttribute('aria-busy');
+        if (mediaUploadStatus) {
+          setTimeout(() => mediaUploadStatus.classList.add('hidden'), 900);
+        }
+      }
     });
   })();
 </script>

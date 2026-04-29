@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Concerns;
 use App\Models\Vehicle;
 use App\Support\VehicleImageUrl;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -12,6 +13,8 @@ use Illuminate\Validation\Rule;
 
 trait InteractsWithVehicleForms
 {
+    private static ?bool $vehiclesHasShowFinancingCalculatorColumn = null;
+
     /**
      * @return array<string, mixed>
      */
@@ -70,7 +73,11 @@ trait InteractsWithVehicleForms
         ]);
 
         $data['is_special'] = $request->boolean('is_special');
-        $data['show_financing_calculator'] = $request->boolean('show_financing_calculator');
+        if ($this->vehiclesHasShowFinancingCalculatorColumn()) {
+            $data['show_financing_calculator'] = $request->boolean('show_financing_calculator');
+        } else {
+            unset($data['show_financing_calculator']);
+        }
 
         $data['features'] = $this->parseFeatures($data['features_text'] ?? null);
         unset($data['features_text']);
@@ -240,5 +247,20 @@ trait InteractsWithVehicleForms
                 Storage::disk('public')->delete($rel);
             }
         }
+    }
+
+    private function vehiclesHasShowFinancingCalculatorColumn(): bool
+    {
+        if (self::$vehiclesHasShowFinancingCalculatorColumn !== null) {
+            return self::$vehiclesHasShowFinancingCalculatorColumn;
+        }
+
+        try {
+            self::$vehiclesHasShowFinancingCalculatorColumn = Schema::hasColumn('vehicles', 'show_financing_calculator');
+        } catch (\Throwable) {
+            self::$vehiclesHasShowFinancingCalculatorColumn = false;
+        }
+
+        return self::$vehiclesHasShowFinancingCalculatorColumn;
     }
 }
