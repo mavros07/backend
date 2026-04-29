@@ -16,6 +16,7 @@ use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\AdminSiteSettingsController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\VendorSettingsController;
+use App\Http\Controllers\CurrencyPreferenceController;
 use App\Models\AdminAuditTrail;
 use App\Models\SiteTrafficEvent;
 use App\Models\User;
@@ -55,6 +56,9 @@ Route::post('/inventory/{slug}/inquiry', [VehicleInquiryController::class, 'stor
     ->name('inventory.inquiry');
 Route::get('/inventory/{slug?}', [PageController::class, 'vehicleShow'])->name('inventory.show');
 Route::get('/compare', [PageController::class, 'compare'])->name('compare');
+Route::post('/currency/select', [CurrencyPreferenceController::class, 'update'])
+    ->middleware('throttle:20,1')
+    ->name('currency.select');
 
 Route::post('/compare/add/{vehicle}', [CompareController::class, 'add'])->name('compare.add');
 Route::post('/compare/remove/{vehicle}', [CompareController::class, 'remove'])->name('compare.remove');

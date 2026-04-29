@@ -26,6 +26,7 @@ class Vehicle extends Model
         'finance_interest_rate',
         'finance_term_months',
         'finance_down_payment',
+        'show_financing_calculator',
         'mileage',
         'city_mpg',
         'hwy_mpg',
@@ -67,6 +68,7 @@ class Vehicle extends Model
             'features' => 'array',
             'tech_specs' => 'array',
             'is_special' => 'boolean',
+            'show_financing_calculator' => 'boolean',
         ];
     }
 

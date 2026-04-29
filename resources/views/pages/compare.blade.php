@@ -30,7 +30,7 @@
             <div class="h-56 w-full overflow-hidden">@if ($img?->path)<img src="{{ \App\Support\VehicleImageUrl::url($img->path) }}" alt="{{ $vehicle->title }}" class="w-full h-full object-cover" />@else<div class="w-full h-full bg-slate-700 flex items-center justify-center text-slate-300">No image</div>@endif</div>
             <div class="p-6 space-y-4">
               <h2 class="font-headline text-xl font-bold uppercase">{{ $vehicle->title }}</h2>
-              <p class="text-primary font-bold text-2xl">@if(!is_null($vehicle->price))${{ number_format($vehicle->price, 0, '.', ',') }}@else Ask @endif</p>
+              <p class="text-primary font-bold text-2xl">@if(!is_null($vehicle->price))<span data-currency-amount="{{ (float) $vehicle->price }}" data-currency-decimals="0">${{ number_format($vehicle->price, 0, '.', ',') }}</span>@else Ask @endif</p>
               <div class="text-xs text-slate-300 space-y-1 uppercase tracking-wide">
                 <p><span class="text-slate-400">Mileage:</span> {{ number_format((int) ($vehicle->mileage ?? 0)) }} mi</p>
                 <p><span class="text-slate-400">Fuel:</span> {{ $vehicle->fuel_type ?? 'N/A' }}</p>

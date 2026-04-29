@@ -62,7 +62,7 @@
               <span class="inv-card__eyebrow">Buy online</span>
               <span class="inv-card__price">
                 @if(!is_null($vehicle->price))
-                  ${{ number_format($vehicle->price, 0, '.', ' ') }}
+                  <span data-currency-amount="{{ (float) $vehicle->price }}" data-currency-decimals="0">${{ number_format($vehicle->price, 0, '.', ' ') }}</span>
                 @endif
               </span>
             </div>

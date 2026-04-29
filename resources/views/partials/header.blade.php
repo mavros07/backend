@@ -1,5 +1,6 @@
 @php
   $site = $site ?? [];
+  $currencyUi = $currencyUi ?? ['default' => 'USD', 'selected' => 'USD', 'supported' => ['USD' => 'US Dollar'], 'symbols' => ['USD' => '$']];
   $brandName = ! empty(trim((string) ($site['site_display_name'] ?? ''))) ? trim((string) $site['site_display_name']) : config('app.name', 'Site');
   $logoPath = $site['logo_path'] ?? $site['logo_url'] ?? null;
   $hoursLabel = trim((string) ($site['dealer_hours_label'] ?? '')) ?: __('Work Hours');
@@ -10,7 +11,9 @@
   if ($phone === '') {
       $phone = trim((string) ($site['dealer_sales_phone'] ?? ''));
   }
-  $currencyLabel = trim((string) ($site['currency_label'] ?? '')) ?: __('Currency (USD)');
+  $currencyCode = strtoupper((string) ($currencyUi['selected'] ?? 'USD'));
+  $currencySymbols = is_array($currencyUi['symbols'] ?? null) ? $currencyUi['symbols'] : ['USD' => '$'];
+  $currencyLabel = __('Currency') . ' (' . $currencyCode . ')';
   $socialFacebook = trim((string) ($site['social_facebook'] ?? ''));
   $socialInstagram = trim((string) ($site['social_instagram'] ?? ''));
   $socialLinkedin = trim((string) ($site['social_linkedin'] ?? ''));
@@ -51,10 +54,19 @@
   @endif
   <div class="h-10 border-b border-white/10 bg-[#232628]">
     <div class="mx-auto flex h-full w-full max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
-      <button type="button" class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.05em] text-white/70 hover:text-white">
-        <span>{{ $currencyLabel }}</span>
-        <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
-      </button>
+      <div class="relative">
+        <button type="button" class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.05em] text-white/70 hover:text-white" data-currency-toggle>
+          <span data-currency-label>{{ $currencyLabel }}</span>
+          <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
+        </button>
+        <div class="absolute left-0 top-full z-30 mt-2 hidden min-w-[200px] rounded-md border border-white/10 bg-[#181b1f] p-2 shadow-xl" data-currency-menu>
+          @foreach (($currencyUi['supported'] ?? ['USD' => 'US Dollar']) as $code => $name)
+            <button type="button" class="block w-full rounded px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white/80 hover:bg-white/10 hover:text-white" data-currency-option="{{ $code }}">
+              {{ $code }} - {{ $name }}
+            </button>
+          @endforeach
+        </div>
+      </div>
 
       <div class="hidden xl:flex items-center gap-6 text-[11px] font-semibold tracking-[0.01em] text-white/90">
         @if ($phone !== '')
@@ -196,3 +208,36 @@
     @endif
   </nav>
 </div>
+
+<input type="hidden" id="currency-select-endpoint" value="{{ route('currency.select') }}">
+
+<script>
+  (() => {
+    const toggle = document.querySelector('[data-currency-toggle]');
+    const menu = document.querySelector('[data-currency-menu]');
+    if (!toggle || !menu) return;
+
+    toggle.addEventListener('click', () => menu.classList.toggle('hidden'));
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target) && !toggle.contains(e.target)) menu.classList.add('hidden');
+    });
+    menu.querySelectorAll('[data-currency-option]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const code = btn.getAttribute('data-currency-option');
+        if (!code) return;
+        const endpoint = document.getElementById('currency-select-endpoint')?.value;
+        if (!endpoint) return;
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token},
+          body: JSON.stringify({ currency: code }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) return;
+        menu.classList.add('hidden');
+        window.location.reload();
+      });
+    });
+  })();
+</script>

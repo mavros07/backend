@@ -96,17 +96,39 @@ class AdminMediaController extends Controller
 
     public function upload(Request $request): RedirectResponse|JsonResponse
     {
-        $request->validate([
-            'files' => ['required', 'array'],
-            'files.*' => ['image', 'max:5120'],
-        ]);
+        $single = $request->file('file');
+        $many = $request->file('files', []);
+        if ($single !== null && $many === []) {
+            $many = [$single];
+        }
+        if (! is_array($many) || count($many) === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please select at least one image.',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        foreach ($many as $f) {
+            if (! $f || ! str_starts_with((string) $f->getMimeType(), 'image/')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only images are allowed.',
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+            if ((int) $f->getSize() > 5 * 1024 * 1024) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Each image must be 5MB or smaller.',
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+        }
 
         $dir = $this->mediaDir();
         if (! is_dir($dir)) {
             File::makeDirectory($dir, 0755, true);
         }
 
-        $files = $request->file('files');
+        $files = $many;
         $uploadedCount = 0;
 
         foreach ($files as $file) {

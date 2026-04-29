@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     @php
       $site = $site ?? [];
       $siteDisplayName = ! empty(trim((string) ($site['site_display_name'] ?? ''))) ? trim((string) $site['site_display_name']) : config('app.name');
@@ -59,7 +60,7 @@
     @stack('head')
   </head>
 
-  <body class="bg-page_bg font-body text-on_surface selection:bg-brand_blue/20 {{ $bodyClass ?? '' }}">
+  <body class="bg-page_bg font-body text-on_surface selection:bg-brand_blue/20 {{ $bodyClass ?? '' }}" data-currency-ui="{{ e(json_encode($currencyUi ?? ['default' => 'USD', 'selected' => 'USD', 'symbols' => ['USD' => '$'], 'rates' => ['USD' => 1.0]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}">
     <!-- Global Loading Screen -->
     <div id="global-loader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#1E2229] transition-opacity duration-700 ease-in-out">
       <div class="relative flex items-center justify-center">
@@ -93,7 +94,104 @@
       @yield('content')
     </main>
     @include('partials.footer')
+    <div id="currencySelectionModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/65 p-4">
+      <div class="w-full max-w-xl rounded-xl bg-white p-6 text-zinc-900 shadow-2xl">
+        <h2 class="text-xl font-black">{{ __('Use your local currency?') }}</h2>
+        <p class="mt-2 text-sm text-zinc-600">{{ __('We detected your likely currency. You can always change this later from the header switcher.') }}</p>
+        <div class="mt-5 space-y-3 rounded-lg bg-zinc-50 p-4">
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-semibold">{{ __('Detected') }}</span>
+            <span id="detectedCurrencyDisplay" class="font-black">—</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-semibold">{{ __('Site default') }}</span>
+            <span id="defaultCurrencyDisplay" class="font-black">—</span>
+          </div>
+        </div>
+        <div class="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <button type="button" id="currencyKeepDefaultBtn" class="rounded-md border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50">{{ __('Keep default') }}</button>
+          <button type="button" id="currencyUseDetectedBtn" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">{{ __('Use detected currency') }}</button>
+        </div>
+      </div>
+    </div>
     <script src="{{ asset('asset/js/main.js') }}" defer></script>
+    <script>
+      const bodyEl = document.body;
+      let parsedCurrencyUi = {default: 'USD', selected: 'USD', symbols: {USD: '$'}, rates: {USD: 1}};
+      try {
+        const rawCurrencyUi = bodyEl?.getAttribute('data-currency-ui') || '{}';
+        parsedCurrencyUi = JSON.parse(rawCurrencyUi);
+      } catch (_) {
+        parsedCurrencyUi = {default: 'USD', selected: 'USD', symbols: {USD: '$'}, rates: {USD: 1}};
+      }
+      window.siteCurrency = parsedCurrencyUi;
+      (() => {
+        const cfg = window.siteCurrency || {};
+        const selected = String(cfg.selected || cfg.default || 'USD').toUpperCase();
+        const base = String(cfg.default || 'USD').toUpperCase();
+        const rates = cfg.rates || {};
+        const symbols = cfg.symbols || {};
+        const rate = Number(rates[selected] ?? rates[base] ?? 1);
+        const symbol = symbols[selected] ?? (selected + ' ');
+        document.querySelectorAll('[data-currency-amount]').forEach((el) => {
+          const raw = Number(el.getAttribute('data-currency-amount'));
+          if (!Number.isFinite(raw)) return;
+          const decimals = Number(el.getAttribute('data-currency-decimals') ?? '0');
+          const converted = raw * (Number.isFinite(rate) && rate > 0 ? rate : 1);
+          el.textContent = symbol + converted.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        });
+      })();
+
+      (() => {
+        const cfg = window.siteCurrency || {};
+        const modal = document.getElementById('currencySelectionModal');
+        if (!modal) return;
+
+        const supported = cfg.supported || {};
+        const defaultCurrency = String(cfg.default || 'USD').toUpperCase();
+        const selectedCurrency = String(cfg.selected || defaultCurrency).toUpperCase();
+        const promptDismissed = Boolean(cfg.promptDismissed);
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const shouldSkip = promptDismissed || localStorage.getItem('currency_modal_dismissed') === '1';
+        if (shouldSkip) return;
+
+        const locale = Intl.DateTimeFormat().resolvedOptions().locale || '';
+        const localeCountry = locale.includes('-') ? locale.split('-').pop().toUpperCase() : '';
+        const countryToCurrency = {
+          US: 'USD', GB: 'GBP', NG: 'NGN', CA: 'CAD', AE: 'AED',
+          IE: 'EUR', DE: 'EUR', FR: 'EUR', ES: 'EUR', IT: 'EUR', NL: 'EUR', BE: 'EUR'
+        };
+        const detectedCurrency = countryToCurrency[localeCountry] || defaultCurrency;
+        if (!supported[detectedCurrency] || detectedCurrency === selectedCurrency) return;
+
+        const detectedEl = document.getElementById('detectedCurrencyDisplay');
+        const defaultEl = document.getElementById('defaultCurrencyDisplay');
+        const useBtn = document.getElementById('currencyUseDetectedBtn');
+        const keepBtn = document.getElementById('currencyKeepDefaultBtn');
+        if (!detectedEl || !defaultEl || !useBtn || !keepBtn) return;
+
+        detectedEl.textContent = detectedCurrency + ' - ' + (supported[detectedCurrency] || detectedCurrency);
+        defaultEl.textContent = defaultCurrency + ' - ' + (supported[defaultCurrency] || defaultCurrency);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        const persist = async (currency) => {
+          const endpointEl = document.getElementById('currency-select-endpoint');
+          const endpoint = endpointEl?.value || '';
+          if (!endpoint) return;
+          await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token},
+            body: JSON.stringify({ currency, markAsShown: true }),
+          });
+          localStorage.setItem('currency_modal_dismissed', '1');
+          window.location.reload();
+        };
+
+        useBtn.addEventListener('click', () => persist(detectedCurrency));
+        keepBtn.addEventListener('click', () => persist(defaultCurrency));
+      })();
+    </script>
     @stack('scripts')
   </body>
 </html>

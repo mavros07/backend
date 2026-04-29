@@ -6,10 +6,21 @@ use App\Models\SiteSetting;
 use App\Support\SiteSettingDefaults;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AdminSiteSettingsController extends Controller
 {
+    /** @var array<string, string> */
+    private const SUPPORTED_CURRENCIES = [
+        'USD' => 'US Dollar ($)',
+        'EUR' => 'Euro (€)',
+        'GBP' => 'British Pound (£)',
+        'NGN' => 'Nigerian Naira (NGN)',
+        'CAD' => 'Canadian Dollar (C$)',
+        'AED' => 'UAE Dirham (AED)',
+    ];
+
     public function edit(Request $request): View
     {
         $settings = SiteSettingDefaults::mergeWithDatabase(SiteSetting::allKeyed());
@@ -17,6 +28,7 @@ class AdminSiteSettingsController extends Controller
         return view('admin.settings.edit', [
             'title' => __('Site settings'),
             'settings' => $settings,
+            'supportedCurrencies' => self::SUPPORTED_CURRENCIES,
         ]);
     }
 
@@ -27,6 +39,10 @@ class AdminSiteSettingsController extends Controller
             'logo_path' => ['nullable', 'string', 'max:2048'],
             'logo_light_path' => ['nullable', 'string', 'max:2048'],
             'favicon_path' => ['nullable', 'string', 'max:2048'],
+            'logo_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
+            'logo_light_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
+            'favicon_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,ico', 'max:2048'],
+            'currency_code' => ['nullable', 'string', 'in:' . implode(',', array_keys(self::SUPPORTED_CURRENCIES))],
             'currency_label' => ['nullable', 'string', 'max:100'],
             'dealer_phone' => ['nullable', 'string', 'max:64'],
             'dealer_sales_phone' => ['nullable', 'string', 'max:64'],
@@ -50,6 +66,20 @@ class AdminSiteSettingsController extends Controller
             'contact_from_name' => ['nullable', 'string', 'max:255'],
             'dealer_public_email' => ['nullable', 'email', 'max:255'],
         ]);
+
+        if ($request->hasFile('logo_file')) {
+            $validated['logo_path'] = $this->storeBrandAsset($request->file('logo_file'), 'logo');
+        }
+        if ($request->hasFile('logo_light_file')) {
+            $validated['logo_light_path'] = $this->storeBrandAsset($request->file('logo_light_file'), 'logo-light');
+        }
+        if ($request->hasFile('favicon_file')) {
+            $validated['favicon_path'] = $this->storeBrandAsset($request->file('favicon_file'), 'favicon');
+        }
+
+        $currencyCode = strtoupper(trim((string) ($validated['currency_code'] ?? 'USD')));
+        $validated['currency_code'] = array_key_exists($currencyCode, self::SUPPORTED_CURRENCIES) ? $currencyCode : 'USD';
+        $validated['currency_label'] = 'Currency (' . $validated['currency_code'] . ')';
 
         $blogJson = (string) ($validated['footer_blog_entries_json'] ?? '');
         if (trim($blogJson) !== '') {
@@ -87,6 +117,15 @@ class AdminSiteSettingsController extends Controller
         return redirect()
             ->route('admin.settings.edit')
             ->with('status', __('Site settings saved.'));
+    }
+
+    private function storeBrandAsset(\Illuminate\Http\UploadedFile $file, string $prefix): string
+    {
+        $safePrefix = Str::slug($prefix);
+        $filename = $safePrefix . '-' . Str::uuid() . '.' . strtolower($file->getClientOriginalExtension() ?: 'png');
+        $stored = $file->storePubliclyAs('site-settings', $filename, 'public');
+
+        return 'storage/' . ltrim((string) $stored, '/');
     }
 
     private function persistKey(string $key, string $value): void

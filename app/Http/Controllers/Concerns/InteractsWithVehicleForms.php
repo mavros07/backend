@@ -48,6 +48,7 @@ trait InteractsWithVehicleForms
             'finance_interest_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'finance_term_months' => ['nullable', 'integer', 'min:1', 'max:600'],
             'finance_down_payment' => ['nullable', 'integer', 'min:0'],
+            'show_financing_calculator' => ['nullable', 'boolean'],
             'features_text' => ['nullable', 'string', 'max:10000'],
             'exterior_color' => ['nullable', 'string', 'max:255'],
             'interior_color' => ['nullable', 'string', 'max:255'],
@@ -69,6 +70,7 @@ trait InteractsWithVehicleForms
         ]);
 
         $data['is_special'] = $request->boolean('is_special');
+        $data['show_financing_calculator'] = $request->boolean('show_financing_calculator');
 
         $data['features'] = $this->parseFeatures($data['features_text'] ?? null);
         unset($data['features_text']);

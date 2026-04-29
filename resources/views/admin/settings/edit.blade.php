@@ -7,7 +7,7 @@
   </x-slot>
 
   <div class="mx-auto max-w-5xl space-y-8">
-    <p class="text-sm text-zinc-600">{{ __('Branding, footer, top bar, and contact/newsletter routing. Paths for images may be pasted from ') }}<a href="{{ route('admin.media.index') }}" class="font-semibold text-indigo-600 hover:text-indigo-500">{{ __('Media library') }}</a>.</p>
+    <p class="text-sm text-zinc-600">{{ __('Branding, footer, top bar, and contact/newsletter routing. Upload logos/favicons directly here, or paste media library paths if needed.') }}</p>
 
     @if (session('status'))
       <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">{{ session('status') }}</div>
@@ -19,7 +19,7 @@
       </div>
     @endif
 
-    <form action="{{ route('admin.settings.update') }}" method="post" class="space-y-8">
+    <form action="{{ route('admin.settings.update') }}" method="post" class="space-y-8" enctype="multipart/form-data">
       @csrf
       @method('PUT')
 
@@ -39,22 +39,25 @@
           </div>
           <div class="grid gap-4 md:grid-cols-3">
             <div>
-              <label for="logo_path" class="block text-sm font-medium text-zinc-700">{{ __('Logo path') }}</label>
-              <input type="text" name="logo_path" id="logo_path" value="{{ old('logo_path', $settings['logo_path']) }}" placeholder="storage/..." class="mt-1 block w-full rounded-md border-zinc-300 font-mono text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+              <label for="logo_file" class="block text-sm font-medium text-zinc-700">{{ __('Logo (dark variant)') }}</label>
+              <input type="file" name="logo_file" id="logo_file" accept=".jpg,.jpeg,.png,.webp,.svg" class="mt-1 block w-full rounded-md border border-zinc-300 bg-white text-sm shadow-sm file:mr-3 file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200"/>
+              <input type="text" name="logo_path" id="logo_path" value="{{ old('logo_path', $settings['logo_path']) }}" placeholder="Optional manual path (storage/...)" class="mt-2 block w-full rounded-md border-zinc-300 font-mono text-xs shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
               @if (!empty(old('logo_path', $settings['logo_path'])))
                 <img src="{{ \App\Support\VehicleImageUrl::url(old('logo_path', $settings['logo_path'])) }}" alt="" class="mt-2 h-12 w-auto max-w-[200px] object-contain"/>
               @endif
             </div>
             <div>
-              <label for="logo_light_path" class="block text-sm font-medium text-zinc-700">{{ __('Logo light variant (optional)') }}</label>
-              <input type="text" name="logo_light_path" id="logo_light_path" value="{{ old('logo_light_path', $settings['logo_light_path']) }}" class="mt-1 block w-full rounded-md border-zinc-300 font-mono text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+              <label for="logo_light_file" class="block text-sm font-medium text-zinc-700">{{ __('Logo light variant (optional)') }}</label>
+              <input type="file" name="logo_light_file" id="logo_light_file" accept=".jpg,.jpeg,.png,.webp,.svg" class="mt-1 block w-full rounded-md border border-zinc-300 bg-white text-sm shadow-sm file:mr-3 file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200"/>
+              <input type="text" name="logo_light_path" id="logo_light_path" value="{{ old('logo_light_path', $settings['logo_light_path']) }}" placeholder="Optional manual path (storage/...)" class="mt-2 block w-full rounded-md border-zinc-300 font-mono text-xs shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
               @if (!empty(old('logo_light_path', $settings['logo_light_path'])))
                 <img src="{{ \App\Support\VehicleImageUrl::url(old('logo_light_path', $settings['logo_light_path'])) }}" alt="" class="mt-2 h-12 w-auto max-w-[200px] rounded bg-zinc-800 object-contain p-2"/>
               @endif
             </div>
             <div>
-              <label for="favicon_path" class="block text-sm font-medium text-zinc-700">{{ __('Favicon path') }}</label>
-              <input type="text" name="favicon_path" id="favicon_path" value="{{ old('favicon_path', $settings['favicon_path']) }}" class="mt-1 block w-full rounded-md border-zinc-300 font-mono text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+              <label for="favicon_file" class="block text-sm font-medium text-zinc-700">{{ __('Favicon') }}</label>
+              <input type="file" name="favicon_file" id="favicon_file" accept=".ico,.png,.jpg,.jpeg,.webp" class="mt-1 block w-full rounded-md border border-zinc-300 bg-white text-sm shadow-sm file:mr-3 file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200"/>
+              <input type="text" name="favicon_path" id="favicon_path" value="{{ old('favicon_path', $settings['favicon_path']) }}" placeholder="Optional manual path (storage/...)" class="mt-2 block w-full rounded-md border-zinc-300 font-mono text-xs shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
               @if (!empty(old('favicon_path', $settings['favicon_path'])))
                 <img src="{{ \App\Support\VehicleImageUrl::url(old('favicon_path', $settings['favicon_path'])) }}" alt="" class="mt-2 h-12 w-12 object-contain"/>
               @endif
@@ -69,8 +72,13 @@
         </div>
         <div class="grid gap-4 px-6 py-5 md:grid-cols-2">
           <div>
-            <label for="currency_label" class="block text-sm font-medium text-zinc-700">{{ __('Currency label') }}</label>
-            <input type="text" name="currency_label" id="currency_label" value="{{ old('currency_label', $settings['currency_label']) }}" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm"/>
+            <label for="currency_code" class="block text-sm font-medium text-zinc-700">{{ __('Default currency') }}</label>
+            <select name="currency_code" id="currency_code" class="mt-1 block w-full rounded-md border-zinc-300 shadow-sm">
+              @foreach (($supportedCurrencies ?? ['USD' => 'US Dollar ($)']) as $code => $label)
+                <option value="{{ $code }}" @selected(old('currency_code', $settings['currency_code'] ?? 'USD') === $code)>{{ $code }} - {{ $label }}</option>
+              @endforeach
+            </select>
+            <p class="mt-1 text-xs text-zinc-500">{{ __('This controls the header currency switch label.') }}</p>
           </div>
           <div>
             <label for="dealer_hours_label" class="block text-sm font-medium text-zinc-700">{{ __('Hours label') }}</label>

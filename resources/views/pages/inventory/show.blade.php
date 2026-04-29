@@ -23,6 +23,10 @@
   $financeRate = (float) ($vehicle->finance_interest_rate ?: 3);
   $financeTerm = (int) ($vehicle->finance_term_months ?: 24);
   $financeDown = (int) ($vehicle->finance_down_payment ?: 350);
+  $showFinanceCalculator = (bool) ($vehicle->show_financing_calculator ?? false)
+    && $financePrice > 0
+    && $financeRate > 0
+    && $financeTerm > 0;
 @endphp
 
 <div class="vehicle-detail-page bg-black text-white font-['Open_Sans']">
@@ -35,15 +39,15 @@
       <div class="flex flex-wrap md:flex-nowrap items-stretch shadow-xl w-full md:w-auto">
         <div class="bg-[#3b5998] p-4 flex flex-col justify-center min-w-[140px] text-center border-r border-white/10">
           <div class="text-[10px] uppercase font-bold opacity-70">Buy for</div>
-          <div class="text-2xl font-black">{{ !is_null($price) ? '$'.number_format((int) $price) : 'ASK' }}</div>
+          <div class="text-2xl font-black">{{ !is_null($price) ? '' : 'ASK' }}@if(!is_null($price))<span data-currency-amount="{{ (float) $price }}" data-currency-decimals="0">${{ number_format((int) $price) }}</span>@endif</div>
         </div>
         <div class="bg-[#3b5998] p-4 flex flex-col justify-center min-w-[140px] text-center">
           <div class="text-[10px] uppercase font-bold opacity-70">MSRP</div>
-          <div class="text-2xl font-black">{{ !is_null($msrp) ? '$'.number_format((int) $msrp) : 'N/A' }}</div>
+          <div class="text-2xl font-black">{{ !is_null($msrp) ? '' : 'N/A' }}@if(!is_null($msrp))<span data-currency-amount="{{ (float) $msrp }}" data-currency-decimals="0">${{ number_format((int) $msrp) }}</span>@endif</div>
         </div>
         @if ($saving)
           <div class="bg-black/20 p-2 flex items-center px-4">
-            <span class="text-[10px] font-bold uppercase text-[#ffb129]">Instant Savings: ${{ number_format((int) $saving) }}</span>
+            <span class="text-[10px] font-bold uppercase text-[#ffb129]">Instant Savings: <span data-currency-amount="{{ (float) $saving }}" data-currency-decimals="0">${{ number_format((int) $saving) }}</span></span>
           </div>
         @endif
       </div>
@@ -90,12 +94,6 @@
           <h2 class="text-2xl font-black uppercase mb-6 font-['Montserrat']">Vehicle overview</h2>
           <div class="text-gray-400 text-sm leading-relaxed space-y-6">
             <p class="whitespace-pre-line">{{ $overview ?: 'No overview available for this vehicle.' }}</p>
-            @if (!empty($vehicle->description))
-              <div class="flex gap-4 items-start bg-[#232628] p-6 border-l-4 border-[#ffb129]">
-                <span class="material-symbols-outlined text-[#ffb129] text-3xl">info</span>
-                <p class="italic">{{ \Illuminate\Support\Str::limit(strip_tags($vehicle->description), 260) }}</p>
-              </div>
-            @endif
           </div>
         </div>
 
@@ -147,25 +145,27 @@
           <div class="text-center"><div class="text-3xl font-black">{{ $vehicle->hwy_mpg ?: 'N/A' }}</div><div class="text-[10px] font-bold text-gray-500 uppercase">HWY MPG</div></div>
         </div>
 
-        <div class="bg-[#191c1e] p-8 border border-white/5" data-finance-calculator
-             data-price="{{ $financePrice }}"
-             data-rate="{{ $financeRate }}"
-             data-term="{{ $financeTerm }}"
-             data-down="{{ $financeDown }}">
-          <h3 class="text-sm font-black uppercase flex items-center gap-2 mb-8"><span class="material-symbols-outlined text-[#ffb129]">calculate</span> Financing calculator</h3>
-          <div class="space-y-6">
-            <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Vehicle price ($)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="price"></div>
-            <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Interest rate (%)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" step="0.01" data-finance-input="rate"></div>
-            <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Loan term (month)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="term"></div>
-            <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Down payment ($)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="down"></div>
-            <button class="w-full bg-[#3b5998] py-3 text-xs font-black uppercase tracking-tighter hover:bg-[#4b71be] transition-colors" type="button" data-finance-calc-btn>Calculate</button>
-            <div class="pt-6 border-t border-white/10 space-y-2">
-              <div class="flex justify-between text-xs"><span class="text-gray-500">Monthly Payment</span><span class="font-black text-[#ffb129]" data-finance-result>$0</span></div>
-              <div class="flex justify-between text-xs"><span class="text-gray-500">Total Interest Payment</span><span class="font-black text-[#ffb129]" data-finance-total-interest>$0</span></div>
-              <div class="flex justify-between text-xs"><span class="text-gray-500">Total Amount to Pay</span><span class="font-black text-[#ffb129]" data-finance-total-amount>$0</span></div>
+        @if ($showFinanceCalculator)
+          <div class="bg-[#191c1e] p-8 border border-white/5" data-finance-calculator
+               data-price="{{ $financePrice }}"
+               data-rate="{{ $financeRate }}"
+               data-term="{{ $financeTerm }}"
+               data-down="{{ $financeDown }}">
+            <h3 class="text-sm font-black uppercase flex items-center gap-2 mb-8"><span class="material-symbols-outlined text-[#ffb129]">calculate</span> Financing calculator</h3>
+            <div class="space-y-6">
+              <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Vehicle price ($)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="price"></div>
+              <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Interest rate (%)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" step="0.01" data-finance-input="rate"></div>
+              <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Loan term (month)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="term"></div>
+              <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Down payment ($)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="down"></div>
+              <button class="w-full bg-[#3b5998] py-3 text-xs font-black uppercase tracking-tighter hover:bg-[#4b71be] transition-colors" type="button" data-finance-calc-btn>Calculate</button>
+              <div class="pt-6 border-t border-white/10 space-y-2">
+                <div class="flex justify-between text-xs"><span class="text-gray-500">Monthly Payment</span><span class="font-black text-[#ffb129]" data-finance-result>$0</span></div>
+                <div class="flex justify-between text-xs"><span class="text-gray-500">Total Interest Payment</span><span class="font-black text-[#ffb129]" data-finance-total-interest>$0</span></div>
+                <div class="flex justify-between text-xs"><span class="text-gray-500">Total Amount to Pay</span><span class="font-black text-[#ffb129]" data-finance-total-amount>$0</span></div>
+              </div>
             </div>
           </div>
-        </div>
+        @endif
       </aside>
     </section>
 
@@ -265,7 +265,7 @@
                         <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="{{ \App\Support\VehicleImageUrl::url($itemCover->path) }}" alt="{{ $item->title }}">
                       @endif
                       <div class="absolute bottom-0 left-0 right-0 bg-[#3b5998]/90 p-2 text-center">
-                        <span class="text-[10px] font-bold">Our price {{ !is_null($item->price) ? '$'.number_format((int) $item->price) : 'ASK' }} @if($item->msrp)<span class="opacity-50">MSRP ${{ number_format((int) $item->msrp) }}</span>@endif</span>
+                        <span class="text-[10px] font-bold">Our price {{ !is_null($item->price) ? '' : 'ASK' }}@if(!is_null($item->price))<span data-currency-amount="{{ (float) $item->price }}" data-currency-decimals="0">${{ number_format((int) $item->price) }}</span>@endif @if($item->msrp)<span class="opacity-50">MSRP <span data-currency-amount="{{ (float) $item->msrp }}" data-currency-decimals="0">${{ number_format((int) $item->msrp) }}</span></span>@endif</span>
                       </div>
                     </div>
                     <div class="p-4"><h4 class="text-xs font-bold uppercase">{{ ($item->make ?: '').' '.($item->model ?: '').' '.($item->year ?: '') }}</h4></div>

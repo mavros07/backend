@@ -11,30 +11,7 @@
 </div>
 
 @if($isAdminUser)
-  <div id="vehicle-media-modal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/70 p-4">
-    <div class="w-full max-w-5xl rounded-lg bg-white shadow-xl">
-      <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
-        <h3 class="text-sm font-semibold text-gray-900">Select Media</h3>
-        <button type="button" id="vehicle-media-close" class="text-gray-500 hover:text-gray-900">✕</button>
-      </div>
-      <div class="border-b border-gray-200 p-4">
-        <div class="flex flex-wrap items-center gap-2">
-          <input id="vehicle-media-search" type="search" class="w-full rounded-md border-gray-300 text-sm shadow-sm sm:w-72" placeholder="Search media..." />
-          <form id="vehicle-media-upload-form" action="{{ route('admin.media.upload') }}" method="post" enctype="multipart/form-data" class="flex flex-wrap items-center gap-2">
-            @csrf
-            <input id="vehicle-media-upload-input" type="file" name="file" accept="image/jpeg,image/jpg,image/png,image/webp" class="text-sm text-gray-700" />
-            <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700">Upload</button>
-          </form>
-        </div>
-        <p class="mt-2 text-xs text-gray-500">Gallery supports multi-select in this modal (Ctrl/Cmd-click, Shift-click range).</p>
-      </div>
-      <div id="vehicle-media-grid" class="grid max-h-[60vh] grid-cols-2 gap-3 overflow-auto p-4 sm:grid-cols-3 lg:grid-cols-4"></div>
-      <div class="flex items-center justify-end gap-2 border-t border-gray-200 px-4 py-3">
-        <button type="button" id="vehicle-media-insert" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700" disabled>Use selection</button>
-        <button type="button" id="vehicle-media-cancel" class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-      </div>
-    </div>
-  </div>
+  @include('partials.media-modal')
 @endif
 
 <script>
@@ -277,20 +254,18 @@
       return;
     }
 
-    const mediaModal = document.getElementById('vehicle-media-modal');
-    const mediaGrid = document.getElementById('vehicle-media-grid');
-    const mediaSearch = document.getElementById('vehicle-media-search');
-    const mediaInsert = document.getElementById('vehicle-media-insert');
-    const mediaClose = document.getElementById('vehicle-media-close');
-    const mediaCancel = document.getElementById('vehicle-media-cancel');
-    const mediaUploadForm = document.getElementById('vehicle-media-upload-form');
+    const mediaModal = document.getElementById('media-modal');
+    const mediaGrid = document.getElementById('media-grid');
+    const mediaSearch = document.getElementById('media-search');
+    const mediaInsert = document.getElementById('media-modal-insert');
+    const mediaUploadForm = document.getElementById('media-upload-form');
     const mediaListUrl = @json(route('admin.media.list'));
     let mediaItems = [];
     let mediaTarget = null;
     let mediaSelected = [];
     let shiftAnchor = null;
 
-    if (!mediaModal || !mediaGrid || !mediaSearch || !mediaInsert || !mediaClose || !mediaCancel || !mediaUploadForm) {
+    if (!mediaModal || !mediaGrid || !mediaSearch || !mediaInsert || !mediaUploadForm) {
       return;
     }
 
@@ -299,6 +274,7 @@
       mediaSelected = [];
       shiftAnchor = null;
       mediaInsert.disabled = true;
+      mediaInsert.textContent = 'Use selected image';
       mediaModal.classList.remove('hidden');
       mediaModal.classList.add('flex');
       document.body.style.overflow = 'hidden';
@@ -309,6 +285,7 @@
       mediaModal.classList.add('hidden');
       mediaModal.classList.remove('flex');
       mediaTarget = null;
+      mediaSelected = [];
       document.body.style.overflow = '';
     }
 
@@ -343,12 +320,20 @@
 
           if (mediaTarget === 'gallery' && event.shiftKey && shiftAnchor !== null) {
             const [start, end] = [Math.min(shiftAnchor, idx), Math.max(shiftAnchor, idx)];
-            mediaSelected = items.slice(start, end + 1).map((item) => item.path);
+            const range = items.slice(start, end + 1).map((item) => item.path);
+            mediaSelected = Array.from(new Set([...(mediaSelected || []), ...range]));
           } else if (mediaTarget === 'gallery' && (event.ctrlKey || event.metaKey)) {
             if (mediaSelected.includes(path)) {
               mediaSelected = mediaSelected.filter((value) => value !== path);
             } else {
               mediaSelected.push(path);
+            }
+            shiftAnchor = idx;
+          } else if (mediaTarget === 'gallery') {
+            if (mediaSelected.includes(path)) {
+              mediaSelected = mediaSelected.filter((value) => value !== path);
+            } else {
+              mediaSelected = [...mediaSelected, path];
             }
             shiftAnchor = idx;
           } else {
@@ -357,6 +342,7 @@
           }
 
           mediaInsert.disabled = mediaSelected.length === 0;
+          mediaInsert.textContent = mediaSelected.length > 1 ? ('Use ' + mediaSelected.length + ' selected images') : 'Use selected image';
           renderMediaGrid();
         });
       });
@@ -383,8 +369,9 @@
     });
 
     mediaSearch.addEventListener('input', renderMediaGrid);
-    mediaClose.addEventListener('click', closeMediaPicker);
-    mediaCancel.addEventListener('click', closeMediaPicker);
+    document.querySelectorAll('.js-media-modal-close').forEach((btn) => {
+      btn.addEventListener('click', closeMediaPicker);
+    });
     mediaModal.addEventListener('click', (event) => {
       if (event.target === mediaModal) closeMediaPicker();
     });
@@ -394,14 +381,23 @@
 
     mediaUploadForm.addEventListener('submit', async (event) => {
       event.preventDefault();
+      const uploadInput = document.getElementById('media-upload-input');
+      if (!uploadInput || !uploadInput.files || uploadInput.files.length === 0) {
+        alert('Please choose one or more images first.');
+        return;
+      }
       const formData = new FormData(mediaUploadForm);
       const token = mediaUploadForm.querySelector('input[name="_token"]')?.value || '';
-      await fetch(mediaUploadForm.action, {
+      const response = await fetch(mediaUploadForm.action, {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
         body: formData,
       });
+      if (!response.ok) {
+        alert('Upload failed. Please try again.');
+        return;
+      }
       mediaUploadForm.reset();
       await fetchMediaItems();
     });

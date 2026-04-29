@@ -30,6 +30,8 @@ class User extends Authenticatable
         'google_id',
         'avatar',
         'email_login_otp_enabled',
+        'preferred_currency',
+        'currency_selection_prompt_dismissed',
         'email_verified_at',
     ];
 
@@ -54,6 +56,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'email_login_otp_enabled' => 'boolean',
+            'currency_selection_prompt_dismissed' => 'boolean',
         ];
     }
 

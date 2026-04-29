@@ -114,12 +114,6 @@
               <x-input-error :messages="$errors->get('features_text')" class="mt-2" />
             </div>
 
-            <div>
-              <x-input-label for="description" value="Description" />
-              <textarea id="description" name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" rows="5">{{ old('description') }}</textarea>
-              <x-input-error :messages="$errors->get('description')" class="mt-2" />
-            </div>
-
             <section class="rounded-lg border border-gray-200 p-4 space-y-4">
               <h3 class="text-base font-semibold text-gray-900">Detail page configuration</h3>
 
@@ -159,6 +153,11 @@
                   <x-input-label for="finance_term_months" value="Finance term (months)" />
                   <x-text-input id="finance_term_months" name="finance_term_months" type="number" class="mt-1 block w-full" value="{{ old('finance_term_months') }}" />
                 </div>
+              </div>
+
+              <div class="flex items-center gap-2 rounded-md border border-indigo-200 bg-indigo-50/70 px-3 py-2">
+                <input id="show_financing_calculator" name="show_financing_calculator" type="checkbox" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(old('show_financing_calculator')) />
+                <x-input-label for="show_financing_calculator" value="{{ __('Show financing calculator on detail page') }}" class="!mb-0" />
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
