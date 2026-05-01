@@ -32,5 +32,7 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- External HTTP import disabled for tests unless explicitly enabled -->
+        <env name="IMPORT_STYLEMIX_SOLD_LISTINGS" value="false"/>
     </php>
 </phpunit>
