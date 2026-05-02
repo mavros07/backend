@@ -25,45 +25,21 @@ return new class extends Migration
             throw new RuntimeException('vehicles table is missing legacy make column and make_listing_option_id; cannot migrate.');
         }
 
+        $listingOptionFkSpec = self::listingOptionsIdFkSpec();
+
         // Add each FK column only if missing (resumes cleanly after partial/failed DDL).
-        if (! Schema::hasColumn('vehicles', 'make_listing_option_id')) {
-            Schema::table('vehicles', function (Blueprint $table) {
-                $table->foreignId('make_listing_option_id')->nullable()->after('year')->constrained('listing_options')->restrictOnDelete();
-            });
-        }
-        if (! Schema::hasColumn('vehicles', 'model_listing_option_id')) {
-            Schema::table('vehicles', function (Blueprint $table) {
-                $table->foreignId('model_listing_option_id')->nullable()->after('make_listing_option_id')->constrained('listing_options')->restrictOnDelete();
-            });
-        }
-        if (! Schema::hasColumn('vehicles', 'condition_listing_option_id')) {
-            Schema::table('vehicles', function (Blueprint $table) {
-                $table->foreignId('condition_listing_option_id')->nullable()->after('model_listing_option_id')->constrained('listing_options')->restrictOnDelete();
-            });
-        }
-        if (! Schema::hasColumn('vehicles', 'body_type_listing_option_id')) {
-            Schema::table('vehicles', function (Blueprint $table) {
-                $table->foreignId('body_type_listing_option_id')->nullable()->after('condition_listing_option_id')->constrained('listing_options')->restrictOnDelete();
-            });
-        }
-        if (! Schema::hasColumn('vehicles', 'transmission_listing_option_id')) {
-            Schema::table('vehicles', function (Blueprint $table) {
-                $table->foreignId('transmission_listing_option_id')->nullable()->after('body_type_listing_option_id')->constrained('listing_options')->restrictOnDelete();
-            });
-        }
-        if (! Schema::hasColumn('vehicles', 'fuel_type_listing_option_id')) {
-            Schema::table('vehicles', function (Blueprint $table) {
-                $table->foreignId('fuel_type_listing_option_id')->nullable()->after('transmission_listing_option_id')->constrained('listing_options')->restrictOnDelete();
-            });
-        }
-        if (! Schema::hasColumn('vehicles', 'drive_listing_option_id')) {
-            Schema::table('vehicles', function (Blueprint $table) {
-                $table->foreignId('drive_listing_option_id')->nullable()->after('fuel_type_listing_option_id')->constrained('listing_options')->restrictOnDelete();
-            });
-        }
-        if (! Schema::hasColumn('vehicles', 'country_listing_option_id')) {
-            Schema::table('vehicles', function (Blueprint $table) {
-                $table->foreignId('country_listing_option_id')->nullable()->after('drive_listing_option_id')->constrained('listing_options')->restrictOnDelete();
+        foreach (self::vehicleListingOptionFkColumnPairs() as [$columnName, $afterColumn]) {
+            if (Schema::hasColumn('vehicles', $columnName)) {
+                continue;
+            }
+
+            Schema::table('vehicles', function (Blueprint $table) use ($listingOptionFkSpec, $columnName, $afterColumn) {
+                self::applyNullableFkColumnCompatibleWithListingOptions(
+                    $table,
+                    $listingOptionFkSpec,
+                    $columnName,
+                    $afterColumn
+                );
             });
         }
 
@@ -175,5 +151,121 @@ return new class extends Migration
             $table->string('country', 191)->nullable()->after('location');
             $table->string('contact_address', 255)->nullable()->after('contact_phone');
         });
+    }
+
+    /**
+     * @return list<array{0: string, 1: string}>
+     */
+    private static function vehicleListingOptionFkColumnPairs(): array
+    {
+        return [
+            ['make_listing_option_id', 'year'],
+            ['model_listing_option_id', 'make_listing_option_id'],
+            ['condition_listing_option_id', 'model_listing_option_id'],
+            ['body_type_listing_option_id', 'condition_listing_option_id'],
+            ['transmission_listing_option_id', 'body_type_listing_option_id'],
+            ['fuel_type_listing_option_id', 'transmission_listing_option_id'],
+            ['drive_listing_option_id', 'fuel_type_listing_option_id'],
+            ['country_listing_option_id', 'drive_listing_option_id'],
+        ];
+    }
+
+    /**
+     * Match vehicles.*_listing_option_id column SQL type to listing_options.id (signedness + integer width).
+     * Laravel's nullable foreignId() is always unsigned bigint; InnoDB_errno_150 commonly means the PK is bigint signed etc.
+     *
+     * @return array{data_type: string, unsigned: bool}
+     */
+    private static function listingOptionsIdFkSpec(): array
+    {
+        $default = ['data_type' => 'bigint', 'unsigned' => true];
+        $connection = Schema::connection();
+
+        if (! in_array($connection->getDriverName(), ['mysql', 'mariadb'], true)) {
+            return $default;
+        }
+
+        try {
+            $database = $connection->getDatabaseName();
+            $tableName = $connection->getTablePrefix().'listing_options';
+
+            /** @var object{COLUMN_TYPE: string|null, DATA_TYPE: string|null}|null $row */
+            $row = DB::selectOne(
+                'SELECT COLUMN_TYPE, DATA_TYPE FROM information_schema.columns
+                 WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?',
+                [$database, $tableName, 'id']
+            );
+
+            if ($row === null || empty($row->DATA_TYPE)) {
+                return $default;
+            }
+
+            $dataType = strtolower((string) $row->DATA_TYPE);
+            $columnType = strtolower((string) ($row->COLUMN_TYPE ?? ''));
+            $unsigned = str_contains($columnType, 'unsigned');
+
+            foreach (['tinyint', 'smallint', 'mediumint', 'int', 'bigint'] as $integerType) {
+                if ($dataType === $integerType) {
+                    return ['data_type' => $dataType, 'unsigned' => $unsigned];
+                }
+            }
+
+            return $default;
+        } catch (\Throwable) {
+            return $default;
+        }
+    }
+
+    /**
+     * @param  array{data_type: string, unsigned: bool}  $spec
+     */
+    private static function applyNullableFkColumnCompatibleWithListingOptions(
+        Blueprint $table,
+        array $spec,
+        string $columnName,
+        string $afterColumn,
+    ): void {
+        $dataType = $spec['data_type'];
+        $unsigned = $spec['unsigned'];
+
+        switch (true) {
+            case $dataType === 'bigint' && $unsigned:
+                $table->unsignedBigInteger($columnName)->nullable()->after($afterColumn);
+                break;
+            case $dataType === 'bigint' && ! $unsigned:
+                $table->bigInteger($columnName)->nullable()->after($afterColumn);
+                break;
+            case $dataType === 'int' && $unsigned:
+                $table->unsignedInteger($columnName)->nullable()->after($afterColumn);
+                break;
+            case $dataType === 'int' && ! $unsigned:
+                $table->integer($columnName)->nullable()->after($afterColumn);
+                break;
+            case $dataType === 'mediumint' && $unsigned:
+                $table->unsignedMediumInteger($columnName)->nullable()->after($afterColumn);
+                break;
+            case $dataType === 'mediumint' && ! $unsigned:
+                $table->mediumInteger($columnName)->nullable()->after($afterColumn);
+                break;
+            case $dataType === 'smallint' && $unsigned:
+                $table->unsignedSmallInteger($columnName)->nullable()->after($afterColumn);
+                break;
+            case $dataType === 'smallint' && ! $unsigned:
+                $table->smallInteger($columnName)->nullable()->after($afterColumn);
+                break;
+            case $dataType === 'tinyint' && $unsigned:
+                $table->unsignedTinyInteger($columnName)->nullable()->after($afterColumn);
+                break;
+            case $dataType === 'tinyint' && ! $unsigned:
+                $table->tinyInteger($columnName)->nullable()->after($afterColumn);
+                break;
+            default:
+                throw new RuntimeException(sprintf(
+                    'listing_options.id has unsupported INTEGER DATA_TYPE `%s`; cannot attach foreign keys on vehicles.',
+                    $dataType
+                ));
+        }
+
+        $table->foreign($columnName)->references('id')->on('listing_options')->restrictOnDelete();
     }
 };
