@@ -149,6 +149,45 @@ final class ListingOptionCatalogSync
     }
 
     /**
+     * When the country catalog has at least one active root option but legacy rows have an empty
+     * country string, {@see unresolvedLegacyProblems} would block the FK migration. Ensure a single
+     * fallback root option exists and set empty vehicle.country to that label before validation.
+     */
+    public static function ensureFallbackCountryForEmptyLegacyVehicleRows(): void
+    {
+        if (! self::tablesExist()) {
+            return;
+        }
+
+        if (self::activeRootOptionCount('country') === 0) {
+            return;
+        }
+
+        $hasEmpty = DB::table('vehicles')
+            ->where(function ($q) {
+                $q->whereNull('country')->orWhereRaw("TRIM(country) = ''");
+            })
+            ->exists();
+        if (! $hasEmpty) {
+            return;
+        }
+
+        $catId = (int) ListingOptionCategory::query()->where('slug', 'country')->value('id');
+        if (! $catId) {
+            return;
+        }
+
+        $label = ListingOptionNormalizer::canonical('country', 'Unspecified');
+        self::ensureRootOption($catId, $label);
+
+        DB::table('vehicles')
+            ->where(function ($q) {
+                $q->whereNull('country')->orWhereRaw("TRIM(country) = ''");
+            })
+            ->update(['country' => $label]);
+    }
+
+    /**
      * @return array<string, int|null>
      */
     public static function resolveLegacyRowToForeignKeys(object $row): array

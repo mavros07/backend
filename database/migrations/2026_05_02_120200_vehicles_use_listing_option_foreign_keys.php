@@ -54,6 +54,7 @@ return new class extends Migration
         }
 
         ListingOptionCatalogSync::syncOptionsFromLegacyVehicleColumns();
+        ListingOptionCatalogSync::ensureFallbackCountryForEmptyLegacyVehicleRows();
 
         $failures = [];
         DB::table('vehicles')->orderBy('id')->chunkById(200, function ($rows) use (&$failures) {
