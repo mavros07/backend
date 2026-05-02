@@ -3,10 +3,8 @@
 namespace App\Providers;
 
 use App\Models\SiteSetting;
-use App\Models\User;
-use App\Services\CurrencyRateService;
-use App\Support\CurrencyCatalog;
 use App\Support\SiteSettingDefaults;
+use App\View\Composers\SiteCurrencyComposer;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -47,49 +45,7 @@ class AppServiceProvider extends ServiceProvider
         $site = SiteSettingDefaults::mergeWithDatabase($fromDb);
         View::share('site', $site);
 
-        $defaultCurrency = strtoupper(trim((string) ($site['currency_code'] ?? 'USD')));
-        if (! array_key_exists($defaultCurrency, CurrencyCatalog::supported())) {
-            $defaultCurrency = 'USD';
-        }
-        $selectedCurrency = $defaultCurrency;
-        $promptDismissed = false;
-        try {
-            if (! app()->runningInConsole() && request()->hasSession()) {
-                $sessionCurrency = strtoupper((string) request()->session()->get('site_currency', $defaultCurrency));
-                if (array_key_exists($sessionCurrency, CurrencyCatalog::supported())) {
-                    $selectedCurrency = $sessionCurrency;
-                }
-                $promptDismissed = (bool) request()->session()->get('currency_selection_prompt_dismissed', false);
-
-                /** @var User|null $authUser */
-                $authUser = request()->user();
-                if ($authUser) {
-                    $userCurrency = strtoupper((string) ($authUser->preferred_currency ?? ''));
-                    if (array_key_exists($userCurrency, CurrencyCatalog::supported())) {
-                        $selectedCurrency = $userCurrency;
-                        request()->session()->put('site_currency', $userCurrency);
-                    }
-                    $promptDismissed = (bool) $authUser->currency_selection_prompt_dismissed;
-                }
-            }
-        } catch (\Throwable) {
-            $selectedCurrency = $defaultCurrency;
-        }
-
-        $rates = [$defaultCurrency => 1.0];
-        try {
-            $rates = app(CurrencyRateService::class)->ratesFrom($defaultCurrency);
-        } catch (\Throwable) {
-            $rates = [$defaultCurrency => 1.0];
-        }
-
-        View::share('currencyUi', [
-            'default' => $defaultCurrency,
-            'selected' => $selectedCurrency,
-            'supported' => CurrencyCatalog::supported(),
-            'symbols' => CurrencyCatalog::symbols(),
-            'rates' => $rates,
-            'promptDismissed' => $promptDismissed,
-        ]);
+        // currencyUi must be composed after StartSession — see SiteCurrencyComposer.
+        View::composer('layouts.site', SiteCurrencyComposer::class);
     }
 }

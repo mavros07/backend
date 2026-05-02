@@ -1,5 +1,7 @@
 # MyAuto-Torque (Laravel backend)
 
+Full **site behavior, feature list, and codebase map**: see **[docs/SITE_AND_CODEBASE.md](docs/SITE_AND_CODEBASE.md)**.
+
 ## Requirements
 
 - PHP 8.2+
@@ -58,5 +60,7 @@ php artisan serve
 
 ## Default seeded users
 
+Defined in `database/seeders/DemoData.php` (run via `DatabaseSeeder`):
+
 - Admin: `admin@example.com` / `password`
-- User: `test@example.com` / `password`
+- User: `demo@example.com` / `password`

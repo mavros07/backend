@@ -7,6 +7,7 @@
     @php
       $site = $site ?? [];
       $siteDisplayName = ! empty(trim((string) ($site['site_display_name'] ?? ''))) ? trim((string) $site['site_display_name']) : config('app.name');
+      $loaderLogoPath = $site['logo_path'] ?? $site['logo_url'] ?? null;
     @endphp
     <title>@if(!empty($title ?? null)){{ $title }} | @endif{{ $siteDisplayName }}</title>
     @if (!empty($metaDescription))
@@ -63,13 +64,12 @@
   <body class="bg-page_bg font-body text-on_surface selection:bg-brand_blue/20 {{ $bodyClass ?? '' }}" data-currency-ui="{{ e(json_encode($currencyUi ?? ['default' => 'USD', 'selected' => 'USD', 'symbols' => ['USD' => '$'], 'rates' => ['USD' => 1.0]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}">
     <!-- Global Loading Screen -->
     <div id="global-loader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#1E2229] transition-opacity duration-700 ease-in-out">
-      <div class="relative flex items-center justify-center">
-        <!-- Spinner -->
-        <svg class="h-20 w-20 animate-spin text-brand_orange" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span class="absolute material-symbols-outlined text-white text-3xl">directions_car</span>
+      <div class="flex h-32 w-32 items-center justify-center rounded-full border-2 border-white/20 bg-[#2a3038] shadow-[inset_0_2px_10px_rgba(0,0,0,0.4)]">
+        @if (! empty($loaderLogoPath))
+          <img src="{{ \App\Support\VehicleImageUrl::url($loaderLogoPath) }}" alt="" class="h-[5.25rem] w-[5.25rem] max-h-[82%] max-w-[82%] object-contain" />
+        @else
+          <span class="max-w-[80%] truncate px-2 text-center font-headline text-lg font-black uppercase tracking-tight text-white">{{ $siteDisplayName }}</span>
+        @endif
       </div>
       <!-- Fading Site Name -->
       <div class="mt-8 animate-pulse text-center font-headline text-2xl font-black italic tracking-widest text-white uppercase">
@@ -179,13 +179,21 @@
           const endpointEl = document.getElementById('currency-select-endpoint');
           const endpoint = endpointEl?.value || '';
           if (!endpoint) return;
-          await fetch(endpoint, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token},
-            body: JSON.stringify({ currency, markAsShown: true }),
-          });
-          localStorage.setItem('currency_modal_dismissed', '1');
-          window.location.reload();
+          useBtn.setAttribute('disabled', 'disabled');
+          keepBtn.setAttribute('disabled', 'disabled');
+          try {
+            await fetch(endpoint, {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json'},
+              body: JSON.stringify({ currency, markAsShown: true }),
+            });
+            localStorage.setItem('currency_modal_dismissed', '1');
+            window.location.reload();
+          } finally {
+            useBtn.removeAttribute('disabled');
+            keepBtn.removeAttribute('disabled');
+          }
         };
 
         useBtn.addEventListener('click', () => persist(detectedCurrency));

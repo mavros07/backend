@@ -22,6 +22,7 @@ final class SiteSettingDefaults
             'logo_path' => '',
             'logo_light_path' => '',
             'favicon_path' => '',
+            'auth_panel_image_path' => '',
             'currency_code' => 'USD',
             'currency_label' => 'Currency (USD)',
             'dealer_phone' => '+1 212-226-3126',

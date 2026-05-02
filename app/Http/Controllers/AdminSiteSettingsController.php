@@ -39,6 +39,8 @@ class AdminSiteSettingsController extends Controller
             'logo_path' => ['nullable', 'string', 'max:2048'],
             'logo_light_path' => ['nullable', 'string', 'max:2048'],
             'favicon_path' => ['nullable', 'string', 'max:2048'],
+            'auth_panel_image_path' => ['nullable', 'string', 'max:2048'],
+            'auth_panel_image_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
             'logo_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
             'logo_light_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
             'favicon_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,ico', 'max:2048'],
@@ -75,6 +77,9 @@ class AdminSiteSettingsController extends Controller
         }
         if ($request->hasFile('favicon_file')) {
             $validated['favicon_path'] = $this->storeBrandAsset($request->file('favicon_file'), 'favicon');
+        }
+        if ($request->hasFile('auth_panel_image_file')) {
+            $validated['auth_panel_image_path'] = $this->storeBrandAsset($request->file('auth_panel_image_file'), 'auth-panel');
         }
 
         $currencyCode = strtoupper(trim((string) ($validated['currency_code'] ?? 'USD')));

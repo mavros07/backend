@@ -125,8 +125,8 @@
         @foreach ([
           ['route' => 'home', 'label' => __('Home')],
           ['route' => 'inventory.index', 'label' => __('Inventory')],
-          ['url' => route('inventory.index', ['condition' => 'used', 'location' => 'nigeria']), 'label' => __('Nigerian Used')],
-          ['url' => route('inventory.index', ['condition' => 'used', 'location' => 'united states']), 'label' => __('Foreign Used')],
+          ['url' => route('inventory.index', ['q' => 'Nigeria']), 'label' => __('Nigerian Used')],
+          ['url' => route('inventory.index', ['q' => 'United States']), 'label' => __('Foreign Used')],
           ['route' => 'about', 'label' => __('About')],
           ['route' => 'faq', 'label' => __('FAQ')],
           ['route' => 'contact', 'label' => __('Contact')],
@@ -137,7 +137,7 @@
             if ($r) {
                 $active = match ($r) {
                   'home' => request()->routeIs('home'),
-                  'inventory.index' => request()->routeIs('inventory.*') && !request()->has('location'),
+                  'inventory.index' => request()->routeIs('inventory.index'),
                   default => request()->routeIs($r),
                 };
             } else {
@@ -184,8 +184,8 @@
     @foreach ([
       ['route' => 'home', 'label' => __('Home')],
       ['route' => 'inventory.index', 'label' => __('Inventory')],
-      ['url' => route('inventory.index', ['condition' => 'used', 'location' => 'nigeria']), 'label' => __('Nigerian Used')],
-      ['url' => route('inventory.index', ['condition' => 'used', 'location' => 'united states']), 'label' => __('Foreign Used')],
+      ['url' => route('inventory.index', ['q' => 'Nigeria']), 'label' => __('Nigerian Used')],
+      ['url' => route('inventory.index', ['q' => 'United States']), 'label' => __('Foreign Used')],
       ['route' => 'about', 'label' => __('About')],
       ['route' => 'faq', 'label' => __('FAQ')],
       ['route' => 'compare', 'label' => __('Compare')],
@@ -228,15 +228,25 @@
         const endpoint = document.getElementById('currency-select-endpoint')?.value;
         if (!endpoint) return;
         const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token},
-          body: JSON.stringify({ currency: code }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.success) return;
-        menu.classList.add('hidden');
-        window.location.reload();
+        toggle.setAttribute('aria-busy', 'true');
+        toggle.setAttribute('disabled', 'disabled');
+        menu.querySelectorAll('[data-currency-option]').forEach((b) => b.setAttribute('disabled', 'disabled'));
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json'},
+            body: JSON.stringify({ currency: code }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.success) return;
+          menu.classList.add('hidden');
+          window.location.reload();
+        } finally {
+          toggle.removeAttribute('aria-busy');
+          toggle.removeAttribute('disabled');
+          menu.querySelectorAll('[data-currency-option]').forEach((b) => b.removeAttribute('disabled'));
+        }
       });
     });
   })();

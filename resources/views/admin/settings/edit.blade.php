@@ -69,6 +69,12 @@
               @endif
             </div>
           </div>
+          <div class="border-t border-zinc-100 pt-4">
+            <label for="auth_panel_image_file" class="block text-sm font-medium text-zinc-700">{{ __('Sign-in / register panel image (desktop)') }}</label>
+            <p class="mt-1 text-xs text-zinc-500">{{ __('Shown on the right side of the account layout on large screens. Square or portrait photos work best.') }}</p>
+            <input type="file" name="auth_panel_image_file" id="auth_panel_image_file" accept=".jpg,.jpeg,.png,.webp" class="mt-2 block w-full rounded-md border border-zinc-300 bg-white text-sm shadow-sm file:mr-3 file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200"/>
+            <input type="text" name="auth_panel_image_path" id="auth_panel_image_path" value="{{ old('auth_panel_image_path', $settings['auth_panel_image_path'] ?? '') }}" placeholder="{{ __('Optional manual path (storage/...)') }}" class="mt-2 block w-full rounded-md border-zinc-300 font-mono text-xs shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+          </div>
         </div>
       </section>
 

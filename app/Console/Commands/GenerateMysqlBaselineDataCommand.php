@@ -119,36 +119,8 @@ class GenerateMysqlBaselineDataCommand extends Command
             $lines[] = '';
         }
 
-        $lines[] = '-- Demo approved inventory mapped to the demo user';
-        foreach (DemoData::vehicles() as $index => $vehicle) {
-            $slug = Str::slug((string) $vehicle['title']);
-            $features = isset($vehicle['features']) ? json_encode($vehicle['features'], JSON_UNESCAPED_SLASHES) : null;
-            $approvedByEmail = $this->sqlString($demoUsers['admin']['email']);
-            $ownerEmail = $this->sqlString($demoUsers['user']['email']);
-            $description = $this->sqlString((string) ($vehicle['description'] ?? 'Seed vehicle for UI placeholder. Replace with real content later.'));
-
-            $lines[] = "INSERT INTO `vehicles` (`user_id`, `title`, `slug`, `status`, `year`, `make`, `model`, `price`, `mileage`, `transmission`, `fuel_type`, `drive`, `body_type`, `condition`, `engine_size`, `location`, `features`, `exterior_color`, `interior_color`, `description`, `submitted_at`, `approved_at`, `approved_by`, `created_at`, `updated_at`)";
-            $lines[] = 'SELECT u.id, '.$this->sqlString((string) $vehicle['title']).', '.$this->sqlString($slug).", 'approved', ".(int) $vehicle['year'].', '.$this->sqlString((string) $vehicle['make']).', '.$this->sqlString((string) $vehicle['model']).', '.(int) $vehicle['price'].', '.(int) $vehicle['mileage'].', '.$this->sqlString((string) $vehicle['transmission']).', '.$this->sqlString((string) $vehicle['fuel_type']).', '.$this->sqlString((string) $vehicle['drive']).', '.$this->sqlString((string) $vehicle['body_type']).', '.$this->sqlString((string) $vehicle['condition']).', '.$this->sqlString((string) $vehicle['engine_size']).', '.$this->sqlString((string) $vehicle['location']).', '.($features ? $this->sqlString($features) : 'NULL').', '.$this->sqlString((string) $vehicle['exterior_color']).', '.$this->sqlString((string) $vehicle['interior_color']).', '.$description.", '{$now}', '{$now}', approver.id, '{$now}', '{$now}'";
-            $lines[] = 'FROM `users` u';
-            $lines[] = 'JOIN `users` approver ON approver.email = '.$approvedByEmail;
-            $lines[] = 'WHERE u.email = '.$ownerEmail;
-            $lines[] = 'ON DUPLICATE KEY UPDATE `user_id` = VALUES(`user_id`), `title` = VALUES(`title`), `status` = VALUES(`status`), `year` = VALUES(`year`), `make` = VALUES(`make`), `model` = VALUES(`model`), `price` = VALUES(`price`), `mileage` = VALUES(`mileage`), `transmission` = VALUES(`transmission`), `fuel_type` = VALUES(`fuel_type`), `drive` = VALUES(`drive`), `body_type` = VALUES(`body_type`), `condition` = VALUES(`condition`), `engine_size` = VALUES(`engine_size`), `location` = VALUES(`location`), `features` = VALUES(`features`), `exterior_color` = VALUES(`exterior_color`), `interior_color` = VALUES(`interior_color`), `description` = VALUES(`description`), `submitted_at` = VALUES(`submitted_at`), `approved_at` = VALUES(`approved_at`), `approved_by` = VALUES(`approved_by`), `rejection_reason` = NULL, `updated_at` = VALUES(`updated_at`);';
-
-            $lines[] = 'DELETE vi FROM `vehicle_images` vi';
-            $lines[] = 'JOIN `vehicles` v ON v.id = vi.vehicle_id';
-            $lines[] = 'WHERE v.slug = '.$this->sqlString($slug).';';
-
-            foreach ($vehicle['images'] as $sortOrder => $imagePath) {
-                $lines[] = "INSERT INTO `vehicle_images` (`vehicle_id`, `path`, `sort_order`, `created_at`, `updated_at`)";
-                $lines[] = 'SELECT v.id, '.$this->sqlString((string) $imagePath).', '.(int) $sortOrder.", '{$now}', '{$now}'";
-                $lines[] = 'FROM `vehicles` v';
-                $lines[] = 'WHERE v.slug = '.$this->sqlString($slug).';';
-            }
-
-            if ($index < count(DemoData::vehicles()) - 1) {
-                $lines[] = '';
-            }
-        }
+        $lines[] = '-- Demo inventory uses listing_option foreign keys; seed with Laravel after import:';
+        $lines[] = '--   php artisan db:seed --class=VehiclesSeeder';
         $lines[] = '';
 
         $lines[] = 'SET FOREIGN_KEY_CHECKS = 1;';

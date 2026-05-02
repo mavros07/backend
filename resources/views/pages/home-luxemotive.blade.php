@@ -28,13 +28,20 @@
   $recentFirstWords = trim(implode(' ', $recentTitleParts));
   $welcomeVideoRaw = trim((string) ($s['welcome_video_url'] ?? ''));
   $welcomeYoutubeWatch = null;
+  $welcomeYoutubeEmbedId = null;
   if ($welcomeVideoRaw !== '') {
     if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $welcomeVideoRaw, $m)) {
+      $welcomeYoutubeEmbedId = $m[1];
       $welcomeYoutubeWatch = 'https://www.youtube.com/watch?v=' . $m[1];
     } elseif (preg_match('/^[a-zA-Z0-9_-]{11}$/', $welcomeVideoRaw)) {
+      $welcomeYoutubeEmbedId = $welcomeVideoRaw;
       $welcomeYoutubeWatch = 'https://www.youtube.com/watch?v=' . $welcomeVideoRaw;
     }
   }
+  $prefooterTitle = $s['prefooter_title'] ?? 'Lorem ipsum — questions?';
+  $prefooterButtonText = $s['prefooter_button_text'] ?? 'Contact';
+  $prefooterButtonHref = trim((string) ($s['prefooter_button_href'] ?? '/contact'));
+  $prefooterButtonUrl = \Illuminate\Support\Str::startsWith($prefooterButtonHref, ['http://', 'https://']) ? $prefooterButtonHref : url($prefooterButtonHref);
 @endphp
 
 @section('content')
@@ -54,29 +61,32 @@
 
   <section class="container mx-auto max-w-5xl px-4 sm:px-6 md:px-8 -mt-16 relative z-20">
     <div class="rounded-lg bg-[#232628] p-6 shadow-2xl ring-1 ring-black/20 md:p-8">
-      <form method="get" action="{{ route('inventory.index') }}" class="space-y-4">
+      @php
+        $homeMatrix = collect($filterOptions['model_matrix'] ?? []);
+        $homeConditions = collect($filterOptions['conditions'] ?? []);
+        $homeMakes = collect($filterOptions['makes'] ?? []);
+      @endphp
+      <form id="home-inventory-search" method="get" action="{{ route('inventory.index') }}" class="space-y-4">
         <div class="flex items-center gap-2.5 text-white">
           <span class="material-symbols-outlined text-[28px] text-primary">search_insights</span>
           <span class="font-headline text-[20px] font-black uppercase tracking-tight">{{ $s['home_search_label'] ?? 'Search inventory' }}</span>
         </div>
         <div class="flex flex-col gap-4 md:flex-row md:items-center">
           <div class="grid flex-1 grid-cols-1 gap-4 md:grid-cols-3">
-            <select name="condition" class="appearance-none rounded border-none bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary">
+            <select name="condition_listing_option_id" class="appearance-none rounded border-none bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary">
               <option value="">Condition</option>
-              <option value="new" @selected(($filters['condition'] ?? '') === 'new')>New</option>
-              <option value="used" @selected(($filters['condition'] ?? '') === 'used')>Used</option>
+              @foreach ($homeConditions as $row)
+                <option value="{{ $row->id }}" @selected((int) ($filters['condition_listing_option_id'] ?? 0) === (int) $row->id)>{{ $row->value }}</option>
+              @endforeach
             </select>
-            <select name="make" class="appearance-none rounded border-none bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary">
+            <select id="home-search-make" name="make_listing_option_id" class="appearance-none rounded border-none bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary">
               <option value="">Make</option>
-              @foreach (($filterOptions['makes'] ?? collect()) as $make)
-                <option value="{{ $make }}" @selected(($filters['make'] ?? '') === $make)>{{ $make }}</option>
+              @foreach ($homeMakes as $row)
+                <option value="{{ $row->id }}" @selected((int) ($filters['make_listing_option_id'] ?? 0) === (int) $row->id)>{{ $row->value }}</option>
               @endforeach
             </select>
-            <select name="model" class="appearance-none rounded border-none bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary">
+            <select id="home-search-model" name="model_listing_option_id" class="appearance-none rounded border-none bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-primary">
               <option value="">Model</option>
-              @foreach (($filterOptions['models'] ?? collect()) as $model)
-                <option value="{{ $model }}" @selected(($filters['model'] ?? '') === $model)>{{ $model }}</option>
-              @endforeach
             </select>
           </div>
           <div class="flex gap-2 w-full md:w-auto">
@@ -89,19 +99,47 @@
           </div>
         </div>
       </form>
+      @if ($homeMatrix->isNotEmpty())
+        <script>
+          (() => {
+            const matrix = @json($homeMatrix->values()->all());
+            const makeEl = document.getElementById('home-search-make');
+            const modelEl = document.getElementById('home-search-model');
+            const form = document.getElementById('home-inventory-search');
+            if (!makeEl || !modelEl || !form) return;
+            const initialModel = {{ (int) ($filters['model_listing_option_id'] ?? 0) }};
+            function rebuild() {
+              const mk = parseInt(makeEl.value || '0', 10) || 0;
+              modelEl.innerHTML = '<option value=\"\">Model</option>';
+              if (!mk) return;
+              matrix.forEach((r) => {
+                if (!r || !r.model_id) return;
+                if ((parseInt(r.make_id, 10) || 0) !== mk) return;
+                const o = document.createElement('option');
+                o.value = String(r.model_id);
+                o.textContent = r.model || '';
+                if ((parseInt(r.model_id, 10) || 0) === initialModel) o.selected = true;
+                modelEl.appendChild(o);
+              });
+            }
+            makeEl.addEventListener('change', rebuild);
+            rebuild();
+          })();
+        </script>
+      @endif
     </div>
   </section>
 
   <section class="bg-[#f4f5f7] py-16 md:py-20">
     <div class="container mx-auto max-w-[1240px] px-6 md:px-8">
       <div class="mb-10 md:mb-12 text-center">
-        <h2 class="font-headline font-black text-4xl tracking-tight text-on_surface uppercase inline-block section-line">
+        <h2 class="section-line font-headline font-black text-4xl tracking-tight text-on_surface uppercase">
           @if($recentFirstWords !== '')
             <span class="text-on_surface">{{ $recentFirstWords }}</span>
           @endif
           <span class="text-primary">{{ $recentLastWord }}</span>
         </h2>
-        <p class="mt-3 max-w-xl mx-auto text-sm md:text-base text-slate-500">{{ $s['recent_subtitle'] ?? 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' }}</p>
+        <p class="mt-6 max-w-xl mx-auto text-sm md:text-base text-slate-500">{{ $s['recent_subtitle'] ?? 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' }}</p>
       </div>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         @forelse ($recentVehicles as $vehicle)
@@ -126,7 +164,7 @@
               </div>
               <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-slate-500/40 pt-2 text-[10px] md:text-[11px] font-semibold text-slate-300/95">
                 <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">speed</span> {{ number_format((int) ($vehicle->mileage ?? 0)) }} mi</span>
-                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">settings_input_component</span> {{ strtoupper((string) ($vehicle->transmission ?? 'AUTO')) }}</span>
+                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">settings_input_component</span> {{ strtoupper((string) ($vehicle->transmissionOption?->value ?: 'AUTO')) }}</span>
                 <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> {{ $vehicle->year ?? '—' }}</span>
               </div>
             </div>
@@ -222,10 +260,19 @@
     <div class="container mx-auto flex flex-col items-center px-8 text-center">
       <h2 class="mb-8 font-headline text-4xl font-black uppercase tracking-tight">{{ $s['welcome_title'] ?? 'Lorem ipsum welcome block' }}</h2>
       <p class="mb-12 max-w-3xl font-body text-lg leading-relaxed text-slate-500">{{ $s['welcome_body'] ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sagittis ipsum. Praesent mauris.' }}</p>
-      @if ($welcomeYoutubeWatch)
-        <a href="{{ $welcomeYoutubeWatch }}" target="_blank" rel="noopener noreferrer" class="flex h-20 w-20 items-center justify-center rounded-full bg-[#4a69e2] shadow-lg transition-transform hover:scale-110" aria-label="{{ __('Watch video') }}">
+      @if ($welcomeYoutubeEmbedId)
+        <button type="button" id="homeWelcomeVideoOpen" class="flex h-20 w-20 items-center justify-center rounded-full bg-[#4a69e2] shadow-lg transition-transform hover:scale-110" aria-label="{{ __('Watch video') }}" aria-haspopup="dialog">
           <span class="material-symbols-outlined ml-1 text-4xl text-white" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
-        </a>
+        </button>
+        <div id="homeWelcomeVideoModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/75 p-4" role="dialog" aria-modal="true" aria-labelledby="homeWelcomeVideoTitle">
+          <div class="relative w-full max-w-4xl rounded-xl bg-black p-2 shadow-2xl ring-1 ring-white/10 sm:p-4">
+            <button type="button" id="homeWelcomeVideoClose" class="absolute -right-1 -top-1 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-zinc-900 shadow hover:bg-white sm:right-2 sm:top-2" aria-label="{{ __('Close') }}">&times;</button>
+            <p id="homeWelcomeVideoTitle" class="sr-only">{{ __('Video') }}</p>
+            <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
+              <iframe id="homeWelcomeVideoFrame" title="{{ __('Welcome video') }}" class="h-full w-full" width="560" height="315" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+            </div>
+          </div>
+        </div>
       @else
         <div class="flex h-20 w-20 cursor-not-allowed items-center justify-center rounded-full bg-slate-300 shadow-lg opacity-60" title="{{ __('Add a YouTube URL in Admin → Pages → Home') }}">
           <span class="material-symbols-outlined ml-1 text-4xl text-white" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
@@ -238,12 +285,47 @@
     <div class="container mx-auto flex flex-col items-stretch justify-between gap-5 px-4 sm:px-6 md:flex-row md:items-center md:gap-6 md:px-8">
       <div class="flex items-center gap-3 text-on_surface md:gap-4">
         <span class="material-symbols-outlined text-3xl">help</span>
-        <h3 class="font-headline text-lg font-bold tracking-tight uppercase md:text-xl">Lorem ipsum — questions?</h3>
+        <h3 class="font-headline text-lg font-bold tracking-tight uppercase md:text-xl">{{ $prefooterTitle }}</h3>
       </div>
       <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between md:w-auto md:gap-6">
         <div class="flex items-center gap-2.5"><span class="material-symbols-outlined text-slate-800">call</span><p class="font-headline text-xl font-black text-slate-900 sm:text-2xl">{{ $dealerPhone ?? '' }}</p></div>
-        <a href="{{ route('contact') }}" class="inline-flex items-center justify-center rounded border border-slate-900/10 bg-white/20 px-6 py-3 text-xs font-bold uppercase tracking-widest text-slate-900 transition-all hover:bg-white/40 sm:px-8"><span class="material-symbols-outlined mr-1 text-sm align-middle">mail</span> Lorem contact</a>
+        <a href="{{ $prefooterButtonUrl }}" class="inline-flex items-center justify-center rounded border border-slate-900/10 bg-white/20 px-6 py-3 text-xs font-bold uppercase tracking-widest text-slate-900 transition-all hover:bg-white/40 sm:px-8"><span class="material-symbols-outlined mr-1 text-sm align-middle">mail</span> {{ $prefooterButtonText }}</a>
       </div>
     </div>
   </section>
 @endsection
+
+@push('scripts')
+  @if (! empty($welcomeYoutubeEmbedId))
+    <script>
+      (function () {
+        var openBtn = document.getElementById('homeWelcomeVideoOpen');
+        var modal = document.getElementById('homeWelcomeVideoModal');
+        var closeBtn = document.getElementById('homeWelcomeVideoClose');
+        var frame = document.getElementById('homeWelcomeVideoFrame');
+        if (!openBtn || !modal || !closeBtn || !frame) return;
+        var embedBase = 'https://www.youtube.com/embed/{{ $welcomeYoutubeEmbedId }}?autoplay=1&rel=0';
+        function openModal() {
+          frame.src = embedBase;
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+          document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+          frame.src = '';
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          document.body.style.overflow = '';
+        }
+        openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+        });
+      })();
+    </script>
+  @endif
+@endpush

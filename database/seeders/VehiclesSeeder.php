@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
+use App\Support\ListingOptionCatalogSync;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -44,7 +45,12 @@ class VehiclesSeeder extends Seeder
         $seedVehicles = DemoData::vehicles();
 
         foreach ($seedVehicles as $v) {
+            ListingOptionCatalogSync::ensureOptionValuesFromArray($v);
+        }
+
+        foreach ($seedVehicles as $v) {
             $slug = Str::slug($v['title']);
+            $fk = ListingOptionCatalogSync::resolveLegacyRowToForeignKeys((object) $v);
 
             $vehicle = Vehicle::query()->updateOrCreate(
                 ['slug' => $slug],
@@ -54,17 +60,18 @@ class VehiclesSeeder extends Seeder
                     'slug' => $slug,
                     'status' => 'approved',
                     'year' => $v['year'],
-                    'make' => $v['make'],
-                    'model' => $v['model'],
+                    'make_listing_option_id' => $fk['make_listing_option_id'],
+                    'model_listing_option_id' => $fk['model_listing_option_id'],
+                    'condition_listing_option_id' => $fk['condition_listing_option_id'],
+                    'body_type_listing_option_id' => $fk['body_type_listing_option_id'],
+                    'transmission_listing_option_id' => $fk['transmission_listing_option_id'],
+                    'fuel_type_listing_option_id' => $fk['fuel_type_listing_option_id'],
+                    'drive_listing_option_id' => $fk['drive_listing_option_id'],
+                    'country_listing_option_id' => $fk['country_listing_option_id'],
                     'price' => $v['price'],
                     'mileage' => $v['mileage'],
-                    'fuel_type' => $v['fuel_type'],
-                    'transmission' => $v['transmission'],
-                    'drive' => $v['drive'],
-                    'body_type' => $v['body_type'],
-                    'condition' => $v['condition'] ?? null,
                     'engine_size' => $v['engine_size'] ?? null,
-                    'location' => $v['location'] ?? null,
+                    'street_address' => $v['street_address'] ?? null,
                     'features' => $v['features'] ?? null,
                     'exterior_color' => $v['exterior_color'],
                     'interior_color' => $v['interior_color'],

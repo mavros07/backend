@@ -14,6 +14,7 @@
       ['route' => 'admin.users.index', 'match' => 'admin.users.*', 'label' => __('All users'), 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
       ['route' => 'admin.analytics.index', 'match' => 'admin.analytics.*', 'label' => __('Analytics'), 'icon' => 'M3 3v18h18M7 15l3-3 3 2 4-5'],
       ['route' => 'admin.pages.index', 'match' => 'admin.pages.*', 'label' => __('Pages'), 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+      ['route' => 'admin.listing-options.index', 'match' => 'admin.listing-options.*', 'label' => __('Listing options'), 'icon' => 'M4 6h16M4 10h16M4 14h10'],
       ['route' => 'admin.settings.edit', 'match' => 'admin.settings.*', 'label' => __('Site settings'), 'icon' => 'M3 3v18h18M7 15l3-3 3 2 4-5'],
       ['route' => 'admin.media.index', 'match' => 'admin.media.*', 'label' => __('Media'), 'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
       ['route' => 'admin.audit.index', 'match' => 'admin.audit.*', 'label' => __('Audit trail'), 'icon' => 'M9 12h6m-6 4h6M7.5 3.75h9A2.25 2.25 0 0118.75 6v12A2.25 2.25 0 0116.5 20.25h-9A2.25 2.25 0 015.25 18V6A2.25 2.25 0 017.5 3.75z'],
@@ -62,6 +63,10 @@
         }
       }
       .admin-content-scroll { flex: 1 1 0%; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+      .admin-scrollbar { scrollbar-width: thin; scrollbar-color: #a1a1aa #f4f4f5; }
+      .admin-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
+      .admin-scrollbar::-webkit-scrollbar-track { background: #f4f4f5; }
+      .admin-scrollbar::-webkit-scrollbar-thumb { background-color: #a1a1aa; border-radius: 9999px; border: 2px solid #f4f4f5; }
       .hide-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
@@ -230,7 +235,7 @@
           </a>
         </header>
 
-        <main class="admin-content-scroll hide-scrollbar min-w-0 bg-gradient-to-b from-zinc-100 to-zinc-50 overscroll-contain overflow-x-auto">
+        <main class="admin-content-scroll admin-scrollbar min-w-0 bg-gradient-to-b from-zinc-100 to-zinc-50 overscroll-contain overflow-x-auto">
           <div class="mx-auto max-w-[1600px] min-w-0 px-4 py-8 sm:px-6 lg:px-10">
             {{ $slot }}
           </div>

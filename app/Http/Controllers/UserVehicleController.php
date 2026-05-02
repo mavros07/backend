@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\InteractsWithVehicleForms;
 use App\Models\Vehicle;
+use App\Support\VehicleListingCatalog;
 use App\Models\VehicleImage;
 use App\Services\Mail\OutboundMailService;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +25,7 @@ class UserVehicleController extends Controller
         $isAdmin = $request->user()->hasRole('admin');
 
         $query = Vehicle::query()
-            ->with(['user.roles'])
+            ->with(['user.roles', 'makeOption', 'modelOption'])
             ->latest();
 
         if (! $isAdmin) {
@@ -52,7 +53,10 @@ class UserVehicleController extends Controller
 
     public function create(): View
     {
-        return view('dashboard.vehicles.create');
+        return view('dashboard.vehicles.create', [
+            'listingOptions' => VehicleListingCatalog::filterOptions(),
+            'makeRows' => VehicleListingCatalog::activeMakeSelectRows(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -102,6 +106,8 @@ class UserVehicleController extends Controller
         return view('dashboard.vehicles.edit', [
             'vehicle' => $vehicle,
             'isAdminEdit' => $request->user()->hasRole('admin'),
+            'listingOptions' => VehicleListingCatalog::filterOptions(),
+            'makeRows' => VehicleListingCatalog::activeMakeSelectRows(),
         ]);
     }
 

@@ -13,7 +13,9 @@ use App\Http\Controllers\TemporaryAdminController;
 use App\Http\Controllers\AdminPageController;
 use App\Http\Controllers\AdminMediaController;
 use App\Http\Controllers\AdminAnalyticsController;
+use App\Http\Controllers\AdminListingOptionController;
 use App\Http\Controllers\AdminSiteSettingsController;
+use App\Http\Controllers\ListingOptionLookupController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\VendorSettingsController;
 use App\Http\Controllers\CurrencyPreferenceController;
@@ -115,6 +117,10 @@ Route::middleware('auth')->group(function () {
         // Some hosting/WAF setups block DELETE requests; accept POST as well.
         Route::post('/vehicles/{vehicle}/images/{image}', [UserVehicleController::class, 'destroyImage'])->name('dashboard.vehicles.images.destroy.post');
     });
+
+    Route::get('/dashboard/listing-models/{make}', [ListingOptionLookupController::class, 'modelsForMake'])
+        ->whereNumber('make')
+        ->name('dashboard.listing-models');
 });
 
 Route::middleware(['auth', 'role:admin', 'admin.audit'])->prefix('admin')->group(function () {
@@ -240,6 +246,13 @@ Route::middleware(['auth', 'role:admin', 'admin.audit'])->prefix('admin')->group
 
     Route::get('/settings', [AdminSiteSettingsController::class, 'edit'])->name('admin.settings.edit');
     Route::put('/settings', [AdminSiteSettingsController::class, 'update'])->name('admin.settings.update');
+
+    Route::get('/listing-options', [AdminListingOptionController::class, 'index'])->name('admin.listing-options.index');
+    Route::get('/listing-options/{category}', [AdminListingOptionController::class, 'show'])->name('admin.listing-options.show');
+    Route::post('/listing-options/{category}', [AdminListingOptionController::class, 'store'])->name('admin.listing-options.store');
+    Route::put('/listing-options/{category}/options/{option}', [AdminListingOptionController::class, 'update'])->name('admin.listing-options.update');
+    Route::delete('/listing-options/{category}/options/{option}', [AdminListingOptionController::class, 'destroy'])->name('admin.listing-options.destroy');
+    Route::post('/listing-options/{category}/options/{option}/move', [AdminListingOptionController::class, 'move'])->name('admin.listing-options.move');
 });
 
 require __DIR__.'/auth.php';

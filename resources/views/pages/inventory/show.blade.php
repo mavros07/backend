@@ -11,14 +11,26 @@
   $images = $vehicle->images ?? collect();
   $cover = $images->first();
   $galleryUrls = $images->map(fn ($img) => \App\Support\VehicleImageUrl::url($img->path))->values();
-  $thumbUrls = $galleryUrls->take(5);
-  $moreCount = max(0, $galleryUrls->count() - $thumbUrls->count());
   $msrp = $vehicle->msrp;
   $price = $vehicle->price;
   $saving = (!is_null($price) && !is_null($msrp) && $msrp > $price) ? ($msrp - $price) : null;
   $overview = $vehicle->overview ?: $vehicle->description;
   $techSpecs = is_array($vehicle->tech_specs) ? $vehicle->tech_specs : [];
-  $mapQuery = trim((string) ($sellerProfile['map_location'] ?? $vehicle->location ?? ''));
+  $pickMap = static function (?string ...$candidates): string {
+      foreach ($candidates as $c) {
+          $t = trim((string) $c);
+          if ($t !== '') {
+              return $t;
+          }
+      }
+
+      return '';
+  };
+  $mapQuery = $pickMap(
+    $sellerProfile['map_location'] ?? null,
+    $vehicle->map_location ?? null,
+    $vehicle->street_address ?? null,
+  );
   $financePrice = (int) ($vehicle->finance_price ?: $vehicle->price ?: 0);
   $financeRate = (float) ($vehicle->finance_interest_rate ?: 3);
   $financeTerm = (int) ($vehicle->finance_term_months ?: 24);
@@ -33,7 +45,7 @@
   <main class="max-w-7xl mx-auto px-6 py-10">
     <section class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6 border-b border-white/10 pb-8">
       <div>
-        <div class="text-[#ffb129] text-sm font-bold uppercase tracking-widest mb-1">{{ $vehicle->body_type ?: 'Vehicle' }}</div>
+        <div class="text-[#ffb129] text-sm font-bold uppercase tracking-widest mb-1">{{ $vehicle->bodyTypeOption?->value ?: 'Vehicle' }}</div>
         <h1 class="text-4xl md:text-5xl font-black uppercase font-['Montserrat']">{{ $vehicle->year ?: '' }}</h1>
       </div>
       <div class="flex flex-wrap md:flex-nowrap items-stretch shadow-xl w-full md:w-auto">
@@ -55,7 +67,7 @@
 
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-10">
       <div class="lg:col-span-2">
-        <div class="relative" data-vehicle-detail-gallery>
+        <div class="relative">
           <div class="absolute top-4 left-0 flex flex-col gap-2 z-10">
             @if (!empty($vehicle->video_url))
               <span class="bg-white/20 backdrop-blur-md text-[10px] font-bold px-3 py-1 flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">videocam</span> 1 VIDEO</span>
@@ -73,19 +85,39 @@
               </form>
             @endauth
           </div>
-          @if ($cover)
-            <img src="{{ \App\Support\VehicleImageUrl::url($cover->path) }}" alt="{{ $vehicle->title }}" class="w-full aspect-[16/9] object-cover rounded-sm mb-4" data-vehicle-detail-main>
-          @endif
-          @if ($thumbUrls->isNotEmpty())
-            <div class="grid grid-cols-6 gap-2">
-              @foreach ($thumbUrls as $index => $url)
-                <button type="button" class="w-full aspect-video object-cover border-2 {{ $index === 0 ? 'border-[#ffb129] is-active' : 'border-transparent opacity-70 hover:opacity-100' }}" data-vehicle-detail-thumb data-full="{{ $url }}">
-                  <img src="{{ $url }}" alt="" class="w-full h-full object-cover">
-                </button>
-              @endforeach
-              @if ($moreCount > 0)
-                <div class="bg-[#232628] flex items-center justify-center text-xs font-bold">+{{ $moreCount }}</div>
-              @endif
+          @if ($galleryUrls->isNotEmpty())
+            <div
+              class="outline-none"
+              data-vehicle-detail-gallery
+              data-gallery-urls="{{ e($galleryUrls->values()->toJson(JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)) }}"
+              tabindex="0"
+              aria-label="{{ __('Image gallery') }}"
+            >
+              <div class="relative aspect-[16/9] w-full overflow-hidden rounded-sm mb-4 bg-[#111]" data-vehicle-detail-viewport>
+                <img
+                  src="{{ $galleryUrls->first() }}"
+                  alt="{{ $vehicle->title }}"
+                  class="h-full w-full object-cover transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+                  style="opacity:1"
+                  data-vehicle-detail-main
+                  draggable="false"
+                />
+              </div>
+              <div class="flex gap-2 overflow-x-auto pb-2 scroll-smooth" data-vehicle-detail-thumbs-scroll>
+                @foreach ($galleryUrls as $index => $url)
+                  <button
+                    type="button"
+                    class="vehicle-detail-thumb-btn shrink-0 w-[calc((100%-2.5rem)/6))] min-w-[4.5rem] max-w-[6.25rem] border-2 {{ $index === 0 ? 'border-[#ffb129] is-active opacity-100' : 'border-transparent opacity-70 hover:opacity-100' }} focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb129]"
+                    data-vehicle-detail-thumb
+                    data-index="{{ $index }}"
+                    data-full="{{ $url }}"
+                  >
+                    <span class="block aspect-video w-full overflow-hidden rounded-sm bg-[#232628]">
+                      <img src="{{ $url }}" alt="" class="h-full w-full object-cover" draggable="false" />
+                    </span>
+                  </button>
+                @endforeach
+              </div>
             </div>
           @endif
         </div>
@@ -129,10 +161,10 @@
         <div class="bg-[#1e2124] overflow-hidden rounded-sm">
           <table class="w-full text-xs">
             <tbody>
-              <tr class="border-b border-white/5"><td class="p-4 text-gray-500 font-bold uppercase">Body</td><td class="p-4 font-bold text-right">{{ $vehicle->body_type ?: 'N/A' }}</td></tr>
+              <tr class="border-b border-white/5"><td class="p-4 text-gray-500 font-bold uppercase">Body</td><td class="p-4 font-bold text-right">{{ $vehicle->bodyTypeOption?->value ?: 'N/A' }}</td></tr>
               <tr class="border-b border-white/5"><td class="p-4 text-gray-500 font-bold uppercase">Mileage</td><td class="p-4 font-bold text-right">{{ $vehicle->mileage ? number_format((int) $vehicle->mileage).'mi' : 'N/A' }}</td></tr>
-              <tr class="border-b border-white/5"><td class="p-4 text-gray-500 font-bold uppercase">Transmission</td><td class="p-4 font-bold text-right text-[#ffb129]">{{ $vehicle->transmission ?: 'N/A' }}</td></tr>
-              <tr class="border-b border-white/5"><td class="p-4 text-gray-500 font-bold uppercase">Fuel Type</td><td class="p-4 font-bold text-right">{{ $vehicle->fuel_type ?: 'N/A' }}</td></tr>
+              <tr class="border-b border-white/5"><td class="p-4 text-gray-500 font-bold uppercase">Transmission</td><td class="p-4 font-bold text-right text-[#ffb129]">{{ $vehicle->transmissionOption?->value ?: 'N/A' }}</td></tr>
+              <tr class="border-b border-white/5"><td class="p-4 text-gray-500 font-bold uppercase">Fuel Type</td><td class="p-4 font-bold text-right">{{ $vehicle->fuelTypeOption?->value ?: 'N/A' }}</td></tr>
               <tr class="border-b border-white/5"><td class="p-4 text-gray-500 font-bold uppercase">Engine</td><td class="p-4 font-bold text-right">{{ $vehicle->engine_size ?: 'N/A' }}</td></tr>
               <tr><td class="p-4 text-gray-500 font-bold uppercase">Year</td><td class="p-4 font-bold text-right">{{ $vehicle->year ?: 'N/A' }}</td></tr>
             </tbody>
@@ -176,7 +208,7 @@
           <div class="space-y-4 text-xs">
             <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-gray-500 uppercase font-bold">Layout</span><span class="font-bold">{{ $techSpecs['engine_layout'] ?? $vehicle->engine_layout ?: 'N/A' }}</span></div>
             <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-gray-500 uppercase font-bold">Engine volume</span><span class="font-bold">{{ $techSpecs['engine_volume'] ?? $vehicle->engine_size ?: 'N/A' }}</span></div>
-            <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-gray-500 uppercase font-bold">Type of drive</span><span class="font-bold">{{ $techSpecs['drive_type'] ?? $vehicle->drive ?: 'N/A' }}</span></div>
+            <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-gray-500 uppercase font-bold">Type of drive</span><span class="font-bold">{{ $techSpecs['drive_type'] ?? $vehicle->driveOption?->value ?: 'N/A' }}</span></div>
           </div>
         </div>
         <div>
@@ -189,7 +221,7 @@
         <div>
           <h3 class="flex items-center gap-2 text-sm font-black uppercase mb-6"><span class="material-symbols-outlined text-[#ffb129]">settings_input_component</span> Transmission</h3>
           <div class="space-y-4 text-xs">
-            <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-gray-500 uppercase font-bold">Type</span><span class="font-bold">{{ $vehicle->transmission ?: 'N/A' }}</span></div>
+            <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-gray-500 uppercase font-bold">Type</span><span class="font-bold">{{ $vehicle->transmissionOption?->value ?: 'N/A' }}</span></div>
             <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-gray-500 uppercase font-bold">Number of gears</span><span class="font-bold">{{ $techSpecs['transmission_gears'] ?? $vehicle->number_of_gears ?: 'N/A' }}</span></div>
           </div>
         </div>
@@ -217,7 +249,7 @@
             <h3 class="text-2xl font-black uppercase font-['Montserrat']">Contact Information</h3>
             <p class="text-gray-400 text-sm">This vehicle listing is powered by live seller data and synced from the listing editor.</p>
             <div class="space-y-4">
-              <div class="flex items-center gap-4"><div class="bg-[#ffb129] p-2 rounded-full"><span class="material-symbols-outlined text-[#191c1e] text-lg">location_on</span></div><span class="text-sm font-bold">{{ $sellerProfile['address'] ?? $vehicle->location ?: 'N/A' }}</span></div>
+              <div class="flex items-center gap-4"><div class="bg-[#ffb129] p-2 rounded-full"><span class="material-symbols-outlined text-[#191c1e] text-lg">location_on</span></div><span class="text-sm font-bold">{{ $sellerProfile['address'] ?? $vehicle->street_address ?: 'N/A' }}</span></div>
               <div class="flex items-center gap-4"><div class="bg-[#ffb129] p-2 rounded-full"><span class="material-symbols-outlined text-[#191c1e] text-lg">phone</span></div><span class="text-sm font-bold">{{ $sellerProfile['phone'] ?? 'N/A' }}</span></div>
               <div class="flex items-center gap-4"><div class="bg-[#ffb129] p-2 rounded-full"><span class="material-symbols-outlined text-[#191c1e] text-lg">mail</span></div><span class="text-sm font-bold">{{ $sellerProfile['email'] ?? 'N/A' }}</span></div>
             </div>
@@ -268,7 +300,7 @@
                         <span class="text-[10px] font-bold">Our price {{ !is_null($item->price) ? '' : 'ASK' }}@if(!is_null($item->price))<span data-currency-amount="{{ (float) $item->price }}" data-currency-decimals="0">${{ number_format((int) $item->price) }}</span>@endif @if($item->msrp)<span class="opacity-50">MSRP <span data-currency-amount="{{ (float) $item->msrp }}" data-currency-decimals="0">${{ number_format((int) $item->msrp) }}</span></span>@endif</span>
                       </div>
                     </div>
-                    <div class="p-4"><h4 class="text-xs font-bold uppercase">{{ ($item->make ?: '').' '.($item->model ?: '').' '.($item->year ?: '') }}</h4></div>
+                    <div class="p-4"><h4 class="text-xs font-bold uppercase">{{ trim(($item->makeOption?->value ?: '').' '.($item->modelOption?->value ?: '').' '.($item->year ?: '')) }}</h4></div>
                   </a>
                 </article>
               @endforeach

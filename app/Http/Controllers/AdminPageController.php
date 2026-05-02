@@ -63,6 +63,9 @@ class AdminPageController extends Controller
                     ['name' => 'testimonial_role', 'label' => 'Testimonial Role', 'type' => 'text', 'default' => 'Lorem role', 'group' => 'Testimonial'],
                     ['name' => 'testimonial_avatar', 'label' => 'Testimonial headshot', 'type' => 'image', 'default' => 'asset/images/media/home-testimonial-avatar.jpg', 'group' => 'Testimonial', 'preview' => 'thumbnail'],
                     ['name' => 'testimonial_quote', 'label' => 'Testimonial Quote', 'type' => 'textarea', 'default' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla, velit id laoreet hendrerit, sapien nisl varius dolor, eu consequat erat augue in eros.', 'group' => 'Testimonial'],
+                    ['name' => 'prefooter_title', 'label' => 'Pre-footer heading', 'type' => 'text', 'default' => 'Lorem ipsum — questions?', 'group' => 'Pre-footer CTA'],
+                    ['name' => 'prefooter_button_text', 'label' => 'Pre-footer button text', 'type' => 'text', 'default' => 'Contact', 'group' => 'Pre-footer CTA'],
+                    ['name' => 'prefooter_button_href', 'label' => 'Pre-footer button link (path or URL)', 'type' => 'text', 'default' => '/contact', 'group' => 'Pre-footer CTA'],
                 ],
             ],
             'inventory' => [

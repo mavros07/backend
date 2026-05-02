@@ -124,7 +124,7 @@
                         <img src="{{ $thumbUrl }}" alt="" class="h-12 w-16 shrink-0 rounded-md border border-slate-200 object-cover" loading="lazy" />
                         <div class="min-w-0">
                           <div class="truncate font-semibold text-slate-900" title="{{ $vehicle->title }}">{{ $vehicle->title }}</div>
-                          <div class="text-xs text-slate-500">{{ $vehicle->year }} {{ $vehicle->make }} {{ $vehicle->model }}</div>
+                          <div class="text-xs text-slate-500">{{ $vehicle->year }} {{ $vehicle->makeOption?->value }} {{ $vehicle->modelOption?->value }}</div>
                           <div class="mt-0.5 text-[11px] leading-snug text-slate-500">
                         @if($listingWhen)
                           {{ __('Submitted') }} {{ $listingWhen->format('M j, Y') }} · {{ $listingWhen->format('g:i a') }}

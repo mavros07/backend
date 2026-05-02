@@ -350,17 +350,131 @@
     var roots = document.querySelectorAll('[data-vehicle-detail-gallery]');
     if (!roots.length) return;
     roots.forEach(function (root) {
+      var raw = root.getAttribute('data-gallery-urls') || '[]';
+      var urls = [];
+      try {
+        urls = JSON.parse(raw);
+      } catch (e) {
+        urls = [];
+      }
+      if (!Array.isArray(urls) || !urls.length) return;
+
       var main = root.querySelector('[data-vehicle-detail-main]');
+      var viewport = root.querySelector('[data-vehicle-detail-viewport]') || root;
       var thumbs = root.querySelectorAll('[data-vehicle-detail-thumb]');
+      var thumbScroll = root.querySelector('[data-vehicle-detail-thumbs-scroll]');
       if (!main || !thumbs.length) return;
-      thumbs.forEach(function (thumb, idx) {
+
+      var idx = 0;
+      var preloaded = {};
+      var fadeMs = 280;
+
+      function preload(i) {
+        if (preloaded[i]) return;
+        var im = new Image();
+        im.src = urls[i];
+        preloaded[i] = true;
+      }
+
+      function syncThumbStyles() {
+        thumbs.forEach(function (t) {
+          var ti = parseInt(t.getAttribute('data-index') || '-1', 10);
+          var on = ti === idx;
+          t.classList.toggle('is-active', on);
+          t.classList.toggle('border-[#ffb129]', on);
+          t.classList.toggle('border-transparent', !on);
+          t.classList.toggle('opacity-100', on);
+          t.classList.toggle('opacity-70', !on);
+        });
+        if (thumbScroll) {
+          var active = root.querySelector('[data-vehicle-detail-thumb].is-active');
+          if (active) {
+            active.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' });
+          }
+        }
+      }
+
+      function setIndex(nextIdx, force) {
+        var n = ((nextIdx % urls.length) + urls.length) % urls.length;
+        if (n === idx && !force) return;
+        main.style.opacity = '0';
+        window.setTimeout(function () {
+          main.setAttribute('src', urls[n]);
+          idx = n;
+          syncThumbStyles();
+          preload((idx + 1) % urls.length);
+          preload((idx - 1 + urls.length) % urls.length);
+          var done = function () {
+            main.style.opacity = '1';
+          };
+          if (main.complete) {
+            requestAnimationFrame(done);
+          } else {
+            main.onload = function () {
+              main.onload = null;
+              requestAnimationFrame(done);
+            };
+          }
+        }, Math.round(fadeMs * 0.45));
+      }
+
+      thumbs.forEach(function (thumb) {
         thumb.addEventListener('click', function () {
-          var full = thumb.getAttribute('data-full');
-          if (!full) return;
-          main.setAttribute('src', full);
-          thumbs.forEach(function (t, i) { t.classList.toggle('is-active', i === idx); });
+          var i = parseInt(thumb.getAttribute('data-index') || '', 10);
+          if (!isNaN(i)) setIndex(i, true);
         });
       });
+
+      root.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          setIndex(idx - 1, true);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          setIndex(idx + 1, true);
+        }
+      });
+
+      (function bindSwipe() {
+        var startX = 0;
+        var startY = 0;
+        var startT = 0;
+        var active = false;
+        var moved = false;
+        function onStart(e) {
+          if (!e.touches || !e.touches[0]) return;
+          active = true;
+          moved = false;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          startT = Date.now();
+        }
+        function onMove(e) {
+          if (!active || !e.touches || !e.touches[0]) return;
+          var dx = e.touches[0].clientX - startX;
+          var dy = e.touches[0].clientY - startY;
+          if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.1) moved = true;
+        }
+        function onEnd(e) {
+          if (!active) return;
+          active = false;
+          var t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+          if (!t) return;
+          var dx = t.clientX - startX;
+          var dt = Math.max(1, Date.now() - startT);
+          var vx = Math.abs(dx) / dt;
+          if (!moved && Math.abs(dx) < 8) return;
+          if (Math.abs(dx) < 28 && vx < 0.35) return;
+          setIndex(dx < 0 ? idx + 1 : idx - 1, true);
+        }
+        viewport.addEventListener('touchstart', onStart, { passive: true });
+        viewport.addEventListener('touchmove', onMove, { passive: true });
+        viewport.addEventListener('touchend', onEnd, { passive: true });
+        viewport.addEventListener('touchcancel', function () { active = false; }, { passive: true });
+      })();
+
+      preload(0);
+      if (urls.length > 1) preload(1);
     });
   }
 

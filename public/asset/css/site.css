@@ -16,15 +16,24 @@ body {
 
 .section-line {
   position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0 0.35em;
+  padding-bottom: 1.1rem;
+  text-align: center;
 }
 
 .section-line::after {
   content: '';
   position: absolute;
-  bottom: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50px;
+  left: 0;
+  right: 0;
+  top: calc(100% - 0.35rem);
+  margin: 0 auto;
+  width: 100%;
+  max-width: min(100%, 28rem);
   height: 3px;
   background-color: #ffb129;
 }

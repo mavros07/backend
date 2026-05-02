@@ -9,6 +9,7 @@ use App\Models\Vehicle;
 use App\Support\Compare;
 use App\Support\SiteSettingDefaults;
 use App\Support\VehicleImageUrl;
+use App\Support\VehicleListingCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -39,7 +40,7 @@ class PageController extends Controller
         $page = CmsPage::query()->where('slug', 'home')->where('is_active', true)->firstOrFail();
         $siteName = config('app.name');
         $recentVehicles = Vehicle::query()
-            ->with('images')
+            ->with(['images', 'transmissionOption', 'makeOption', 'modelOption'])
             ->where('status', 'approved')
             // Homepage "recent cars" should reflect newly approved/added inventory,
             // not last edited listings.
@@ -97,6 +98,9 @@ class PageController extends Controller
             'testimonial_role' => 'Lorem role',
             'testimonial_avatar' => 'asset/images/media/home-testimonial-avatar.jpg',
             'testimonial_quote' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In fringilla, velit id laoreet hendrerit, sapien nisl varius dolor, eu consequat erat augue in eros.',
+            'prefooter_title' => 'Lorem ipsum — questions?',
+            'prefooter_button_text' => 'Contact',
+            'prefooter_button_href' => '/contact',
         ]);
 
         return view('pages.home-luxemotive', [
@@ -265,18 +269,32 @@ class PageController extends Controller
     {
         $page = CmsPage::query()->where('slug', 'inventory')->where('is_active', true)->first();
         $yearUpper = (int) date('Y') + 1;
+        $filterOpts = $this->approvedVehicleFilterOptions();
+
+        $idIn = function (Collection $rows): array {
+            $ids = $rows->pluck('id')->filter()->values()->all();
+
+            return $ids === [] ? [] : [Rule::in($ids)];
+        };
+
+        $extColors = collect($filterOpts['exterior_colors'] ?? []);
+        $extRule = ['nullable', 'string', 'max:255'];
+        if ($extColors instanceof Collection && $extColors->isNotEmpty()) {
+            $extRule[] = Rule::in(array_values(array_unique(array_merge([''], $extColors->all()))));
+        }
 
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:255'],
-            'condition' => ['nullable', 'string', Rule::in(['', 'new', 'used'])],
-            'location' => ['nullable', 'string', 'max:255'],
-            'make' => ['nullable', 'string', 'max:255'],
-            'model' => ['nullable', 'string', 'max:255'],
-            'fuel_type' => ['nullable', 'string', 'max:255'],
-            'transmission' => ['nullable', 'string', 'max:255'],
-            'body_type' => ['nullable', 'string', 'max:255'],
-            'drive' => ['nullable', 'string', 'max:255'],
-            'exterior_color' => ['nullable', 'string', 'max:255'],
+            'street_q' => ['nullable', 'string', 'max:1000'],
+            'condition_listing_option_id' => array_merge(['nullable', 'integer'], $idIn(collect($filterOpts['conditions'] ?? []))),
+            'country_listing_option_id' => array_merge(['nullable', 'integer'], $idIn(collect($filterOpts['countries'] ?? []))),
+            'make_listing_option_id' => array_merge(['nullable', 'integer'], $idIn(collect($filterOpts['makes'] ?? []))),
+            'model_listing_option_id' => array_merge(['nullable', 'integer'], $idIn(collect($filterOpts['model_matrix'] ?? collect())->pluck('model_id'))),
+            'fuel_type_listing_option_id' => array_merge(['nullable', 'integer'], $idIn(collect($filterOpts['fuel_types'] ?? []))),
+            'transmission_listing_option_id' => array_merge(['nullable', 'integer'], $idIn(collect($filterOpts['transmissions'] ?? []))),
+            'body_type_listing_option_id' => array_merge(['nullable', 'integer'], $idIn(collect($filterOpts['body_types'] ?? []))),
+            'drive_listing_option_id' => array_merge(['nullable', 'integer'], $idIn(collect($filterOpts['drives'] ?? []))),
+            'exterior_color' => $extRule,
             'vin' => ['nullable', 'string', 'max:255'],
             'year_min' => ['nullable', 'integer', 'min:1900', 'max:'.$yearUpper],
             'year_max' => ['nullable', 'integer', 'min:1900', 'max:'.$yearUpper],
@@ -286,6 +304,12 @@ class PageController extends Controller
             'price_max' => ['nullable', 'integer', 'min:0', 'max:999999999'],
             'sort' => ['nullable', 'string', Rule::in(['newest', 'price_low', 'price_high', 'year_new', 'year_old'])],
         ]);
+
+        $mk = (int) ($filters['make_listing_option_id'] ?? 0);
+        $md = (int) ($filters['model_listing_option_id'] ?? 0);
+        if ($mk > 0 && $md > 0 && ($filterOpts['model_matrix'] ?? collect()) instanceof Collection && $filterOpts['model_matrix']->isNotEmpty()) {
+            VehicleListingCatalog::assertMakeModelPairById($filterOpts['model_matrix'], $mk, $md);
+        }
         if (!empty($filters['year_min']) && !empty($filters['year_max']) && (int) $filters['year_min'] > (int) $filters['year_max']) {
             throw ValidationException::withMessages(['year_min' => __('Minimum year cannot be greater than maximum year.')]);
         }
@@ -297,37 +321,66 @@ class PageController extends Controller
         }
 
         $query = Vehicle::query()
-            ->with('images')
+            ->with(['images', 'fuelTypeOption', 'transmissionOption', 'makeOption', 'modelOption'])
             ->where('status', 'approved')
             ->latest();
 
         $search = isset($filters['q']) ? trim((string) $filters['q']) : '';
         if ($search !== '') {
-            $query->where(function ($builder) use ($search) {
+            $like = '%'.$search.'%';
+            $query->where(function ($builder) use ($like) {
                 $builder
-                    ->where('title', 'like', '%' . $search . '%')
-                    ->orWhere('make', 'like', '%' . $search . '%')
-                    ->orWhere('model', 'like', '%' . $search . '%')
-                    ->orWhere('location', 'like', '%' . $search . '%')
-                    ->orWhere('description', 'like', '%' . $search . '%');
+                    ->where('title', 'like', $like)
+                    ->orWhere('street_address', 'like', $like)
+                    ->orWhere('description', 'like', $like)
+                    ->orWhereHas('makeOption', fn ($q) => $q->where('value', 'like', $like))
+                    ->orWhereHas('modelOption', fn ($q) => $q->where('value', 'like', $like))
+                    ->orWhereHas('countryOption', fn ($q) => $q->where('value', 'like', $like));
             });
         }
 
-        $condition = isset($filters['condition']) ? trim((string) $filters['condition']) : '';
-        if ($condition !== '') {
-            $query->where('condition', $condition);
+        $streetQ = isset($filters['street_q']) ? trim((string) $filters['street_q']) : '';
+        if ($streetQ !== '') {
+            $query->where('street_address', 'like', '%'.$streetQ.'%');
         }
 
-        $location = isset($filters['location']) ? trim((string) $filters['location']) : '';
-        if ($location !== '') {
-            $query->where('location', $location);
+        $cid = (int) ($filters['condition_listing_option_id'] ?? 0);
+        if ($cid > 0) {
+            $query->where('condition_listing_option_id', $cid);
         }
 
-        foreach (['make', 'model', 'fuel_type', 'transmission', 'body_type', 'drive', 'exterior_color'] as $field) {
-            $value = isset($filters[$field]) ? trim((string) $filters[$field]) : '';
-            if ($value !== '') {
-                $query->where($field, $value);
+        $countryId = (int) ($filters['country_listing_option_id'] ?? 0);
+        if ($countryId > 0) {
+            $query->where('country_listing_option_id', $countryId);
+        }
+
+        $makeId = (int) ($filters['make_listing_option_id'] ?? 0);
+        if ($makeId > 0) {
+            $query->where('make_listing_option_id', $makeId);
+        }
+
+        $modelId = (int) ($filters['model_listing_option_id'] ?? 0);
+        if ($modelId > 0) {
+            $query->where('model_listing_option_id', $modelId);
+        }
+
+        foreach (
+            [
+                'fuel_type_listing_option_id',
+                'transmission_listing_option_id',
+                'body_type_listing_option_id',
+                'drive_listing_option_id',
+            ] as $field
+        ) {
+            $id = (int) ($filters[$field] ?? 0);
+            if ($id > 0) {
+                $query->where($field, $id);
             }
+        }
+
+        $ext = isset($filters['exterior_color']) ? trim((string) $filters['exterior_color']) : '';
+        if ($ext !== '') {
+            $query->where('exterior_color', $ext);
         }
         $vin = isset($filters['vin']) ? trim((string) $filters['vin']) : '';
         if ($vin !== '') {
@@ -377,7 +430,7 @@ class PageController extends Controller
             'title' => ($page?->title ?: 'Inventory'),
             'vehicles' => $vehicles,
             'filters' => array_merge($this->defaultInventoryFilters(), $filters),
-            'filterOptions' => $this->approvedVehicleFilterOptions(),
+            'filterOptions' => $filterOpts,
             'page' => $page,
             'sections' => $this->pageSections('inventory', [
                 'heading' => 'Vehicles For Sale',
@@ -393,16 +446,17 @@ class PageController extends Controller
     {
         return [
             'q' => '',
-            'make' => '',
-            'model' => '',
-            'fuel_type' => '',
-            'transmission' => '',
-            'body_type' => '',
-            'drive' => '',
+            'street_q' => '',
+            'make_listing_option_id' => '',
+            'model_listing_option_id' => '',
+            'fuel_type_listing_option_id' => '',
+            'transmission_listing_option_id' => '',
+            'body_type_listing_option_id' => '',
+            'drive_listing_option_id' => '',
             'exterior_color' => '',
             'vin' => '',
-            'condition' => '',
-            'location' => '',
+            'condition_listing_option_id' => '',
+            'country_listing_option_id' => '',
             'year_min' => '',
             'year_max' => '',
             'mileage_min' => '',
@@ -414,45 +468,13 @@ class PageController extends Controller
     }
 
     /**
-     * Distinct filter values from approved listings (same logic as inventory page).
+     * Filter dropdown values: prefer admin listing catalog when present, else distinct from approved vehicles.
      *
-     * @return array<string, \Illuminate\Support\Collection>
+     * @return array<string, mixed>
      */
     protected function approvedVehicleFilterOptions(): array
     {
-        $optionQuery = Vehicle::query()->where('status', 'approved');
-
-        return [
-            'makes' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('make')->where('make', '!=', '')->pluck('make')),
-            'models' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('model')->where('model', '!=', '')->pluck('model')),
-            'fuel_types' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('fuel_type')->where('fuel_type', '!=', '')->pluck('fuel_type')),
-            'transmissions' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('transmission')->where('transmission', '!=', '')->pluck('transmission')),
-            'body_types' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('body_type')->where('body_type', '!=', '')->pluck('body_type')),
-            'locations' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('location')->where('location', '!=', '')->pluck('location')),
-            'drives' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('drive')->where('drive', '!=', '')->pluck('drive')),
-            'exterior_colors' => $this->normalizeOptionValues((clone $optionQuery)->whereNotNull('exterior_color')->where('exterior_color', '!=', '')->pluck('exterior_color')),
-        ];
-    }
-
-    /**
-     * @param  Collection<int, string>  $values
-     * @return Collection<int, string>
-     */
-    protected function normalizeOptionValues(Collection $values): Collection
-    {
-        $byLower = [];
-        foreach ($values as $value) {
-            $trimmed = trim((string) $value);
-            if ($trimmed === '') {
-                continue;
-            }
-            $key = mb_strtolower($trimmed);
-            if (!isset($byLower[$key])) {
-                $byLower[$key] = $trimmed;
-            }
-        }
-        natcasesort($byLower);
-        return collect(array_values($byLower));
+        return VehicleListingCatalog::filterOptions();
     }
 
     public function vehicleShow(Request $request, string $slug = '2021-bmw-m4-competition')
@@ -462,7 +484,17 @@ class PageController extends Controller
         $user = $request->user();
 
         $vehicle = Vehicle::query()
-            ->with(['images', 'user.vendorProfile'])
+            ->with([
+                'images',
+                'user.vendorProfile',
+                'makeOption',
+                'modelOption',
+                'bodyTypeOption',
+                'transmissionOption',
+                'fuelTypeOption',
+                'driveOption',
+                'countryOption',
+            ])
             ->where('slug', $slug)
             ->when(!($user && $user->hasRole('admin')), function ($query) use ($user) {
                 $query->where(function ($visibility) use ($user) {
@@ -483,7 +515,7 @@ class PageController extends Controller
                 'email' => trim((string) ($siteMerged['dealer_public_email'] ?? '')) ?: (string) config('mail.from.address'),
                 'phone' => trim((string) ($siteMerged['dealer_phone'] ?? '')) ?: trim((string) ($siteMerged['dealer_sales_phone'] ?? '')),
                 'address' => (string) ($siteMerged['dealer_address'] ?? ''),
-                'map_location' => $vehicle->map_location ?: $vehicle->location,
+                'map_location' => trim((string) ($vehicle->map_location ?? '')),
             ];
         } else {
             $vp = $vehicle->user?->vendorProfile;
@@ -492,33 +524,37 @@ class PageController extends Controller
                     'name' => trim((string) ($vp->business_name ?? '')) ?: ($vehicle->user?->name ?: 'Dealer'),
                     'email' => trim((string) ($vp->public_email ?? '')) ?: ($vehicle->contact_email ?: $vehicle->user?->email),
                     'phone' => trim((string) ($vp->public_phone ?? '')) ?: ($vehicle->contact_phone ?: trim((string) ($siteMerged['dealer_phone'] ?? ''))),
-                    'address' => trim((string) ($vp->public_address ?? '')) ?: ($vehicle->contact_address ?: $vehicle->location),
-                    'map_location' => trim((string) ($vp->map_location ?? '')) ?: ($vehicle->map_location ?: $vehicle->contact_address ?: $vehicle->location),
+                    'address' => trim((string) ($vp->public_address ?? '')) ?: trim((string) ($vehicle->street_address ?? '')),
+                    'map_location' => trim((string) ($vp->map_location ?? '')) ?: trim((string) ($vehicle->map_location ?? '')),
                 ];
             } else {
                 $sellerProfile = [
                     'name' => $vehicle->user?->name ?: 'Dealer',
                     'email' => $vehicle->contact_email ?: $vehicle->user?->email,
                     'phone' => $vehicle->contact_phone ?: SiteSetting::getValue('dealer_phone', ''),
-                    'address' => $vehicle->contact_address ?: $vehicle->location,
-                    'map_location' => $vehicle->map_location ?: $vehicle->contact_address ?: $vehicle->location,
+                    'address' => trim((string) ($vehicle->street_address ?? '')),
+                    'map_location' => trim((string) ($vehicle->map_location ?? '')),
                 ];
             }
         }
 
         $similarVehicles = Vehicle::query()
-            ->with('images')
+            ->with(['images', 'makeOption', 'modelOption'])
             ->where('status', 'approved')
             ->whereKeyNot($vehicle->id)
             ->where(function ($query) use ($vehicle) {
-                if ($vehicle->make && $vehicle->model) {
-                    $query->where(function ($q) use ($vehicle) {
-                        $q->where('make', $vehicle->make)->where('model', $vehicle->model);
-                    })->orWhere('make', $vehicle->make);
+                $makeId = (int) ($vehicle->make_listing_option_id ?? 0);
+                $modelId = (int) ($vehicle->model_listing_option_id ?? 0);
+                if ($makeId > 0 && $modelId > 0) {
+                    $query->where(function ($q) use ($makeId, $modelId) {
+                        $q->where('make_listing_option_id', $makeId)->where('model_listing_option_id', $modelId);
+                    })->orWhere('make_listing_option_id', $makeId);
+
                     return;
                 }
-                if ($vehicle->make) {
-                    $query->where('make', $vehicle->make);
+                if ($makeId > 0) {
+                    $query->where('make_listing_option_id', $makeId);
+
                     return;
                 }
                 $query->whereNotNull('id');
@@ -542,9 +578,11 @@ class PageController extends Controller
         }
 
         $siteName = config('app.name');
+        $makeLabel = $vehicle->makeOption?->value ?? '';
+        $modelLabel = $vehicle->modelOption?->value ?? '';
         $plainDesc = $vehicle->description
             ? Str::limit(strip_tags($vehicle->description), 160)
-            : Str::limit(trim(($vehicle->title ?? '') . ' ' . ($vehicle->make ?? '') . ' ' . ($vehicle->model ?? '')), 160);
+            : Str::limit(trim(($vehicle->title ?? '') . ' ' . $makeLabel . ' ' . $modelLabel), 160);
 
         $cover = $vehicle->images->first();
         $listingUrl = route('inventory.show', ['slug' => $vehicle->slug], true);
@@ -576,7 +614,7 @@ class PageController extends Controller
     {
         $page = CmsPage::query()->where('slug', 'compare')->where('is_active', true)->first();
         $vehicles = Vehicle::query()
-            ->with('images')
+            ->with(['images', 'fuelTypeOption', 'transmissionOption', 'makeOption', 'modelOption'])
             ->whereIn('id', Compare::ids())
             ->get()
             ->sortBy(fn (Vehicle $v) => array_search($v->id, Compare::ids(), true))

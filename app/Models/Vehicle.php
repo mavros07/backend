@@ -18,8 +18,14 @@ class Vehicle extends Model
         'slug',
         'status',
         'year',
-        'make',
-        'model',
+        'make_listing_option_id',
+        'model_listing_option_id',
+        'condition_listing_option_id',
+        'body_type_listing_option_id',
+        'transmission_listing_option_id',
+        'fuel_type_listing_option_id',
+        'drive_listing_option_id',
+        'country_listing_option_id',
         'price',
         'msrp',
         'finance_price',
@@ -30,19 +36,13 @@ class Vehicle extends Model
         'mileage',
         'city_mpg',
         'hwy_mpg',
-        'transmission',
-        'fuel_type',
-        'drive',
-        'body_type',
-        'condition',
         'engine_size',
         'engine_layout',
         'top_track_speed',
         'zero_to_sixty',
         'number_of_gears',
-        'location',
+        'street_address',
         'contact_phone',
-        'contact_address',
         'contact_email',
         'map_location',
         'features',
@@ -101,5 +101,45 @@ class Vehicle extends Model
     public function favoritedByUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'vehicle_favorites')->withTimestamps();
+    }
+
+    public function makeOption(): BelongsTo
+    {
+        return $this->belongsTo(ListingOption::class, 'make_listing_option_id');
+    }
+
+    public function modelOption(): BelongsTo
+    {
+        return $this->belongsTo(ListingOption::class, 'model_listing_option_id');
+    }
+
+    public function conditionOption(): BelongsTo
+    {
+        return $this->belongsTo(ListingOption::class, 'condition_listing_option_id');
+    }
+
+    public function bodyTypeOption(): BelongsTo
+    {
+        return $this->belongsTo(ListingOption::class, 'body_type_listing_option_id');
+    }
+
+    public function transmissionOption(): BelongsTo
+    {
+        return $this->belongsTo(ListingOption::class, 'transmission_listing_option_id');
+    }
+
+    public function fuelTypeOption(): BelongsTo
+    {
+        return $this->belongsTo(ListingOption::class, 'fuel_type_listing_option_id');
+    }
+
+    public function driveOption(): BelongsTo
+    {
+        return $this->belongsTo(ListingOption::class, 'drive_listing_option_id');
+    }
+
+    public function countryOption(): BelongsTo
+    {
+        return $this->belongsTo(ListingOption::class, 'country_listing_option_id');
     }
 }

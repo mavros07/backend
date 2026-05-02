@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers\Concerns;
 
+use App\Models\ListingOption;
+use App\Models\ListingOptionCategory;
 use App\Models\Vehicle;
 use App\Support\VehicleImageUrl;
+use App\Support\VehicleListingCatalog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -20,29 +24,99 @@ trait InteractsWithVehicleForms
      */
     protected function validateVehicleData(Request $request): array
     {
+        $opts = VehicleListingCatalog::filterOptions();
+        $makeRows = VehicleListingCatalog::activeMakeSelectRows();
+        $matrix = collect($opts['model_matrix'] ?? []);
+        $countryRows = VehicleListingCatalog::activeRootOptionRows('country');
+
+        if ($countryRows->isEmpty()) {
+            throw ValidationException::withMessages([
+                'country_listing_option_id' => __('No countries are configured in Admin → Listing options. Add at least one country before saving a listing.'),
+            ]);
+        }
+
+        if ($makeRows->isNotEmpty() && $matrix->isEmpty()) {
+            throw ValidationException::withMessages([
+                'make_listing_option_id' => __('Models are not linked to makes in the catalog yet. Add model rows under each make in Admin → Listing options.'),
+            ]);
+        }
+
+        $catIds = ListingOptionCategory::query()->pluck('id', 'slug')->all();
+        $makeCatId = (int) ($catIds['make'] ?? 0);
+        $modelCatId = (int) ($catIds['model'] ?? 0);
+        $conditionCatId = (int) ($catIds['condition'] ?? 0);
+        $bodyCatId = (int) ($catIds['body_type'] ?? 0);
+        $transCatId = (int) ($catIds['transmission'] ?? 0);
+        $fuelCatId = (int) ($catIds['fuel_type'] ?? 0);
+        $driveCatId = (int) ($catIds['drive'] ?? 0);
+        $countryCatId = (int) ($catIds['country'] ?? 0);
+
+        $rootRule = function (int $categoryId, bool $required): array {
+            if ($categoryId <= 0) {
+                return ['nullable', 'integer'];
+            }
+            $exists = Rule::exists('listing_options', 'id')->where(function ($q) use ($categoryId) {
+                $q->where('category_id', $categoryId)->whereNull('parent_id')->where('is_active', true);
+            });
+
+            return $required ? ['required', 'integer', $exists] : ['nullable', 'integer', $exists];
+        };
+
+        $conditionRequired = VehicleListingCatalog::activeRootOptionRows('condition')->isNotEmpty();
+        $bodyRequired = VehicleListingCatalog::activeRootOptionRows('body_type')->isNotEmpty();
+        $transRequired = VehicleListingCatalog::activeRootOptionRows('transmission')->isNotEmpty();
+        $fuelRequired = VehicleListingCatalog::activeRootOptionRows('fuel_type')->isNotEmpty();
+        $driveRequired = VehicleListingCatalog::activeRootOptionRows('drive')->isNotEmpty();
+
+        $makeRequired = $makeRows->isNotEmpty() && $matrix->isNotEmpty();
+        $modelRequired = $makeRequired;
+
+        $exteriorColors = collect($opts['exterior_colors'] ?? []);
+        $vehicle = $request->route('vehicle');
+        if ($vehicle instanceof Vehicle && trim((string) $vehicle->exterior_color) !== '') {
+            if (! $exteriorColors->contains($vehicle->exterior_color)) {
+                $exteriorColors->push($vehicle->exterior_color);
+            }
+        }
+        $exteriorColors = $exteriorColors->unique()->values();
+
+        $in = function (?Collection $c): array {
+            if ($c === null || ! $c instanceof Collection || $c->isEmpty()) {
+                return [];
+            }
+
+            return [Rule::in($c->all())];
+        };
+
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'year' => ['nullable', 'integer', 'min:1900', 'max:' . (int) date('Y')],
-            'make' => ['nullable', 'string', 'max:255'],
-            'model' => ['nullable', 'string', 'max:255'],
+            'make_listing_option_id' => $makeRequired ? $rootRule($makeCatId, true) : ['nullable', 'integer', Rule::exists('listing_options', 'id')->where(function ($q) use ($makeCatId) {
+                $q->where('category_id', $makeCatId)->whereNull('parent_id')->where('is_active', true);
+            })],
+            'model_listing_option_id' => $modelRequired ? ['required', 'integer', Rule::exists('listing_options', 'id')->where(function ($q) use ($modelCatId) {
+                $q->where('category_id', $modelCatId)->whereNotNull('parent_id')->where('is_active', true);
+            })] : ['nullable', 'integer', Rule::exists('listing_options', 'id')->where(function ($q) use ($modelCatId) {
+                $q->where('category_id', $modelCatId)->whereNotNull('parent_id')->where('is_active', true);
+            })],
             'price' => ['nullable', 'integer', 'min:0'],
             'msrp' => ['nullable', 'integer', 'min:0'],
             'mileage' => ['nullable', 'integer', 'min:0'],
             'city_mpg' => ['nullable', 'integer', 'min:0', 'max:200'],
             'hwy_mpg' => ['nullable', 'integer', 'min:0', 'max:200'],
-            'transmission' => ['nullable', 'string', 'max:255'],
-            'fuel_type' => ['nullable', 'string', 'max:255'],
-            'drive' => ['nullable', 'string', 'max:255'],
-            'body_type' => ['nullable', 'string', 'max:255'],
-            'condition' => ['nullable', Rule::in(['new', 'used'])],
+            'condition_listing_option_id' => $rootRule($conditionCatId, $conditionRequired),
+            'body_type_listing_option_id' => $rootRule($bodyCatId, $bodyRequired),
+            'transmission_listing_option_id' => $rootRule($transCatId, $transRequired),
+            'fuel_type_listing_option_id' => $rootRule($fuelCatId, $fuelRequired),
+            'drive_listing_option_id' => $rootRule($driveCatId, $driveRequired),
+            'street_address' => ['nullable', 'string', 'max:1000'],
+            'country_listing_option_id' => $rootRule($countryCatId, true),
             'engine_size' => ['nullable', 'string', 'max:64'],
             'engine_layout' => ['nullable', 'string', 'max:100'],
             'top_track_speed' => ['nullable', 'string', 'max:100'],
             'zero_to_sixty' => ['nullable', 'string', 'max:100'],
             'number_of_gears' => ['nullable', 'string', 'max:100'],
-            'location' => ['nullable', 'string', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:64'],
-            'contact_address' => ['nullable', 'string', 'max:255'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'map_location' => ['nullable', 'string', 'max:255'],
             'overview' => ['nullable', 'string', 'max:50000'],
@@ -53,7 +127,7 @@ trait InteractsWithVehicleForms
             'finance_down_payment' => ['nullable', 'integer', 'min:0'],
             'show_financing_calculator' => ['nullable', 'boolean'],
             'features_text' => ['nullable', 'string', 'max:10000'],
-            'exterior_color' => ['nullable', 'string', 'max:255'],
+            'exterior_color' => array_merge(['nullable', 'string', 'max:255'], $in($exteriorColors)),
             'interior_color' => ['nullable', 'string', 'max:255'],
             'vin' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:50000'],
@@ -74,6 +148,20 @@ trait InteractsWithVehicleForms
             'remove_image_ids.*' => ['integer', 'min:1'],
         ]);
 
+        $makeId = (int) ($data['make_listing_option_id'] ?? 0);
+        $modelId = (int) ($data['model_listing_option_id'] ?? 0);
+        if ($makeId > 0 && $modelId > 0) {
+            $parentId = (int) (ListingOption::query()->whereKey($modelId)->value('parent_id') ?? 0);
+            if ($parentId !== $makeId) {
+                throw ValidationException::withMessages([
+                    'model_listing_option_id' => __('Model does not match the selected make.'),
+                ]);
+            }
+            if ($matrix instanceof Collection && $matrix->isNotEmpty()) {
+                VehicleListingCatalog::assertMakeModelPairById($matrix, $makeId, $modelId);
+            }
+        }
+
         $data['is_special'] = $request->boolean('is_special');
         if ($this->vehiclesHasShowFinancingCalculatorColumn()) {
             $data['show_financing_calculator'] = $request->boolean('show_financing_calculator');
@@ -84,10 +172,15 @@ trait InteractsWithVehicleForms
         $data['features'] = $this->parseFeatures($data['features_text'] ?? null);
         unset($data['features_text']);
 
+        $driveId = (int) ($data['drive_listing_option_id'] ?? 0);
+        $driveLabel = $driveId > 0
+            ? (string) (ListingOption::query()->whereKey($driveId)->value('value') ?? '')
+            : '';
+
         $rawTechSpecs = [
             'engine_layout' => (string) ($data['tech_specs']['engine_layout'] ?? $data['engine_layout'] ?? ''),
             'engine_volume' => (string) ($data['tech_specs']['engine_volume'] ?? $data['engine_size'] ?? ''),
-            'drive_type' => (string) ($data['tech_specs']['drive_type'] ?? $data['drive'] ?? ''),
+            'drive_type' => (string) ($data['tech_specs']['drive_type'] ?? $driveLabel),
             'top_speed' => (string) ($data['tech_specs']['top_speed'] ?? $data['top_track_speed'] ?? ''),
             'zero_to_70' => (string) ($data['tech_specs']['zero_to_70'] ?? $data['zero_to_sixty'] ?? ''),
             'transmission_gears' => (string) ($data['tech_specs']['transmission_gears'] ?? $data['number_of_gears'] ?? ''),
