@@ -21,7 +21,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('category_id')->constrained('listing_option_categories')->cascadeOnDelete();
             $table->foreignId('parent_id')->nullable()->constrained('listing_options')->cascadeOnDelete();
-            $table->string('value');
+            // 191: safe length for composite indexes with utf8mb4 on MySQL/MariaDB (avoids "Specified key was too long").
+            $table->string('value', 191);
             $table->unsignedInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
