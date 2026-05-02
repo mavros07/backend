@@ -25,15 +25,44 @@ return new class extends Migration
             throw new RuntimeException('vehicles table is missing legacy make column and make_listing_option_id; cannot migrate.');
         }
 
+        // Add each FK column only if missing (resumes cleanly after partial/failed DDL).
         if (! Schema::hasColumn('vehicles', 'make_listing_option_id')) {
             Schema::table('vehicles', function (Blueprint $table) {
                 $table->foreignId('make_listing_option_id')->nullable()->after('year')->constrained('listing_options')->restrictOnDelete();
+            });
+        }
+        if (! Schema::hasColumn('vehicles', 'model_listing_option_id')) {
+            Schema::table('vehicles', function (Blueprint $table) {
                 $table->foreignId('model_listing_option_id')->nullable()->after('make_listing_option_id')->constrained('listing_options')->restrictOnDelete();
+            });
+        }
+        if (! Schema::hasColumn('vehicles', 'condition_listing_option_id')) {
+            Schema::table('vehicles', function (Blueprint $table) {
                 $table->foreignId('condition_listing_option_id')->nullable()->after('model_listing_option_id')->constrained('listing_options')->restrictOnDelete();
+            });
+        }
+        if (! Schema::hasColumn('vehicles', 'body_type_listing_option_id')) {
+            Schema::table('vehicles', function (Blueprint $table) {
                 $table->foreignId('body_type_listing_option_id')->nullable()->after('condition_listing_option_id')->constrained('listing_options')->restrictOnDelete();
+            });
+        }
+        if (! Schema::hasColumn('vehicles', 'transmission_listing_option_id')) {
+            Schema::table('vehicles', function (Blueprint $table) {
                 $table->foreignId('transmission_listing_option_id')->nullable()->after('body_type_listing_option_id')->constrained('listing_options')->restrictOnDelete();
+            });
+        }
+        if (! Schema::hasColumn('vehicles', 'fuel_type_listing_option_id')) {
+            Schema::table('vehicles', function (Blueprint $table) {
                 $table->foreignId('fuel_type_listing_option_id')->nullable()->after('transmission_listing_option_id')->constrained('listing_options')->restrictOnDelete();
+            });
+        }
+        if (! Schema::hasColumn('vehicles', 'drive_listing_option_id')) {
+            Schema::table('vehicles', function (Blueprint $table) {
                 $table->foreignId('drive_listing_option_id')->nullable()->after('fuel_type_listing_option_id')->constrained('listing_options')->restrictOnDelete();
+            });
+        }
+        if (! Schema::hasColumn('vehicles', 'country_listing_option_id')) {
+            Schema::table('vehicles', function (Blueprint $table) {
                 $table->foreignId('country_listing_option_id')->nullable()->after('drive_listing_option_id')->constrained('listing_options')->restrictOnDelete();
             });
         }
