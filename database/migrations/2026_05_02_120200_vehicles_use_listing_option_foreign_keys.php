@@ -25,7 +25,7 @@ return new class extends Migration
             throw new RuntimeException('vehicles table is missing legacy make column and make_listing_option_id; cannot migrate.');
         }
 
-        $listingOptionFkSpec = self::listingOptionsIdFkSpec();
+        $listingOptionFkSpec = $this->listingOptionsIdFkSpec();
 
         // Add each FK column only if missing (resumes cleanly after partial/failed DDL).
         foreach (self::vehicleListingOptionFkColumnPairs() as [$columnName, $afterColumn]) {
@@ -176,10 +176,10 @@ return new class extends Migration
      *
      * @return array{data_type: string, unsigned: bool}
      */
-    private static function listingOptionsIdFkSpec(): array
+    private function listingOptionsIdFkSpec(): array
     {
         $default = ['data_type' => 'bigint', 'unsigned' => true];
-        $connection = Schema::connection();
+        $connection = DB::connection($this->getConnection());
 
         if (! in_array($connection->getDriverName(), ['mysql', 'mariadb'], true)) {
             return $default;
