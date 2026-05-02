@@ -34,7 +34,7 @@ return new class extends Migration
             }
 
             Schema::table('vehicles', function (Blueprint $table) use ($listingOptionFkSpec, $columnName, $afterColumn) {
-                self::applyNullableFkColumnCompatibleWithListingOptions(
+                self::addNullableListingOptionIdColumnIndexed(
                     $table,
                     $listingOptionFkSpec,
                     $columnName,
@@ -115,16 +115,7 @@ return new class extends Migration
             return;
         }
 
-        Schema::table('vehicles', function (Blueprint $table) {
-            $table->dropForeign(['make_listing_option_id']);
-            $table->dropForeign(['model_listing_option_id']);
-            $table->dropForeign(['condition_listing_option_id']);
-            $table->dropForeign(['body_type_listing_option_id']);
-            $table->dropForeign(['transmission_listing_option_id']);
-            $table->dropForeign(['fuel_type_listing_option_id']);
-            $table->dropForeign(['drive_listing_option_id']);
-            $table->dropForeign(['country_listing_option_id']);
-        });
+        $this->dropVehiclesForeignKeysReferencingListingOptions();
 
         Schema::table('vehicles', function (Blueprint $table) {
             $table->dropColumn([
@@ -172,7 +163,8 @@ return new class extends Migration
 
     /**
      * Match vehicles.*_listing_option_id column SQL type to listing_options.id (signedness + integer width).
-     * Laravel's nullable foreignId() is always unsigned bigint; InnoDB_errno_150 commonly means the PK is bigint signed etc.
+     * We do not add InnoDB FOREIGN KEY constraints here: shared MySQL/MariaDB often returns errno 150 for
+     * subtle type/prefix mismatches; indexes + Eloquent relations are enough for this app.
      *
      * @return array{data_type: string, unsigned: bool}
      */
@@ -219,7 +211,7 @@ return new class extends Migration
     /**
      * @param  array{data_type: string, unsigned: bool}  $spec
      */
-    private static function applyNullableFkColumnCompatibleWithListingOptions(
+    private static function addNullableListingOptionIdColumnIndexed(
         Blueprint $table,
         array $spec,
         string $columnName,
@@ -261,11 +253,60 @@ return new class extends Migration
                 break;
             default:
                 throw new RuntimeException(sprintf(
-                    'listing_options.id has unsupported INTEGER DATA_TYPE `%s`; cannot attach foreign keys on vehicles.',
+                    'listing_options.id has unsupported INTEGER DATA_TYPE `%s`; cannot add matching columns on vehicles.',
                     $dataType
                 ));
         }
 
-        $table->foreign($columnName)->references('id')->on('listing_options')->restrictOnDelete();
+        $table->index($columnName);
+    }
+
+    /**
+     * Drop any vehicles → listing_options FKs that may exist from earlier migration attempts (safe rollback).
+     */
+    private function dropVehiclesForeignKeysReferencingListingOptions(): void
+    {
+        $connection = DB::connection($this->getConnection());
+        if (! in_array($connection->getDriverName(), ['mysql', 'mariadb'], true)) {
+            return;
+        }
+
+        $database = $connection->getDatabaseName();
+        $vehiclesTable = $connection->getTablePrefix().'vehicles';
+        $listingOptionsTable = $connection->getTablePrefix().'listing_options';
+
+        $constraints = DB::select(
+            'SELECT DISTINCT kcu.CONSTRAINT_NAME AS name
+             FROM information_schema.KEY_COLUMN_USAGE kcu
+             INNER JOIN information_schema.TABLE_CONSTRAINTS tc
+               ON kcu.CONSTRAINT_SCHEMA = tc.CONSTRAINT_SCHEMA
+               AND kcu.CONSTRAINT_NAME = tc.CONSTRAINT_NAME
+               AND kcu.TABLE_SCHEMA = tc.TABLE_SCHEMA
+               AND kcu.TABLE_NAME = tc.TABLE_NAME
+             WHERE tc.CONSTRAINT_TYPE = ?
+               AND kcu.TABLE_SCHEMA = ?
+               AND kcu.TABLE_NAME = ?
+               AND kcu.REFERENCED_TABLE_SCHEMA = ?
+               AND kcu.REFERENCED_TABLE_NAME = ?',
+            ['FOREIGN KEY', $database, $vehiclesTable, $database, $listingOptionsTable]
+        );
+
+        if ($constraints === []) {
+            return;
+        }
+
+        $grammar = $connection->getSchemaGrammar();
+
+        // Logical name only: grammar applies connection table prefix itself.
+        $quotedVehicles = $grammar->wrapTable('vehicles');
+
+        foreach ($constraints as $row) {
+            $cname = (string) ($row->name ?? '');
+            if ($cname === '') {
+                continue;
+            }
+            $wrapped = $grammar->wrap($cname);
+            $connection->statement("alter table {$quotedVehicles} drop foreign key {$wrapped}");
+        }
     }
 };
