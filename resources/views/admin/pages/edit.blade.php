@@ -1,10 +1,6 @@
 @push('body-end')
   <input type="hidden" id="page-editor-app-url" value="{{ rtrim(url('/'), '/') }}" />
 
-  @include('partials.media-modal')
-
-  <input type="hidden" id="media-list-url" value="{{ route('admin.media.list') }}" />
-
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const appUrlEl = document.getElementById('page-editor-app-url');

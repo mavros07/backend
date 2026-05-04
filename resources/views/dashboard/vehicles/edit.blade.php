@@ -183,16 +183,11 @@
 
               <div class="mt-4 grid gap-4 lg:grid-cols-2">
                 <div class="rounded-md border border-gray-200 p-3">
-                  <x-input-label for="main_image" value="Main image" />
-                  <input id="main_image" name="main_image" type="file" accept=".jpg,.jpeg,.png,.webp" class="sr-only" />
+                  <x-input-label value="Main image" />
                   <input type="hidden" id="main_image_path" name="main_image_path" value="{{ old('main_image_path', '') }}" />
-                  <p class="mt-1 text-xs text-gray-500">Select a new featured image (it becomes the first image).</p>
+                  <p class="mt-1 text-xs text-gray-500">{{ __('Choose a featured image from the media library (upload new files inside the library).') }}</p>
                   <div class="mt-3 flex flex-wrap items-center gap-3">
-                    @if(auth()->user()?->hasRole('admin'))
-                      <button type="button" id="main-image-library" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Select image</button>
-                    @else
-                      <button type="button" onclick="document.getElementById('main_image').click()" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Upload image</button>
-                    @endif
+                    <button type="button" id="main-image-library" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">{{ __('Media library') }}</button>
                     <button type="button" id="main-image-clear" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled>Clear selection</button>
                   </div>
                   <x-input-error :messages="$errors->get('main_image')" class="mt-2" />
@@ -201,16 +196,11 @@
                 </div>
 
                 <div class="rounded-md border border-gray-200 p-3">
-                  <x-input-label for="images" value="Gallery images" />
-                  <input id="images" name="images[]" type="file" multiple accept=".jpg,.jpeg,.png,.webp" class="sr-only" />
+                  <x-input-label value="Gallery images" />
                   <div id="gallery-paths-holder"></div>
-                  <p class="mt-1 text-xs text-gray-500">Add multiple images (Ctrl/Cmd-click, Shift-click range).</p>
+                  <p class="mt-1 text-xs text-gray-500">{{ __('Add images from the media library (Ctrl/Cmd-click, Shift-click range).') }}</p>
                   <div class="mt-3 flex flex-wrap items-center gap-3">
-                    @if(auth()->user()?->hasRole('admin'))
-                      <button type="button" id="gallery-library" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Select images</button>
-                    @else
-                      <button type="button" onclick="document.getElementById('images').click()" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Upload images</button>
-                    @endif
+                    <button type="button" id="gallery-library" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">{{ __('Media library') }}</button>
                     <button type="button" id="gallery-clear-all" class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50" disabled>Clear selection</button>
                   </div>
                   <x-input-error :messages="$errors->get('images')" class="mt-2" />

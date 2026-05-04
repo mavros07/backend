@@ -72,7 +72,7 @@
             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
-        <form method="post" action="{{ route('admin.listing-options.store', $category) }}" class="mt-5 space-y-4" enctype="multipart/form-data">
+        <form method="post" action="{{ route('admin.listing-options.store', $category) }}" class="mt-5 space-y-4">
           @csrf
           <div>
             <x-input-label for="modal_value" :value="__('Value')" />
@@ -91,8 +91,16 @@
           @endif
           @if ($isMake)
             <div>
-              <x-input-label for="modal_logo" :value="__('Logo (optional)')" />
-              <input id="modal_logo" name="logo" type="file" accept="image/*" class="mt-1 block w-full text-sm text-zinc-600 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-900 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white" />
+              <x-input-label for="modal_make_logo_path" :value="__('Logo (optional)')" />
+              <input type="hidden" name="logo_path" id="modal_make_logo_path" value="{{ old('logo_path') }}" />
+              <div class="mt-2 flex flex-wrap items-center gap-2">
+                <button type="button" class="js-mt-media-pick inline-flex items-center rounded-lg border border-zinc-200 bg-zinc-900 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-zinc-800" data-mt-media-target="modal_make_logo_path">
+                  {{ __('Choose from media library') }}
+                </button>
+              </div>
+              <div class="mt-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
+                <img data-mt-logo-preview="modal_make_logo_path" src="{{ \App\Support\VehicleImageUrl::url(old('logo_path')) }}" alt="" class="h-full w-full object-contain p-0.5" />
+              </div>
             </div>
           @endif
           <div class="flex items-center gap-2">
@@ -112,7 +120,7 @@
         {{ __('No options yet. Use Add option to create the first value.') }}
       </div>
     @else
-      <form id="{{ $batchFormId }}" method="post" action="{{ route('admin.listing-options.batch-update', $category) }}" enctype="multipart/form-data">
+      <form id="{{ $batchFormId }}" method="post" action="{{ route('admin.listing-options.batch-update', $category) }}">
         @csrf
         @method('PUT')
 
@@ -145,15 +153,13 @@
                 <tr class="align-top">
                   @if ($isMake)
                     <td class="px-4 py-3">
+                      <input type="hidden" name="logo_paths[{{ $option->id }}]" id="make_logo_path_{{ $option->id }}" value="{{ old('logo_paths.'.$option->id, $option->logo_path) }}" />
                       <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
-                        @if (! empty($option->logo_path))
-                          <img src="{{ \App\Support\VehicleImageUrl::url($option->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" />
-                        @else
-                          <span class="text-[10px] font-semibold uppercase text-zinc-400">{{ __('None') }}</span>
-                        @endif
+                        <img data-mt-logo-preview="make_logo_path_{{ $option->id }}" src="{{ \App\Support\VehicleImageUrl::url($option->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" />
                       </div>
-                      <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500" for="logo_{{ $option->id }}">{{ __('Replace') }}</label>
-                      <input id="logo_{{ $option->id }}" type="file" name="logos[{{ $option->id }}]" accept="image/*" class="mt-1 block w-40 max-w-full text-xs text-zinc-600 file:mr-1 file:rounded file:border-0 file:bg-zinc-200 file:px-2 file:py-1 file:text-[10px] file:font-semibold file:text-zinc-800" />
+                      <button type="button" class="js-mt-media-pick mt-2 inline-flex w-full max-w-[10rem] items-center justify-center rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-700 shadow-sm transition hover:border-amber-300/60 hover:bg-amber-50/40" data-mt-media-target="make_logo_path_{{ $option->id }}">
+                        {{ __('Media library') }}
+                      </button>
                     </td>
                   @endif
                   @if ($isCountry)
@@ -205,7 +211,7 @@
 
       <div class="mt-4 flex flex-col items-stretch gap-2 border-t border-zinc-200/90 pt-4 sm:flex-row sm:items-center sm:justify-between">
         @if ($isMake)
-          <p class="text-xs text-zinc-500">{{ __('Uploading a new logo replaces the previous file for that make.') }}</p>
+          <p class="text-xs text-zinc-500">{{ __('Logos are chosen from the media library. Saving applies the path for each make you changed.') }}</p>
         @else
           <span></span>
         @endif

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ListingOption;
 use App\Models\ListingOptionCategory;
 use App\Models\Vehicle;
+use App\Support\MediaLibraryCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -60,7 +61,7 @@ class AdminListingOptionController extends Controller
             'is_active' => ['sometimes', 'boolean'],
         ];
         if ($isMake) {
-            $rules['logo'] = ['nullable', 'file', 'image', 'max:4096'];
+            $rules['logo_path'] = ['nullable', 'string', 'max:512'];
         }
         $data = $request->validate($rules);
 
@@ -87,9 +88,11 @@ class AdminListingOptionController extends Controller
             'is_active' => (bool) ($data['is_active'] ?? true),
         ]);
 
-        if ($isMake && $request->hasFile('logo')) {
-            $stored = $request->file('logo')->store('listing-options/make', 'public');
-            $option->update(['logo_path' => 'storage/'.$stored]);
+        if ($isMake && ! empty($data['logo_path'] ?? null)) {
+            $path = trim((string) $data['logo_path']);
+            if (MediaLibraryCatalog::isPublicMediaPath($path)) {
+                $option->update(['logo_path' => $path]);
+            }
         }
 
         return back()->with('status', __('Option added.'));
@@ -111,8 +114,8 @@ class AdminListingOptionController extends Controller
             'options.*.is_active' => ['sometimes', 'in:1'],
         ];
         if ($category->slug === 'make') {
-            $rules['logos'] = ['nullable', 'array'];
-            $rules['logos.*'] = ['nullable', 'file', 'image', 'max:4096'];
+            $rules['logo_paths'] = ['nullable', 'array'];
+            $rules['logo_paths.*'] = ['nullable', 'string', 'max:512'];
         }
 
         $validated = $request->validate($rules);
@@ -137,25 +140,27 @@ class AdminListingOptionController extends Controller
         }
 
         if ($category->slug === 'make') {
-            $logos = $request->file('logos', []);
-            foreach ($logos as $idStr => $file) {
-                if (! $file || ! $file->isValid()) {
-                    continue;
+            $logoPaths = $request->input('logo_paths', []);
+            if (is_array($logoPaths)) {
+                foreach ($logoPaths as $idStr => $path) {
+                    $path = trim((string) $path);
+                    if ($path === '' || ! MediaLibraryCatalog::isPublicMediaPath($path)) {
+                        continue;
+                    }
+                    $id = (int) $idStr;
+                    if (! in_array($id, $allowedIds, true)) {
+                        continue;
+                    }
+                    $option = ListingOption::query()->whereKey($id)->first();
+                    if (! $option) {
+                        continue;
+                    }
+                    if ($option->logo_path && str_starts_with((string) $option->logo_path, 'storage/')) {
+                        $rel = substr((string) $option->logo_path, strlen('storage/'));
+                        Storage::disk('public')->delete($rel);
+                    }
+                    $option->update(['logo_path' => $path]);
                 }
-                $id = (int) $idStr;
-                if (! in_array($id, $allowedIds, true)) {
-                    continue;
-                }
-                $option = ListingOption::query()->whereKey($id)->first();
-                if (! $option) {
-                    continue;
-                }
-                if ($option->logo_path && str_starts_with((string) $option->logo_path, 'storage/')) {
-                    $rel = substr((string) $option->logo_path, strlen('storage/'));
-                    Storage::disk('public')->delete($rel);
-                }
-                $stored = $file->store('listing-options/make', 'public');
-                $option->update(['logo_path' => 'storage/'.$stored]);
             }
         }
 

@@ -8,7 +8,7 @@
       <input id="media-search" type="search" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Search media..."/>
     </div>
     <div class="shrink-0 border-b border-gray-200 bg-gray-50 p-4">
-      <form id="media-upload-form" method="post" action="{{ route('admin.media.upload') }}" enctype="multipart/form-data" class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <form id="media-upload-form" method="post" action="{{ $mediaUploadUrl ?? route('admin.media.upload') }}" enctype="multipart/form-data" class="flex flex-col gap-2 sm:flex-row sm:items-center">
         @csrf
         <input id="media-upload-input" type="file" name="files[]" accept="image/jpeg,image/jpg,image/png,image/webp" class="block w-full text-sm text-gray-700" multiple />
         <button type="submit" id="media-upload-submit" class="whitespace-nowrap rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700">Upload</button>

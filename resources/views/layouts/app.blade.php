@@ -32,6 +32,18 @@
                 {{ $slot }}
             </main>
         </div>
+        @auth
+            @php
+                $mtMediaUpload = auth()->user()->hasRole('admin')
+                    ? route('admin.media.upload')
+                    : route('dashboard.api.media.upload');
+                $mtMediaList = auth()->user()->hasRole('admin')
+                    ? route('admin.media.list')
+                    : route('dashboard.api.media');
+            @endphp
+            @include('partials.media-modal', ['mediaUploadUrl' => $mtMediaUpload])
+            <input type="hidden" id="media-list-url" value="{{ $mtMediaList }}" />
+        @endauth
         @stack('body-end')
     </body>
 </html>

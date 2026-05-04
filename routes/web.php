@@ -1,30 +1,32 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\CompareController;
-use App\Http\Controllers\UserVehicleController;
-use App\Http\Controllers\AdminVehicleController;
-use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\FavoriteController;
-use App\Http\Controllers\VehicleInquiryController;
-use App\Http\Controllers\TemporaryAdminController;
-use App\Http\Controllers\AdminPageController;
-use App\Http\Controllers\AdminMediaController;
 use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\AdminListingOptionController;
+use App\Http\Controllers\AdminMediaController;
+use App\Http\Controllers\AdminPageController;
 use App\Http\Controllers\AdminSiteSettingsController;
-use App\Http\Controllers\ListingOptionLookupController;
-use App\Http\Controllers\NewsletterController;
-use App\Http\Controllers\VendorSettingsController;
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminVehicleController;
+use App\Http\Controllers\CompareController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CurrencyPreferenceController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\ListingOptionLookupController;
+use App\Http\Controllers\MediaLibraryController;
+use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicStorageMediaController;
+use App\Http\Controllers\TemporaryAdminController;
+use App\Http\Controllers\UserVehicleController;
+use App\Http\Controllers\VehicleInquiryController;
+use App\Http\Controllers\VendorSettingsController;
 use App\Models\AdminAuditTrail;
 use App\Models\SiteTrafficEvent;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
 
 if (app()->environment('local')) {
@@ -121,6 +123,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/listing-models/{make}', [ListingOptionLookupController::class, 'modelsForMake'])
         ->whereNumber('make')
         ->name('dashboard.listing-models');
+
+    Route::get('/dashboard/api/media', [MediaLibraryController::class, 'list'])->name('dashboard.api.media');
+    Route::post('/dashboard/api/media', [MediaLibraryController::class, 'upload'])->name('dashboard.api.media.upload');
 });
 
 Route::middleware(['auth', 'role:admin', 'admin.audit'])->prefix('admin')->group(function () {
@@ -197,10 +202,10 @@ Route::middleware(['auth', 'role:admin', 'admin.audit'])->prefix('admin')->group
         }
 
         if (! empty($filters['from'])) {
-            $query->where('created_at', '>=', \Illuminate\Support\Carbon::parse($filters['from'])->startOfDay());
+            $query->where('created_at', '>=', Carbon::parse($filters['from'])->startOfDay());
         }
         if (! empty($filters['to'])) {
-            $query->where('created_at', '<=', \Illuminate\Support\Carbon::parse($filters['to'])->endOfDay());
+            $query->where('created_at', '<=', Carbon::parse($filters['to'])->endOfDay());
         }
 
         $search = trim((string) ($filters['q'] ?? ''));
@@ -238,11 +243,11 @@ Route::middleware(['auth', 'role:admin', 'admin.audit'])->prefix('admin')->group
     Route::get('/pages/{slug}/edit', [AdminPageController::class, 'edit'])->name('admin.pages.edit');
     Route::put('/pages/{slug}', [AdminPageController::class, 'update'])->name('admin.pages.update');
     Route::get('/media', [AdminMediaController::class, 'index'])->name('admin.media.index');
-    Route::post('/media', [AdminMediaController::class, 'upload'])->name('admin.media.upload');
+    Route::post('/media', [MediaLibraryController::class, 'upload'])->name('admin.media.upload');
     Route::delete('/media/{media}', [AdminMediaController::class, 'destroy'])->name('admin.media.destroy');
     Route::post('/media/{media}', [AdminMediaController::class, 'destroy'])->name('admin.media.destroy.post');
     Route::post('/media/bulk-delete', [AdminMediaController::class, 'bulkDestroy'])->name('admin.media.bulk-destroy');
-    Route::get('/api/media', [AdminMediaController::class, 'list'])->name('admin.media.list');
+    Route::get('/api/media', [MediaLibraryController::class, 'list'])->name('admin.media.list');
 
     Route::get('/settings', [AdminSiteSettingsController::class, 'edit'])->name('admin.settings.edit');
     Route::put('/settings', [AdminSiteSettingsController::class, 'update'])->name('admin.settings.update');

@@ -15,8 +15,8 @@
       ['route' => 'admin.analytics.index', 'match' => 'admin.analytics.*', 'label' => __('Analytics'), 'icon' => 'M3 3v18h18M7 15l3-3 3 2 4-5'],
       ['route' => 'admin.pages.index', 'match' => 'admin.pages.*', 'label' => __('Pages'), 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
       ['route' => 'admin.listing-options.index', 'match' => 'admin.listing-options.*', 'label' => __('Listing options'), 'icon' => 'M4 6h16M4 10h16M4 14h10'],
-      ['route' => 'admin.settings.edit', 'match' => 'admin.settings.*', 'label' => __('Site settings'), 'icon' => 'M3 3v18h18M7 15l3-3 3 2 4-5'],
       ['route' => 'admin.media.index', 'match' => 'admin.media.*', 'label' => __('Media'), 'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
+      ['route' => 'admin.settings.edit', 'match' => 'admin.settings.*', 'label' => __('Site settings'), 'icon' => 'M3 3v18h18M7 15l3-3 3 2 4-5'],
       ['route' => 'admin.audit.index', 'match' => 'admin.audit.*', 'label' => __('Audit trail'), 'icon' => 'M9 12h6m-6 4h6M7.5 3.75h9A2.25 2.25 0 0118.75 6v12A2.25 2.25 0 0116.5 20.25h-9A2.25 2.25 0 015.25 18V6A2.25 2.25 0 017.5 3.75z'],
   ];
 @endphp
@@ -241,6 +241,11 @@
           </div>
         </main>
       </div>
+    @include('partials.media-modal', ['mediaUploadUrl' => route('admin.media.upload')])
+    <input type="hidden" id="media-list-url" value="{{ route('admin.media.list') }}" />
+    @unless (request()->routeIs('admin.pages.edit'))
+      @include('partials.media-modal-pickers')
+    @endunless
     @stack('body-end')
   </body>
 </html>

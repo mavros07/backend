@@ -1,6 +1,5 @@
 @php
   $supportsExistingGalleryDelete = $supportsExistingGalleryDelete ?? false;
-  $isAdminUser = auth()->user()?->hasRole('admin');
 @endphp
 
 {{-- Render at end of <body> (see layouts.admin @stack('body-end')) so fixed overlays are not clipped by .admin-content-scroll --}}
@@ -10,14 +9,9 @@
   <img id="image-preview-modal-image" src="" alt="" class="max-h-[90vh] max-w-[95vw] rounded-lg object-contain" />
 </div>
 
-@if($isAdminUser)
-  @include('partials.media-modal')
-@endif
-
 <script>
   (function () {
     const supportsExistingGalleryDelete = @json((bool) $supportsExistingGalleryDelete);
-    const isAdminUser = @json((bool) $isAdminUser);
     const mainInput = document.getElementById('main_image');
     const galleryInput = document.getElementById('images');
     const mainPreview = document.getElementById('main-image-preview');
@@ -32,7 +26,7 @@
     let galleryFiles = [];
     let galleryPathItems = [];
 
-    if (!mainInput || !galleryInput || !mainPreview || !galleryPreview || !mainClearBtn || !galleryClearBtn || !modal || !modalImage || !modalClose || !galleryPathsHolder) {
+    if (!mainPreview || !galleryPreview || !mainClearBtn || !galleryClearBtn || !modal || !modalImage || !modalClose || !galleryPathsHolder) {
       return;
     }
 
@@ -69,6 +63,7 @@
     }
 
     function syncGalleryInput() {
+      if (!galleryInput) return;
       const transfer = new DataTransfer();
       galleryFiles.forEach((file) => transfer.items.add(file));
       galleryInput.files = transfer.files;
@@ -86,7 +81,7 @@
     }
 
     function renderMain() {
-      const file = mainInput.files && mainInput.files[0];
+      const file = mainInput && mainInput.files && mainInput.files[0];
       if (!file) {
         const path = (mainPathInput?.value || '').trim();
         if (!path) {
@@ -112,10 +107,10 @@
       }
       mainPreview.classList.remove('hidden');
       mainPreview.innerHTML = '';
-      mainPreview.appendChild(thumb(url, 'Main image', () => {
-        mainInput.value = '';
-        renderMain();
-      }));
+        mainPreview.appendChild(thumb(url, 'Main image', () => {
+          if (mainInput) mainInput.value = '';
+          renderMain();
+        }));
       mainClearBtn.disabled = false;
     }
 
@@ -194,7 +189,7 @@
       const existingCards = getExistingImageCards();
       const hasExisting = existingCards.length > 0;
       const hasExistingMany = existingCards.length > 1;
-      const hasPendingMainSelection = !!(mainInput.files && mainInput.files[0]) || !!((mainPathInput?.value || '').trim());
+      const hasPendingMainSelection = !!(mainInput && mainInput.files && mainInput.files[0]) || !!((mainPathInput?.value || '').trim());
       const hasPendingGallerySelection = galleryFiles.length > 0 || galleryPathItems.length > 0;
 
       mainClearBtn.disabled = !(hasPendingMainSelection || hasExisting);
@@ -202,13 +197,13 @@
       galleryClearBtn.classList.toggle('hidden', !hasPendingGallerySelection && !hasExistingMany);
     }
 
-    mainInput.addEventListener('change', renderMain);
+    if (mainInput) mainInput.addEventListener('change', renderMain);
     mainClearBtn.addEventListener('click', () => {
       if (mainClearBtn.disabled) {
         return;
       }
       const existingCards = getExistingImageCards();
-      if ((!mainInput.files || !mainInput.files[0]) && !((mainPathInput?.value || '').trim()) && existingCards.length > 0) {
+      if ((!mainInput || !mainInput.files || !mainInput.files[0]) && !((mainPathInput?.value || '').trim()) && existingCards.length > 0) {
         const featuredClearBtn = existingCards[0]?.querySelector('[data-clear-existing-image]');
         if (featuredClearBtn) {
           markExistingImageForRemoval(featuredClearBtn);
@@ -216,7 +211,7 @@
         updateClearButtonsState();
         return;
       }
-      mainInput.value = '';
+      if (mainInput) mainInput.value = '';
       if (mainPathInput) {
         mainPathInput.value = '';
       }
@@ -224,12 +219,14 @@
       updateClearButtonsState();
     });
 
-    galleryInput.addEventListener('change', () => {
-      galleryFiles = Array.from(galleryInput.files || []);
-      galleryPathItems = [];
-      renderGalleryPathInputs();
-      renderGallery();
-    });
+    if (galleryInput) {
+      galleryInput.addEventListener('change', () => {
+        galleryFiles = Array.from(galleryInput.files || []);
+        galleryPathItems = [];
+        renderGalleryPathInputs();
+        renderGallery();
+      });
+    }
 
     galleryClearBtn.addEventListener('click', () => {
       if (galleryClearBtn.disabled) {
@@ -278,10 +275,6 @@
     renderGallery();
     updateClearButtonsState();
 
-    if (!isAdminUser) {
-      return;
-    }
-
     const mediaModal = document.getElementById('media-modal');
     const mediaGrid = document.getElementById('media-grid');
     const mediaSearch = document.getElementById('media-search');
@@ -289,7 +282,8 @@
     const mediaUploadForm = document.getElementById('media-upload-form');
     const mediaUploadSubmit = document.getElementById('media-upload-submit');
     const mediaUploadStatus = document.getElementById('media-upload-status');
-    const mediaListUrl = @json(route('admin.media.list'));
+    const mediaListUrlEl = document.getElementById('media-list-url');
+    const mediaListUrl = (mediaListUrlEl && mediaListUrlEl.value) ? mediaListUrlEl.value : @json(route('dashboard.api.media'));
     let mediaItems = [];
     let mediaTarget = null;
     let mediaSelected = [];
@@ -349,9 +343,18 @@
     }
 
     async function fetchMediaItems() {
-      const response = await fetch(mediaListUrl, { credentials: 'same-origin' });
-      const data = await response.json();
-      mediaItems = Array.isArray(data.media) ? data.media : [];
+      try {
+        const response = await fetch(mediaListUrl, { credentials: 'same-origin' });
+        if (!response.ok) {
+          mediaItems = [];
+          renderMediaGrid();
+          return;
+        }
+        const data = await response.json();
+        mediaItems = Array.isArray(data.media) ? data.media : [];
+      } catch (e) {
+        mediaItems = [];
+      }
       renderMediaGrid();
     }
 
@@ -411,7 +414,7 @@
       if (mediaSelected.length === 0) return;
 
       if (mediaTarget === 'main') {
-        mainInput.value = '';
+        if (mainInput) mainInput.value = '';
         if (mainPathInput) {
           mainPathInput.value = mediaSelected[0];
         }
