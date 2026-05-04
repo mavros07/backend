@@ -7,6 +7,7 @@ use App\Models\ListingOptionCategory;
 use App\Models\Vehicle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class AdminListingOptionController extends Controller
@@ -51,12 +52,17 @@ class AdminListingOptionController extends Controller
     public function store(Request $request, ListingOptionCategory $category): RedirectResponse
     {
         $isModel = $category->slug === 'model';
+        $isMake = $category->slug === 'make';
 
-        $data = $request->validate([
+        $rules = [
             'value' => ['required', 'string', 'max:255'],
             'parent_id' => [$isModel ? 'required' : 'nullable', 'integer', 'exists:listing_options,id'],
             'is_active' => ['sometimes', 'boolean'],
-        ]);
+        ];
+        if ($isMake) {
+            $rules['logo'] = ['nullable', 'file', 'image', 'max:4096'];
+        }
+        $data = $request->validate($rules);
 
         $parentId = $data['parent_id'] ?? null;
         if ($isModel) {
@@ -73,7 +79,7 @@ class AdminListingOptionController extends Controller
             ->where('parent_id', $parentId)
             ->max('sort_order');
 
-        ListingOption::query()->create([
+        $option = ListingOption::query()->create([
             'category_id' => $category->id,
             'parent_id' => $parentId,
             'value' => trim($data['value']),
@@ -81,7 +87,79 @@ class AdminListingOptionController extends Controller
             'is_active' => (bool) ($data['is_active'] ?? true),
         ]);
 
+        if ($isMake && $request->hasFile('logo')) {
+            $stored = $request->file('logo')->store('listing-options/make', 'public');
+            $option->update(['logo_path' => 'storage/'.$stored]);
+        }
+
         return back()->with('status', __('Option added.'));
+    }
+
+    public function batchUpdate(Request $request, ListingOptionCategory $category): RedirectResponse
+    {
+        $allowedIds = ListingOption::query()
+            ->where('category_id', $category->id)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $rules = [
+            'options' => ['required', 'array'],
+            'options.*.value' => ['required', 'string', 'max:255'],
+            'options.*.sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
+            // Must be validated or Laravel strips unchecked keys from validated() and all rows become inactive.
+            'options.*.is_active' => ['sometimes', 'in:1'],
+        ];
+        if ($category->slug === 'make') {
+            $rules['logos'] = ['nullable', 'array'];
+            $rules['logos.*'] = ['nullable', 'file', 'image', 'max:4096'];
+        }
+
+        $validated = $request->validate($rules);
+
+        foreach ($validated['options'] as $idStr => $payload) {
+            $id = (int) $idStr;
+            if (! in_array($id, $allowedIds, true)) {
+                continue;
+            }
+            $option = ListingOption::query()->whereKey($id)->first();
+            if (! $option) {
+                continue;
+            }
+            $isActive = array_key_exists('is_active', $payload)
+                && ($payload['is_active'] === '1' || $payload['is_active'] === true || $payload['is_active'] === 1);
+
+            $option->update([
+                'value' => trim((string) ($payload['value'] ?? '')),
+                'sort_order' => isset($payload['sort_order']) ? (int) $payload['sort_order'] : $option->sort_order,
+                'is_active' => $isActive,
+            ]);
+        }
+
+        if ($category->slug === 'make') {
+            $logos = $request->file('logos', []);
+            foreach ($logos as $idStr => $file) {
+                if (! $file || ! $file->isValid()) {
+                    continue;
+                }
+                $id = (int) $idStr;
+                if (! in_array($id, $allowedIds, true)) {
+                    continue;
+                }
+                $option = ListingOption::query()->whereKey($id)->first();
+                if (! $option) {
+                    continue;
+                }
+                if ($option->logo_path && str_starts_with((string) $option->logo_path, 'storage/')) {
+                    $rel = substr((string) $option->logo_path, strlen('storage/'));
+                    Storage::disk('public')->delete($rel);
+                }
+                $stored = $file->store('listing-options/make', 'public');
+                $option->update(['logo_path' => 'storage/'.$stored]);
+            }
+        }
+
+        return back()->with('status', __('Changes saved.'));
     }
 
     public function update(Request $request, ListingOptionCategory $category, ListingOption $option): RedirectResponse
@@ -111,6 +189,10 @@ class AdminListingOptionController extends Controller
         $usage = $this->usageCount($category->slug, $option);
         if ($usage > 0) {
             return back()->withErrors(['option' => __('Cannot delete: :count listing(s) still use this value.', ['count' => $usage])]);
+        }
+
+        if ($category->slug === 'make' && $option->logo_path && str_starts_with((string) $option->logo_path, 'storage/')) {
+            Storage::disk('public')->delete(substr((string) $option->logo_path, strlen('storage/')));
         }
 
         $option->delete();

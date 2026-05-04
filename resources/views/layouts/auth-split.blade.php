@@ -21,8 +21,9 @@
         @include('partials.vite-assets')
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col bg-gray-100 md:flex-row">
-            <div class="flex flex-1 flex-col justify-center px-6 py-10 sm:px-10 md:w-[60%] md:max-w-none md:py-16">
+        <div class="flex min-h-screen flex-col bg-zinc-100 md:h-screen md:flex-row md:overflow-hidden">
+            {{-- Form: 60% width on md+, vertically centered; full width on mobile --}}
+            <div class="flex min-h-screen w-full flex-1 flex-col justify-center px-6 py-12 sm:px-10 md:min-h-0 md:w-[60%] md:max-w-none md:flex-none md:py-16">
                 <div class="mx-auto w-full max-w-md">
                     <a href="/" class="inline-flex items-center gap-3">
                         @if (! empty($logoPath))
@@ -45,7 +46,8 @@
                 </div>
             </div>
 
-            <div class="relative hidden min-h-[40vh] bg-zinc-900 md:block md:min-h-screen md:w-[40%]">
+            {{-- Image: 40% width, full height of viewport; hidden on small screens --}}
+            <div class="relative hidden min-h-0 bg-zinc-900 md:block md:h-full md:min-h-0 md:w-[40%] md:flex-none md:self-stretch">
                 @if ($panelPath !== '')
                     <img
                         src="{{ \App\Support\VehicleImageUrl::url($panelPath) }}"

@@ -1,37 +1,87 @@
+@php
+  $isMake = $category->slug === 'make';
+  $isCountry = $category->slug === 'country';
+  $batchFormId = 'listing-options-batch-form';
+@endphp
 <x-app-layout>
   <x-slot name="header">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Listing options') }}: {{ $category->label }}
-      </h2>
-      <a href="{{ route('admin.listing-options.index') }}" class="text-sm text-indigo-600 hover:underline">{{ __('All categories') }}</a>
+    <div class="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3">
+      <div class="min-w-0">
+        <div class="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">{{ __('Catalog') }}</div>
+        <div class="text-xl font-bold tracking-tight text-zinc-900">{{ __('Listing options') }}: {{ $category->label }}</div>
+      </div>
+      <a
+        href="{{ route('admin.listing-options.index') }}"
+        class="inline-flex shrink-0 items-center rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 shadow-sm transition hover:bg-zinc-50"
+      >
+        {{ __('All categories') }}
+      </a>
     </div>
   </x-slot>
 
-  <div class="w-full space-y-6">
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-      @if ($errors->any())
-        <div class="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-          <ul class="list-disc pl-4">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+  <div
+    class="space-y-6"
+    x-data="{ addOpen: false }"
+    @keydown.escape.window="addOpen = false"
+  >
+    @if ($errors->any())
+      <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <ul class="list-disc space-y-1 pl-5">
+          @foreach ($errors->all() as $e)
+            <li>{{ $e }}</li>
+          @endforeach
+        </ul>
+      </div>
+    @endif
+
+    @if (session('status'))
+      <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900">{{ session('status') }}</div>
+    @endif
+
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <p class="max-w-2xl text-sm leading-relaxed text-zinc-600">
+        {{ __('Edit values, display order, and visibility. Use Save changes at the bottom to apply all edits at once.') }}
+      </p>
+      <button
+        type="button"
+        class="inline-flex items-center rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-zinc-800"
+        @click="addOpen = true"
+      >
+        {{ __('Add option') }}
+      </button>
+    </div>
+
+    {{-- Add option modal --}}
+    <div
+      x-show="addOpen"
+      x-cloak
+      class="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      x-transition.opacity.duration.200ms
+    >
+      <div class="absolute inset-0 bg-black/55 backdrop-blur-[1px]" @click="addOpen = false" aria-hidden="true"></div>
+      <div
+        class="relative z-10 w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-option-title"
+        @click.stop
+      >
+        <div class="flex items-start justify-between gap-3">
+          <h3 id="add-option-title" class="text-lg font-bold text-zinc-900">{{ __('Add option') }}</h3>
+          <button type="button" class="rounded-lg p-1 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800" @click="addOpen = false" aria-label="{{ __('Close') }}">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
         </div>
-      @endif
-
-      @if (session('status'))
-        <div class="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">{{ session('status') }}</div>
-      @endif
-
-      <form method="post" action="{{ route('admin.listing-options.store', $category) }}" class="mb-8 space-y-4 rounded-lg border border-gray-200 p-4">
-        @csrf
-        <h3 class="text-sm font-semibold text-gray-900">{{ __('Add option') }}</h3>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div class="sm:col-span-2">
-            <x-input-label for="value" :value="__('Value')" />
-            <x-text-input id="value" name="value" type="text" class="mt-1 block w-full" required value="{{ old('value') }}" />
+        <form method="post" action="{{ route('admin.listing-options.store', $category) }}" class="mt-5 space-y-4" enctype="multipart/form-data">
+          @csrf
+          <div>
+            <x-input-label for="modal_value" :value="__('Value')" />
+            <x-text-input id="modal_value" name="value" type="text" class="mt-1 block w-full" required value="{{ old('value') }}" />
           </div>
           @if ($category->slug === 'model')
-            <div class="sm:col-span-2">
-              <x-input-label for="parent_id" :value="__('Parent make')" />
-              <select id="parent_id" name="parent_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+            <div>
+              <x-input-label for="modal_parent_id" :value="__('Parent make')" />
+              <select id="modal_parent_id" name="parent_id" class="mt-1 block w-full rounded-lg border-zinc-300 text-sm shadow-sm focus:border-amber-500 focus:ring-amber-500" required>
                 <option value="">{{ __('Select make') }}</option>
                 @foreach ($makeOptions as $m)
                   <option value="{{ $m->id }}" @selected((string) old('parent_id') === (string) $m->id)>{{ $m->value }}</option>
@@ -39,76 +89,151 @@
               </select>
             </div>
           @endif
+          @if ($isMake)
+            <div>
+              <x-input-label for="modal_logo" :value="__('Logo (optional)')" />
+              <input id="modal_logo" name="logo" type="file" accept="image/*" class="mt-1 block w-full text-sm text-zinc-600 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-900 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white" />
+            </div>
+          @endif
           <div class="flex items-center gap-2">
-            <input id="is_active" name="is_active" type="checkbox" value="1" class="rounded border-gray-300 text-indigo-600" @checked(old('is_active', true)) />
-            <x-input-label for="is_active" :value="__('Active')" class="!mb-0" />
+            <input id="modal_is_active" name="is_active" type="checkbox" value="1" class="rounded border-zinc-300 text-amber-600 focus:ring-amber-500" @checked(old('is_active', true)) />
+            <x-input-label for="modal_is_active" :value="__('Active')" class="!mb-0" />
           </div>
-        </div>
-        <x-primary-button type="submit">{{ __('Add') }}</x-primary-button>
-      </form>
+          <div class="flex justify-end gap-2 border-t border-zinc-100 pt-4">
+            <button type="button" class="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50" @click="addOpen = false">{{ __('Cancel') }}</button>
+            <x-primary-button type="submit">{{ __('Add') }}</x-primary-button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-      @if ($options->isEmpty())
-        <p class="text-sm text-gray-600">{{ __('No options yet. Add values above.') }}</p>
-      @else
-        <div class="overflow-x-auto border border-gray-200 rounded-lg">
-          <table class="min-w-full divide-y divide-gray-200 text-sm">
-            <thead class="bg-gray-50">
+    @if ($options->isEmpty())
+      <div class="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50/60 px-6 py-10 text-center text-sm text-zinc-600">
+        {{ __('No options yet. Use Add option to create the first value.') }}
+      </div>
+    @else
+      <form id="{{ $batchFormId }}" method="post" action="{{ route('admin.listing-options.batch-update', $category) }}" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+
+      <div class="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm ring-1 ring-black/[0.02]">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-zinc-200 text-sm">
+            <thead class="bg-zinc-50">
               <tr>
-                <th class="px-3 py-2 text-left font-medium text-gray-700">{{ __('Value') }}</th>
-                @if ($category->slug === 'model')
-                  <th class="px-3 py-2 text-left font-medium text-gray-700">{{ __('Make') }}</th>
+                @if ($isMake)
+                  <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Logo') }}</th>
                 @endif
-                <th class="px-3 py-2 text-left font-medium text-gray-700">{{ __('Order') }}</th>
-                <th class="px-3 py-2 text-left font-medium text-gray-700">{{ __('Active') }}</th>
-                <th class="px-3 py-2 text-right font-medium text-gray-700">{{ __('Actions') }}</th>
+                @if ($isCountry)
+                  <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Flag') }}</th>
+                @endif
+                <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Value') }}</th>
+                @if ($category->slug === 'model')
+                  <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Make') }}</th>
+                @endif
+                <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                  <span class="block">{{ __('Display order') }}</span>
+                  <span class="mt-0.5 block font-normal normal-case text-zinc-500">{{ __('Lower numbers appear first in dropdowns within the same group.') }}</span>
+                </th>
+                <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Active') }}</th>
+                <th class="px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Reorder') }}</th>
+                <th class="px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Actions') }}</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
+            <tbody class="divide-y divide-zinc-100 bg-white">
               @foreach ($options as $option)
-                <tr>
-                  <td class="px-3 py-2 align-top">
-                    <form method="post" action="{{ route('admin.listing-options.update', [$category, $option]) }}" class="flex flex-wrap items-end gap-2">
-                      @csrf
-                      @method('PUT')
-                      <input type="text" name="value" value="{{ $option->value }}" class="rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 min-w-[10rem]" required />
-                      <label class="inline-flex items-center gap-1 text-xs text-gray-600">
-                        <input type="checkbox" name="is_active" value="1" class="rounded border-gray-300 text-indigo-600" @checked($option->is_active) />
-                        {{ __('Active') }}
-                      </label>
-                      <x-secondary-button type="submit" class="!py-1 !text-xs">{{ __('Save') }}</x-secondary-button>
-                    </form>
+                <tr class="align-top">
+                  @if ($isMake)
+                    <td class="px-4 py-3">
+                      <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
+                        @if (! empty($option->logo_path))
+                          <img src="{{ \App\Support\VehicleImageUrl::url($option->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" />
+                        @else
+                          <span class="text-[10px] font-semibold uppercase text-zinc-400">{{ __('None') }}</span>
+                        @endif
+                      </div>
+                      <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wider text-zinc-500" for="logo_{{ $option->id }}">{{ __('Replace') }}</label>
+                      <input id="logo_{{ $option->id }}" type="file" name="logos[{{ $option->id }}]" accept="image/*" class="mt-1 block w-40 max-w-full text-xs text-zinc-600 file:mr-1 file:rounded file:border-0 file:bg-zinc-200 file:px-2 file:py-1 file:text-[10px] file:font-semibold file:text-zinc-800" />
+                    </td>
+                  @endif
+                  @if ($isCountry)
+                    <td class="px-4 py-3 text-2xl leading-none" title="{{ $option->value }}">{{ $option->flag_emoji ?? '—' }}</td>
+                  @endif
+                  <td class="px-4 py-3">
+                    <input
+                      type="text"
+                      name="options[{{ $option->id }}][value]"
+                      value="{{ old('options.'.$option->id.'.value', $option->value) }}"
+                      class="block w-full min-w-[12rem] max-w-xs rounded-lg border-zinc-300 text-sm shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                      required
+                    />
                   </td>
                   @if ($category->slug === 'model')
-                    <td class="px-3 py-2 text-gray-700">{{ $option->parent?->value ?? '—' }}</td>
+                    <td class="px-4 py-3 text-zinc-700">{{ $option->parent?->value ?? '—' }}</td>
                   @endif
-                  <td class="px-3 py-2 whitespace-nowrap">
-                    <div class="flex flex-col gap-1">
-                      <form method="post" action="{{ route('admin.listing-options.move', [$category, $option]) }}" class="inline">
-                        @csrf
-                        <input type="hidden" name="direction" value="up" />
-                        <button type="submit" class="text-xs text-gray-600 hover:text-indigo-600">{{ __('Up') }}</button>
-                      </form>
-                      <form method="post" action="{{ route('admin.listing-options.move', [$category, $option]) }}" class="inline">
-                        @csrf
-                        <input type="hidden" name="direction" value="down" />
-                        <button type="submit" class="text-xs text-gray-600 hover:text-indigo-600">{{ __('Down') }}</button>
-                      </form>
+                  <td class="px-4 py-3">
+                    <input
+                      type="number"
+                      name="options[{{ $option->id }}][sort_order]"
+                      value="{{ old('options.'.$option->id.'.sort_order', $option->sort_order) }}"
+                      min="0"
+                      max="65535"
+                      class="w-24 rounded-lg border-zinc-300 text-sm shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                    />
+                  </td>
+                  <td class="px-4 py-3">
+                    <label class="inline-flex items-center gap-2 text-sm text-zinc-700">
+                      <input type="checkbox" name="options[{{ $option->id }}][is_active]" value="1" class="rounded border-zinc-300 text-amber-600 focus:ring-amber-500" @checked(old('options.'.$option->id.'.is_active', $option->is_active)) />
+                      <span>{{ __('Visible') }}</span>
+                    </label>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="inline-flex flex-col gap-1">
+                      <button type="submit" form="move-up-{{ $option->id }}" class="text-xs font-semibold text-zinc-600 hover:text-amber-700">{{ __('Up') }}</button>
+                      <button type="submit" form="move-down-{{ $option->id }}" class="text-xs font-semibold text-zinc-600 hover:text-amber-700">{{ __('Down') }}</button>
                     </div>
                   </td>
-                  <td class="px-3 py-2">{{ $option->is_active ? __('Yes') : __('No') }}</td>
-                  <td class="px-3 py-2 text-right align-top">
-                    <form method="post" action="{{ route('admin.listing-options.destroy', [$category, $option]) }}" onsubmit="return confirm(@json(__('Delete this option?')))">
-                      @csrf
-                      @method('DELETE')
-                      <x-danger-button type="submit" class="!py-1 !text-xs">{{ __('Delete') }}</x-danger-button>
-                    </form>
+                  <td class="px-4 py-3 text-right">
+                    <x-danger-button type="submit" form="delete-option-{{ $option->id }}" class="!py-1.5 !text-xs">{{ __('Delete') }}</x-danger-button>
                   </td>
                 </tr>
               @endforeach
             </tbody>
           </table>
         </div>
-      @endif
-    </div>
+      </div>
+
+      <div class="mt-4 flex flex-col items-stretch gap-2 border-t border-zinc-200/90 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        @if ($isMake)
+          <p class="text-xs text-zinc-500">{{ __('Uploading a new logo replaces the previous file for that make.') }}</p>
+        @else
+          <span></span>
+        @endif
+        <x-primary-button type="submit" class="sm:ml-auto">{{ __('Save changes') }}</x-primary-button>
+      </div>
+      </form>
+
+      @foreach ($options as $option)
+        <form id="move-up-{{ $option->id }}" method="post" action="{{ route('admin.listing-options.move', [$category, $option]) }}" class="hidden" aria-hidden="true">
+          @csrf
+          <input type="hidden" name="direction" value="up" />
+        </form>
+        <form id="move-down-{{ $option->id }}" method="post" action="{{ route('admin.listing-options.move', [$category, $option]) }}" class="hidden" aria-hidden="true">
+          @csrf
+          <input type="hidden" name="direction" value="down" />
+        </form>
+        <form
+          id="delete-option-{{ $option->id }}"
+          method="post"
+          action="{{ route('admin.listing-options.destroy', [$category, $option]) }}"
+          class="hidden"
+          aria-hidden="true"
+          onsubmit="return confirm('{{ addslashes(__('Delete this option?')) }}')"
+        >
+          @csrf
+          @method('DELETE')
+        </form>
+      @endforeach
+    @endif
   </div>
 </x-app-layout>

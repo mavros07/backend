@@ -62,14 +62,21 @@
   </head>
 
   <body class="bg-page_bg font-body text-on_surface selection:bg-brand_blue/20 {{ $bodyClass ?? '' }}" data-currency-ui="{{ e(json_encode($currencyUi ?? ['default' => 'USD', 'selected' => 'USD', 'symbols' => ['USD' => '$'], 'rates' => ['USD' => 1.0]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}">
-    <!-- Global Loading Screen -->
+    <!-- Global Loading Screen: logo centered; only outer ring animates (no box behind logo) -->
     <div id="global-loader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#1E2229] transition-opacity duration-700 ease-in-out">
-      <div class="flex h-32 w-32 items-center justify-center rounded-full border-2 border-white/20 bg-[#2a3038] shadow-[inset_0_2px_10px_rgba(0,0,0,0.4)]">
-        @if (! empty($loaderLogoPath))
-          <img src="{{ \App\Support\VehicleImageUrl::url($loaderLogoPath) }}" alt="" class="h-[5.25rem] w-[5.25rem] max-h-[82%] max-w-[82%] object-contain" />
-        @else
-          <span class="max-w-[80%] truncate px-2 text-center font-headline text-lg font-black uppercase tracking-tight text-white">{{ $siteDisplayName }}</span>
-        @endif
+      <div class="relative flex h-36 w-36 items-center justify-center">
+        <div
+          class="pointer-events-none absolute inset-0 rounded-full border-2 border-transparent border-t-white border-r-white/25 border-b-white/10 border-l-white/40 animate-spin"
+          style="animation-duration: 0.95s; animation-timing-function: linear;"
+          aria-hidden="true"
+        ></div>
+        <div class="relative z-10 flex h-24 w-24 items-center justify-center">
+          @if (! empty($loaderLogoPath))
+            <img src="{{ \App\Support\VehicleImageUrl::url($loaderLogoPath) }}" alt="" class="h-[4.5rem] w-[4.5rem] max-h-[90%] max-w-[90%] object-contain bg-transparent" />
+          @else
+            <span class="max-w-[90%] truncate px-1 text-center font-headline text-sm font-black uppercase tracking-tight text-white">{{ $siteDisplayName }}</span>
+          @endif
+        </div>
       </div>
       <!-- Fading Site Name -->
       <div class="mt-8 animate-pulse text-center font-headline text-2xl font-black italic tracking-widest text-white uppercase">

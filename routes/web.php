@@ -250,6 +250,7 @@ Route::middleware(['auth', 'role:admin', 'admin.audit'])->prefix('admin')->group
     Route::get('/listing-options', [AdminListingOptionController::class, 'index'])->name('admin.listing-options.index');
     Route::get('/listing-options/{category}', [AdminListingOptionController::class, 'show'])->name('admin.listing-options.show');
     Route::post('/listing-options/{category}', [AdminListingOptionController::class, 'store'])->name('admin.listing-options.store');
+    Route::put('/listing-options/{category}/batch', [AdminListingOptionController::class, 'batchUpdate'])->name('admin.listing-options.batch-update');
     Route::put('/listing-options/{category}/options/{option}', [AdminListingOptionController::class, 'update'])->name('admin.listing-options.update');
     Route::delete('/listing-options/{category}/options/{option}', [AdminListingOptionController::class, 'destroy'])->name('admin.listing-options.destroy');
     Route::post('/listing-options/{category}/options/{option}/move', [AdminListingOptionController::class, 'move'])->name('admin.listing-options.move');

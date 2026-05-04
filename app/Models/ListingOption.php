@@ -12,6 +12,8 @@ class ListingOption extends Model
         'category_id',
         'parent_id',
         'value',
+        'logo_path',
+        'flag_emoji',
         'sort_order',
         'is_active',
     ];

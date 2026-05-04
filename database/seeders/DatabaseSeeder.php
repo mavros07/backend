@@ -36,5 +36,6 @@ class DatabaseSeeder extends Seeder
         $this->call(CmsPagesSeeder::class);
         $this->call(PageSectionsSeeder::class);
         $this->call(MediaSeeder::class);
+        $this->call(ListingOptionCountriesSeeder::class);
     }
 }
