@@ -14,9 +14,20 @@ use Throwable;
 
 class GoogleAuthController extends Controller
 {
+    protected function googleOAuthConfigured(): bool
+    {
+        $id = config('services.google.client_id');
+        $secret = config('services.google.client_secret');
+        $redirect = config('services.google.redirect');
+
+        return is_string($id) && trim($id) !== ''
+            && is_string($secret) && trim($secret) !== ''
+            && is_string($redirect) && trim($redirect) !== '';
+    }
+
     public function redirect(): RedirectResponse
     {
-        if (! is_string(config('services.google.client_id')) || trim((string) config('services.google.client_id')) === '') {
+        if (! $this->googleOAuthConfigured()) {
             return redirect()->route('login')->withErrors(['email' => __('Google sign-in is not configured.')]);
         }
 
@@ -25,7 +36,7 @@ class GoogleAuthController extends Controller
 
     public function callback(EmailOtpService $otp): RedirectResponse
     {
-        if (! is_string(config('services.google.client_id')) || trim((string) config('services.google.client_id')) === '') {
+        if (! $this->googleOAuthConfigured()) {
             return redirect()->route('login')->withErrors(['email' => __('Google sign-in is not configured.')]);
         }
 
