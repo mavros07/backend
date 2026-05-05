@@ -33,7 +33,6 @@
       [data-site-header].is-home-header.is-scrolled [data-header-logo],
       [data-site-header].is-home-header.is-scrolled [data-header-icon],
       [data-site-header].is-home-header.is-scrolled [data-header-action-text],
-      [data-site-header].is-home-header.is-scrolled [data-header-bag-count],
       [data-site-header].is-home-header.is-scrolled [data-header-menu-icon] { color: #111827 !important; }
       [data-site-header].is-home-header.is-scrolled [data-header-nav-link] { color: rgba(17, 24, 39, 0.92) !important; }
       [data-site-header].is-home-header.is-scrolled [data-header-nav-link]:hover { color: #111827 !important; }
@@ -45,7 +44,6 @@
       [data-site-header].is-home-header [data-header-logo],
       [data-site-header].is-home-header [data-header-icon],
       [data-site-header].is-home-header [data-header-action-text],
-      [data-site-header].is-home-header [data-header-bag-count],
       [data-site-header].is-home-header [data-header-menu-icon] { color: #111827 !important; }
       [data-site-header].is-home-header [data-header-nav-link] { color: rgba(17, 24, 39, 0.92) !important; }
       [data-site-header].is-home-header [data-header-nav-link]:hover { color: #111827 !important; }
@@ -150,44 +148,22 @@
         @endforeach
       </nav>
 
-      <div class="relative z-20 flex shrink-0 items-center gap-3 sm:gap-6">
-        <a href="{{ route('compare') }}" class="group hidden items-center gap-2 xl:inline-flex" title="{{ __('Compare vehicles') }}">
-          <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Compare') }}</span>
-          <span class="relative ml-0.5 inline-flex">
-            <span data-header-icon class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]">speed</span>
+      <div class="relative z-20 flex shrink-0 items-center gap-2 sm:gap-4">
+        {{-- Order: Compare (left), then My Account (guest → auth page, user → dashboard), then hamburger on small screens --}}
+        <a href="{{ route('compare') }}" class="group inline-flex items-center gap-2" title="{{ __('Compare vehicles') }}">
+          <span data-header-action-text class="hidden text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF] xl:inline">{{ __('Compare') }}</span>
+          <span class="relative ml-0 inline-flex">
+            <span data-header-icon class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF] xl:text-[24px]">speed</span>
             <span class="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#1280DF] px-1 text-[10px] font-extrabold text-white">{{ $compareCount }}</span>
           </span>
         </a>
 
-        {{-- Auth actions (desktop): keep in sync with mobile menu below --}}
-        @guest
-          <a href="{{ route('login') }}" class="group hidden items-center gap-2 xl:inline-flex" title="{{ __('Login') }}">
-            <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Login') }}</span>
-            <span class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]" data-header-icon>login</span>
-          </a>
-          <a href="{{ route('register') }}" class="group hidden items-center gap-2 xl:inline-flex" title="{{ __('Register') }}">
-            <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Register') }}</span>
-            <span class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]" data-header-icon>person_add</span>
-          </a>
-        @endguest
-        @auth
-          <a href="{{ route('dashboard') }}" class="group hidden items-center gap-2 xl:inline-flex" title="{{ __('Dashboard') }}">
-            <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Account') }}</span>
-            <span class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]" data-header-icon>account_circle</span>
-          </a>
-          <form method="post" action="{{ route('logout') }}" class="hidden xl:inline-flex">
-            @csrf
-            <button type="submit" class="group inline-flex items-center gap-2" title="{{ __('Logout') }}">
-              <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Logout') }}</span>
-              <span class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]" data-header-icon>logout</span>
-            </button>
-          </form>
-        @endauth
-
-        <span class="relative hidden xl:inline-flex border-l border-white/15 pl-5">
-          <span data-header-icon class="material-symbols-outlined text-[27px] text-white">shopping_bag</span>
-          <span data-header-bag-count class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[22%] text-[10px] font-bold text-white">0</span>
-        </span>
+        @php
+          $myAccountUrl = auth()->check() ? route('dashboard') : route('login');
+        @endphp
+        <a href="{{ $myAccountUrl }}" class="inline-flex min-h-[40px] items-center justify-center rounded-md bg-gradient-to-r from-[#c98712] via-[#ffb129] to-[#ffd078] px-4 py-2 text-center text-[11px] font-black uppercase tracking-[0.07em] text-neutral-900 shadow-sm ring-1 ring-black/15 transition hover:brightness-105 active:brightness-95" title="{{ __('My account') }}">
+          {{ __('My account') }}
+        </a>
 
         <button data-header-menu-button class="inline-flex h-11 w-11 items-center justify-center rounded border border-white/15 text-white hover:bg-white/10 xl:hidden" type="button" data-mobile-menu-toggle aria-label="{{ __('Menu') }}">
           <span data-header-menu-icon class="material-symbols-outlined text-2xl">menu</span>
@@ -206,6 +182,16 @@
     </button>
   </div>
   <nav class="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-4" aria-label="{{ __('Mobile') }}">
+    <div class="mb-3 flex flex-col gap-2">
+      <a href="{{ route('compare') }}" class="flex items-center justify-between rounded-md border border-white/15 bg-white/5 px-3 py-3 text-sm font-black uppercase tracking-[0.06em] text-white transition hover:bg-white/10">
+        <span class="inline-flex items-center gap-2">
+          <span class="material-symbols-outlined text-[22px] text-[#1280DF]">speed</span>
+          {{ __('Compare') }}
+        </span>
+        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1280DF] px-2 text-xs font-extrabold">{{ $compareCount }}</span>
+      </a>
+      <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="flex min-h-[44px] items-center justify-center rounded-md bg-gradient-to-r from-[#c98712] via-[#ffb129] to-[#ffd078] px-3 py-3 text-sm font-black uppercase tracking-[0.06em] text-neutral-900 shadow ring-1 ring-black/15">{{ __('My account') }}</a>
+    </div>
     @foreach ([
       ['route' => 'home', 'label' => __('Home')],
       ['route' => 'inventory.index', 'label' => __('Inventory')],
@@ -213,7 +199,6 @@
       ['url' => route('inventory.index', ['q' => 'United States']), 'label' => __('Foreign Used')],
       ['route' => 'about', 'label' => __('About')],
       ['route' => 'faq', 'label' => __('FAQ')],
-      ['route' => 'compare', 'label' => __('Compare')],
       ['route' => 'contact', 'label' => __('Contact')],
     ] as $item)
       @php
@@ -221,28 +206,16 @@
       @endphp
       <a href="{{ $url }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ $item['label'] }}</a>
     @endforeach
-    {{-- Auth actions (mobile): keep in sync with desktop header above --}}
-    <div class="mt-4 border-t border-white/10 pt-4">
-      @guest
-        <a href="{{ route('login') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
-          <span>{{ __('Login') }}</span><span class="material-symbols-outlined text-xl">login</span>
-        </a>
-        <a href="{{ route('register') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
-          <span>{{ __('Register') }}</span><span class="material-symbols-outlined text-xl">person_add</span>
-        </a>
-      @endguest
-      @auth
-        <a href="{{ route('dashboard') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
-          <span>{{ __('Account') }}</span><span class="material-symbols-outlined text-xl">account_circle</span>
-        </a>
-        <form method="post" action="{{ route('logout') }}" class="mt-1">
+    @auth
+      <div class="mt-4 border-t border-white/10 pt-4">
+        <form method="post" action="{{ route('logout') }}">
           @csrf
           <button type="submit" class="w-full rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
             <span>{{ __('Logout') }}</span><span class="material-symbols-outlined text-xl">logout</span>
           </button>
         </form>
-      @endauth
-    </div>
+      </div>
+    @endauth
     @if ($address !== '' || $phone !== '')
       <div class="mt-5 border-t border-white/10 pt-4 text-xs text-white/70">
         @if ($address !== '')
