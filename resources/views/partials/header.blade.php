@@ -174,17 +174,17 @@
               @if ($navMakes->isNotEmpty())
                 <div class="flex min-w-0 w-1/2 flex-col bg-slate-50 p-3 sm:p-4" aria-label="{{ __('Shop by make') }}">
                   <p class="mb-3 text-[10px] font-extrabold uppercase tracking-[0.14em] text-zinc-500">{{ __('Shop by make') }}</p>
-                  <div class="grid max-h-[min(22rem,55vh)] grid-cols-3 gap-x-2 gap-y-3 overflow-y-auto overscroll-contain pr-0.5">
+                  <div class="grid max-h-[min(22rem,55vh)] grid-cols-3 gap-x-2.5 gap-y-3.5 overflow-y-auto overscroll-contain pr-0.5">
                     @foreach ($navMakes as $makeOpt)
-                      <a href="{{ route('inventory.index', ['make_listing_option_id' => $makeOpt->id]) }}" class="group flex flex-col items-center gap-1 rounded-lg p-1.5 text-center transition hover:bg-white hover:shadow-sm">
+                      <a href="{{ route('inventory.index', ['make_listing_option_id' => $makeOpt->id]) }}" class="group flex flex-col items-center gap-1.5 rounded-lg p-2 text-center transition hover:bg-white hover:shadow-sm">
                         @if (! empty($makeOpt->logo_path))
-                          <span class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-slate-200"><img src="{{ \App\Support\VehicleImageUrl::url($makeOpt->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" /></span>
+                          <span class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-slate-200"><img src="{{ \App\Support\VehicleImageUrl::url($makeOpt->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" /></span>
                         @elseif (! empty(trim((string) ($makeOpt->flag_emoji ?? ''))))
-                          <span class="flex h-9 w-9 items-center justify-center text-xl leading-none" style="font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif" aria-hidden="true">{{ trim((string) $makeOpt->flag_emoji) }}</span>
+                          <span class="flex h-12 w-12 items-center justify-center text-2xl leading-none" style="font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif" aria-hidden="true">{{ trim((string) $makeOpt->flag_emoji) }}</span>
                         @else
-                          <span class="flex h-9 w-9 items-center justify-center rounded-md bg-slate-200 text-[10px] font-black text-zinc-700">{{ strtoupper(\Illuminate\Support\Str::substr($makeOpt->value, 0, 2)) }}</span>
+                          <span class="flex h-12 w-12 items-center justify-center rounded-md bg-slate-200 text-[12px] font-black text-zinc-700">{{ strtoupper(\Illuminate\Support\Str::substr($makeOpt->value, 0, 2)) }}</span>
                         @endif
-                        <span class="line-clamp-2 w-full text-[8px] font-bold uppercase leading-tight text-zinc-700 transition group-hover:text-[#1280DF]">{{ $makeOpt->value }}</span>
+                        <span class="line-clamp-2 w-full text-[10px] font-bold uppercase leading-snug text-zinc-800 transition group-hover:text-[#1280DF] sm:text-[11px]">{{ $makeOpt->value }}</span>
                       </a>
                     @endforeach
                   </div>
@@ -209,12 +209,9 @@
                 </div>
                 <div class="grid grid-cols-1 gap-px bg-slate-200 p-px sm:grid-cols-2">
                   @foreach ($faqNavItems as $faqNav)
-                    <a href="{{ $faqUrl }}#{{ $faqNav['hash'] }}" class="group flex items-start gap-3 bg-white px-4 py-3.5 transition hover:bg-slate-50">
+                    <a href="{{ $faqUrl }}#{{ $faqNav['hash'] }}" class="group flex items-center gap-3 bg-white px-4 py-3.5 transition hover:bg-slate-50">
                       <span class="material-symbols-outlined shrink-0 text-[26px] text-[#ffb129]" aria-hidden="true">{{ $faqNav['icon'] }}</span>
-                      <span class="min-w-0 flex-1">
-                        <span class="block text-[12px] font-bold uppercase tracking-[0.06em] text-zinc-900 transition-colors group-hover:text-[#1280DF]">{{ $faqNav['title'] }}</span>
-                        <span class="mt-1 block text-[11px] font-medium text-zinc-600">{{ __('Jump to this section') }}</span>
-                      </span>
+                      <span class="min-w-0 flex-1 text-[12px] font-bold uppercase leading-snug tracking-[0.06em] text-zinc-900 transition-colors group-hover:text-[#1280DF] sm:text-[13px]">{{ $faqNav['title'] }}</span>
                       <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF] transition group-hover:translate-x-0.5 group-hover:text-[#0a5cb3]">chevron_right</span>
                     </a>
                   @endforeach
