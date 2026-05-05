@@ -66,12 +66,24 @@
     if (chev) chev.classList.remove('rotate-180');
   }
 
+  function closeMobileFaqAccordion() {
+    var panel = document.querySelector('[data-mobile-faq-panel]');
+    var btn = document.querySelector('[data-mobile-faq-toggle]');
+    var chev = document.querySelector('[data-mobile-faq-chevron]');
+    if (panel) panel.classList.add('hidden');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (chev) chev.classList.remove('rotate-180');
+  }
+
   function setMenu(open) {
     if (!menuPanel || !menuOverlay) return;
     menuPanel.classList.toggle('is-open', open);
     menuOverlay.classList.toggle('hidden', !open);
     document.body.classList.toggle('mobile-menu-open', open);
-    if (!open) closeMobileInventoryAccordion();
+    if (!open) {
+      closeMobileInventoryAccordion();
+      closeMobileFaqAccordion();
+    }
   }
 
   if (menuToggle && menuPanel && menuOverlay) {
@@ -132,6 +144,58 @@
         panel.classList.add('hidden');
         if (trigger) trigger.setAttribute('aria-expanded', 'false');
       }
+    });
+  }
+
+  /** Desktop FAQ mega panel (same hover pattern as Inventory). */
+  function bindHeaderFaqDropdown() {
+    var root = document.querySelector('[data-header-faq-dropdown]');
+    var panel = document.querySelector('[data-header-faq-panel]');
+    if (!root || !panel) return;
+
+    var closeTimer = null;
+    var trigger = root.querySelector('[data-header-faq-trigger]');
+
+    function open() {
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+      panel.classList.remove('hidden');
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    }
+
+    function scheduleClose() {
+      if (closeTimer) clearTimeout(closeTimer);
+      closeTimer = setTimeout(function () {
+        panel.classList.add('hidden');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        closeTimer = null;
+      }, 140);
+    }
+
+    root.addEventListener('mouseenter', open);
+    root.addEventListener('mouseleave', scheduleClose);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        panel.classList.add('hidden');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  /** Mobile sidebar: collapsible FAQ knowledge base. */
+  function bindMobileFaqAccordion() {
+    var btn = document.querySelector('[data-mobile-faq-toggle]');
+    var panel = document.querySelector('[data-mobile-faq-panel]');
+    var chev = document.querySelector('[data-mobile-faq-chevron]');
+    if (!btn || !panel) return;
+
+    btn.addEventListener('click', function () {
+      panel.classList.toggle('hidden');
+      var expanded = !panel.classList.contains('hidden');
+      btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      if (chev) chev.classList.toggle('rotate-180', expanded);
     });
   }
 
@@ -1076,7 +1140,9 @@
   bindContactTabs();
   bindHeaderScrollState();
   bindHeaderInventoryDropdown();
+  bindHeaderFaqDropdown();
   bindMobileInventoryAccordion();
+  bindMobileFaqAccordion();
   bindHomeStatsCountUp();
   bindListingHoverGalleries();
   bindSimpleCarousels();

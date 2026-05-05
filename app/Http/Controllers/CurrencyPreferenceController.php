@@ -8,6 +8,7 @@ use App\Support\CurrencyCatalog;
 use App\Support\SiteSettingDefaults;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 
 class CurrencyPreferenceController extends Controller
 {
@@ -55,6 +56,9 @@ class CurrencyPreferenceController extends Controller
             'rates' => $rates,
             'promptDismissed' => (bool) $request->session()->get('currency_selection_prompt_dismissed', false),
         ];
+
+        // Long-lived first-party cookie so selection survives new sessions / edge proxy cases.
+        Cookie::queue('site_currency_pref', $currency, 60 * 24 * 365);
 
         return response()->json([
             'success' => true,

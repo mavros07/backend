@@ -1,14 +1,36 @@
 {{-- Single-path media picker for admin pages (e.g. listing-options). Excluded on admin.pages.edit which binds its own modal logic. --}}
 <script>
 (function () {
+  function mtSyncMakeLogoPreview(tid) {
+    var input = document.getElementById(tid);
+    var wrap = document.querySelector('[data-mt-logo-preview-wrap="' + tid + '"]');
+    var img = document.querySelector('[data-mt-logo-preview="' + tid + '"]');
+    var hasPath = !!(input && String(input.value || '').trim() !== '');
+    if (wrap) wrap.classList.toggle('hidden', !hasPath);
+    if (img && img.tagName === 'IMG') {
+      if (hasPath && input) {
+        var clean = String(input.value || '').replace(/^\/+/, '');
+        img.src = '/' + clean;
+      } else {
+        img.removeAttribute('src');
+      }
+    }
+  }
+
+  function mtSyncMakeLogoPickVisibilityFor(tid) {
+    if (!tid || (tid.indexOf('make_logo_path_') !== 0 && tid !== 'modal_make_logo_path')) return;
+    var input = document.getElementById(tid);
+    var hasPath = !!(input && String(input.value || '').trim() !== '');
+    document.querySelectorAll('.js-mt-media-pick[data-mt-media-target="' + tid + '"]').forEach(function (btn) {
+      btn.classList.toggle('hidden', hasPath);
+    });
+    mtSyncMakeLogoPreview(tid);
+  }
+
   function mtSyncMakeLogoPickVisibility() {
     document.querySelectorAll('.js-mt-media-pick[data-mt-media-target]').forEach(function (btn) {
       var tid = btn.getAttribute('data-mt-media-target');
-      if (!tid || (tid.indexOf('make_logo_path_') !== 0 && tid !== 'modal_make_logo_path')) return;
-      var input = document.getElementById(tid);
-      if (!input) return;
-      var hasPath = String(input.value || '').trim() !== '';
-      btn.classList.toggle('hidden', hasPath);
+      mtSyncMakeLogoPickVisibilityFor(tid);
     });
   }
 
@@ -141,12 +163,7 @@
           input.dispatchEvent(new Event('input', { bubbles: true }));
           input.dispatchEvent(new Event('change', { bubbles: true }));
         }
-        const previewImg = document.querySelector('[data-mt-logo-preview="' + tid + '"]');
-        if (previewImg && previewImg.tagName === 'IMG') {
-          const clean = String(path || '').replace(/^\/+/, '');
-          previewImg.src = '/' + clean;
-        }
-        mtSyncMakeLogoPickVisibility();
+        mtSyncMakeLogoPickVisibilityFor(tid);
         closePickerModal();
       }, true);
     }
@@ -208,11 +225,27 @@
     }
 
     mtSyncMakeLogoPickVisibility();
+
+    document.addEventListener('click', function (e) {
+      var clr = e.target.closest('[data-mt-logo-clear]');
+      if (!clr) return;
+      e.preventDefault();
+      var tid = clr.getAttribute('data-mt-logo-clear');
+      if (!tid) return;
+      var input = document.getElementById(tid);
+      if (input) {
+        input.value = '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      mtSyncMakeLogoPickVisibilityFor(tid);
+    }, true);
+
     document.addEventListener('input', function (e) {
       var t = e.target;
       if (!t || !t.id) return;
       if (t.id === 'modal_make_logo_path' || t.id.indexOf('make_logo_path_') === 0) {
-        mtSyncMakeLogoPickVisibility();
+        mtSyncMakeLogoPickVisibilityFor(t.id);
       }
     }, true);
   });

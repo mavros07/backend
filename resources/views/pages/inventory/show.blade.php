@@ -238,11 +238,11 @@
         <div class="mt-12">
           <h3 class="text-xs font-bold uppercase tracking-widest text-[#ffb129] mb-4">Extra features</h3>
           <h4 class="text-lg font-black uppercase mb-6 font-['Montserrat']">Extra Features</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-y-3">
+          <div class="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2 xl:grid-cols-1 xl:max-w-3xl">
             @forelse (($vehicle->features ?? []) as $feature)
-              <div class="flex min-w-0 items-start gap-3 text-xs">
+              <div class="flex min-w-0 max-w-full items-start gap-3 text-xs">
                 <span class="material-symbols-outlined shrink-0 text-[#ffb129] text-[16px]">check_circle</span>
-                <span class="min-w-0 break-words [overflow-wrap:anywhere]">{{ $feature }}</span>
+                <span class="min-w-0 flex-1 break-words pr-1 text-left leading-relaxed [overflow-wrap:anywhere] [hyphens:auto]">{{ $feature }}</span>
               </div>
             @empty
               <div class="text-xs text-gray-400">No extra features provided.</div>

@@ -144,15 +144,24 @@ class AdminListingOptionController extends Controller
             if (is_array($logoPaths)) {
                 foreach ($logoPaths as $idStr => $path) {
                     $path = trim((string) $path);
-                    if ($path === '' || ! MediaLibraryCatalog::isPublicMediaPath($path)) {
-                        continue;
-                    }
                     $id = (int) $idStr;
                     if (! in_array($id, $allowedIds, true)) {
                         continue;
                     }
                     $option = ListingOption::query()->whereKey($id)->first();
                     if (! $option) {
+                        continue;
+                    }
+                    if ($path === '') {
+                        if ($option->logo_path && str_starts_with((string) $option->logo_path, 'storage/')) {
+                            $rel = substr((string) $option->logo_path, strlen('storage/'));
+                            Storage::disk('public')->delete($rel);
+                        }
+                        $option->update(['logo_path' => null]);
+
+                        continue;
+                    }
+                    if (! MediaLibraryCatalog::isPublicMediaPath($path)) {
                         continue;
                     }
                     if ($option->logo_path && str_starts_with((string) $option->logo_path, 'storage/')) {

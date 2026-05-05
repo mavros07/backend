@@ -147,3 +147,26 @@
     </section>
 </main>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+  function scrollToFaqHash() {
+    var h = window.location.hash || '';
+    if (!/^#cat-[1-4]$/.test(h)) return;
+    var id = h.slice(1);
+    var el = document.getElementById(id);
+    if (!el) return;
+    requestAnimationFrame(function () {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scrollToFaqHash);
+  } else {
+    scrollToFaqHash();
+  }
+  window.addEventListener('hashchange', scrollToFaqHash);
+})();
+</script>
+@endpush

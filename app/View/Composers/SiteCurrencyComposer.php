@@ -25,23 +25,45 @@ class SiteCurrencyComposer
         $promptDismissed = false;
 
         try {
-            if (request()->hasSession()) {
-                $sessionCurrency = strtoupper((string) request()->session()->get('site_currency', $defaultCurrency));
-                if (array_key_exists($sessionCurrency, CurrencyCatalog::supported())) {
-                    $selectedCurrency = $sessionCurrency;
-                }
-                $promptDismissed = (bool) request()->session()->get('currency_selection_prompt_dismissed', false);
+            $cookieRaw = request()->cookie('site_currency_pref');
+            $cookieCurrency = strtoupper(trim((string) ($cookieRaw ?? '')));
+            if ($cookieCurrency !== '' && ! array_key_exists($cookieCurrency, CurrencyCatalog::supported())) {
+                $cookieCurrency = '';
+            }
 
-                /** @var User|null $authUser */
-                $authUser = request()->user();
-                if ($authUser) {
-                    $userCurrency = strtoupper((string) ($authUser->preferred_currency ?? ''));
-                    if (array_key_exists($userCurrency, CurrencyCatalog::supported())) {
-                        $selectedCurrency = $userCurrency;
-                        request()->session()->put('site_currency', $userCurrency);
-                    }
-                    $promptDismissed = (bool) $authUser->currency_selection_prompt_dismissed;
+            /** @var User|null $authUser */
+            $authUser = request()->user();
+            $userCurrency = $authUser ? strtoupper(trim((string) ($authUser->preferred_currency ?? ''))) : '';
+            if ($userCurrency !== '' && ! array_key_exists($userCurrency, CurrencyCatalog::supported())) {
+                $userCurrency = '';
+            }
+
+            if (request()->hasSession()) {
+                $promptDismissed = (bool) request()->session()->get('currency_selection_prompt_dismissed', false);
+            }
+
+            if ($authUser) {
+                $promptDismissed = (bool) $authUser->currency_selection_prompt_dismissed;
+            }
+
+            // Logged-in users: DB preference wins when set; otherwise session, then cookie.
+            if ($userCurrency !== '') {
+                $selectedCurrency = $userCurrency;
+                if (request()->hasSession()) {
+                    request()->session()->put('site_currency', $userCurrency);
                 }
+            } elseif (request()->hasSession()) {
+                if (request()->session()->has('site_currency')) {
+                    $sessionCurrency = strtoupper(trim((string) request()->session()->get('site_currency')));
+                    if ($sessionCurrency !== '' && array_key_exists($sessionCurrency, CurrencyCatalog::supported())) {
+                        $selectedCurrency = $sessionCurrency;
+                    }
+                } elseif ($cookieCurrency !== '') {
+                    $selectedCurrency = $cookieCurrency;
+                    request()->session()->put('site_currency', $cookieCurrency);
+                }
+            } elseif ($cookieCurrency !== '') {
+                $selectedCurrency = $cookieCurrency;
             }
         } catch (\Throwable) {
             $selectedCurrency = $defaultCurrency;

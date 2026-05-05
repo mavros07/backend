@@ -28,6 +28,8 @@
   $nigeriaActive = $inventoryActive && str_contains($qRaw, 'nigeria');
   $foreignActive = $inventoryActive && str_contains($qRaw, 'united states');
   $navMakes = \App\Support\VehicleListingCatalog::activeMakeNavTiles();
+  $faqNavItems = $faqNavItems ?? [];
+  $faqUrl = route('faq');
 @endphp
 
 {{-- Motors dealer-two inspired public header: https://motors.stylemixthemes.com/elementor-dealer-two/ --}}
@@ -69,9 +71,9 @@
           <span data-currency-label>{{ $currencyLabel }}</span>
           <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
         </button>
-        <div class="absolute left-0 top-full z-30 mt-2 hidden min-w-[200px] rounded-md border border-white/10 bg-[#181b1f] p-2 shadow-xl" data-currency-menu>
+        <div class="absolute left-0 top-full z-30 mt-2 hidden min-w-[200px] rounded-md border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-black/5" data-currency-menu>
           @foreach (($currencyUi['supported'] ?? ['USD' => 'US Dollar']) as $code => $name)
-            <button type="button" class="block w-full rounded px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white/80 hover:bg-white/10 hover:text-white" data-currency-option="{{ $code }}">
+            <button type="button" class="block w-full rounded px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-zinc-800 hover:bg-slate-100 hover:text-[#1280DF]" data-currency-option="{{ $code }}">
               {{ $code }} - {{ $name }}
             </button>
           @endforeach
@@ -141,48 +143,48 @@
             <span class="material-symbols-outlined text-[18px] leading-none text-inherit" aria-hidden="true">expand_more</span>
           </a>
           <div class="absolute left-1/2 top-full z-[60] hidden w-max -translate-x-1/2 pt-2" data-header-inventory-panel role="region" aria-label="{{ __('Inventory categories') }}">
-            <div class="flex w-[min(56rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/15 bg-[#191c1e]/95 shadow-2xl shadow-black/40 backdrop-blur-xl ring-1 ring-white/5">
-              <div class="flex min-w-0 w-1/2 flex-col border-r border-white/10">
-                <div class="grid flex-1 gap-px bg-white/10 p-px">
-                  <a href="{{ $inventoryNigeriaUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $nigeriaActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
+            <div class="flex w-[min(56rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5">
+              <div class="flex min-w-0 w-1/2 flex-col border-r border-slate-200">
+                <div class="grid flex-1 gap-px bg-slate-200 p-px">
+                  <a href="{{ $inventoryNigeriaUrl }}" class="group flex items-start justify-between gap-3 bg-slate-50 px-4 py-3 transition hover:bg-slate-100 {{ $nigeriaActive ? 'ring-1 ring-inset ring-[#1280DF]/40' : '' }}">
                     <div>
-                      <span class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]">
-                        <img src="https://flagcdn.com/w40/ng.png" srcset="https://flagcdn.com/w80/ng.png 2x" width="28" height="19" alt="" class="h-6 w-auto shrink-0 rounded-sm object-cover shadow-sm ring-1 ring-white/20" decoding="async" loading="lazy" />
+                      <span class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-zinc-900 transition-colors group-hover:text-[#1280DF]">
+                        <img src="https://flagcdn.com/w40/ng.png" srcset="https://flagcdn.com/w80/ng.png 2x" width="28" height="19" alt="" class="h-6 w-auto shrink-0 rounded-sm object-cover shadow-sm ring-1 ring-slate-200" decoding="async" loading="lazy" />
                         {{ __('Nigerian Used') }}
                       </span>
-                      <p class="mt-1 text-xs font-medium text-white/50">{{ __('Locally sourced Nigerian-used listings.') }}</p>
+                      <p class="mt-1 text-xs font-medium text-zinc-600">{{ __('Locally sourced Nigerian-used listings.') }}</p>
                     </div>
-                    <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
+                    <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF] transition group-hover:translate-x-0.5 group-hover:text-[#0a5cb3]">chevron_right</span>
                   </a>
-                  <a href="{{ $inventoryForeignUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $foreignActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
+                  <a href="{{ $inventoryForeignUrl }}" class="group flex items-start justify-between gap-3 bg-slate-50 px-4 py-3 transition hover:bg-slate-100 {{ $foreignActive ? 'ring-1 ring-inset ring-[#1280DF]/40' : '' }}">
                     <div>
-                      <span class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]">
-                        <img src="https://flagcdn.com/w40/us.png" srcset="https://flagcdn.com/w80/us.png 2x" width="28" height="19" alt="" class="h-6 w-auto shrink-0 rounded-sm object-cover shadow-sm ring-1 ring-white/20" decoding="async" loading="lazy" />
+                      <span class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-zinc-900 transition-colors group-hover:text-[#1280DF]">
+                        <img src="https://flagcdn.com/w40/us.png" srcset="https://flagcdn.com/w80/us.png 2x" width="28" height="19" alt="" class="h-6 w-auto shrink-0 rounded-sm object-cover shadow-sm ring-1 ring-slate-200" decoding="async" loading="lazy" />
                         {{ __('Foreign Used') }}
                       </span>
-                      <p class="mt-1 text-xs font-medium text-white/50">{{ __('Foreign-used imports and international stock.') }}</p>
+                      <p class="mt-1 text-xs font-medium text-zinc-600">{{ __('Foreign-used imports and international stock.') }}</p>
                     </div>
-                    <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
+                    <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF] transition group-hover:translate-x-0.5 group-hover:text-[#0a5cb3]">chevron_right</span>
                   </a>
                 </div>
-                <div class="border-t border-white/10 bg-white/[0.04] px-4 py-3">
-                  <a href="{{ $inventoryUrl }}" class="inline-flex items-center gap-1 text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#1280DF] hover:text-white">{{ __('View full inventory') }}<span class="material-symbols-outlined text-base">arrow_forward</span></a>
+                <div class="border-t border-slate-200 bg-slate-50/90 px-4 py-3">
+                  <a href="{{ $inventoryUrl }}" class="inline-flex items-center gap-1 text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#1280DF] transition-colors hover:text-[#0a5cb3]">{{ __('View full inventory') }}<span class="material-symbols-outlined text-base">arrow_forward</span></a>
                 </div>
               </div>
               @if ($navMakes->isNotEmpty())
-                <div class="flex min-w-0 w-1/2 flex-col bg-black/25 p-3 sm:p-4" aria-label="{{ __('Shop by make') }}">
-                  <p class="mb-3 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white/45">{{ __('Shop by make') }}</p>
-                  <div class="grid grid-cols-3 gap-x-2 gap-y-3">
+                <div class="flex min-w-0 w-1/2 flex-col bg-slate-50 p-3 sm:p-4" aria-label="{{ __('Shop by make') }}">
+                  <p class="mb-3 text-[10px] font-extrabold uppercase tracking-[0.14em] text-zinc-500">{{ __('Shop by make') }}</p>
+                  <div class="grid max-h-[min(22rem,55vh)] grid-cols-3 gap-x-2 gap-y-3 overflow-y-auto overscroll-contain pr-0.5">
                     @foreach ($navMakes as $makeOpt)
-                      <a href="{{ route('inventory.index', ['make_listing_option_id' => $makeOpt->id]) }}" class="group flex flex-col items-center gap-1 rounded-lg p-1.5 text-center transition hover:bg-white/10">
+                      <a href="{{ route('inventory.index', ['make_listing_option_id' => $makeOpt->id]) }}" class="group flex flex-col items-center gap-1 rounded-lg p-1.5 text-center transition hover:bg-white hover:shadow-sm">
                         @if (! empty($makeOpt->logo_path))
-                          <span class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md bg-white/[0.06] ring-1 ring-white/10"><img src="{{ \App\Support\VehicleImageUrl::url($makeOpt->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" /></span>
+                          <span class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-slate-200"><img src="{{ \App\Support\VehicleImageUrl::url($makeOpt->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" /></span>
                         @elseif (! empty(trim((string) ($makeOpt->flag_emoji ?? ''))))
                           <span class="flex h-9 w-9 items-center justify-center text-xl leading-none" style="font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif" aria-hidden="true">{{ trim((string) $makeOpt->flag_emoji) }}</span>
                         @else
-                          <span class="flex h-9 w-9 items-center justify-center rounded-md bg-white/10 text-[10px] font-black text-white/60">{{ strtoupper(\Illuminate\Support\Str::substr($makeOpt->value, 0, 2)) }}</span>
+                          <span class="flex h-9 w-9 items-center justify-center rounded-md bg-slate-200 text-[10px] font-black text-zinc-700">{{ strtoupper(\Illuminate\Support\Str::substr($makeOpt->value, 0, 2)) }}</span>
                         @endif
-                        <span class="line-clamp-2 w-full text-[8px] font-bold uppercase leading-tight text-white/70 transition group-hover:text-white">{{ $makeOpt->value }}</span>
+                        <span class="line-clamp-2 w-full text-[8px] font-bold uppercase leading-tight text-zinc-700 transition group-hover:text-[#1280DF]">{{ $makeOpt->value }}</span>
                       </a>
                     @endforeach
                   </div>
@@ -193,7 +195,39 @@
         </div>
 
         <a href="{{ route('about') }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ request()->routeIs('about') ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">{{ __('About') }}</a>
-        <a href="{{ route('faq') }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ request()->routeIs('faq') ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">{{ __('FAQ') }}</a>
+
+        @if (! empty($faqNavItems))
+          <div class="pointer-events-auto relative flex items-end" data-header-faq-dropdown>
+            <a href="{{ $faqUrl }}" data-header-faq-trigger data-header-nav-link class="inline-flex items-center gap-0.5 border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ request()->routeIs('faq') ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}" aria-expanded="false" aria-haspopup="true">
+              <span>{{ __('FAQ') }}</span>
+              <span class="material-symbols-outlined text-[18px] leading-none text-inherit" aria-hidden="true">expand_more</span>
+            </a>
+            <div class="absolute left-1/2 top-full z-[60] hidden w-max -translate-x-1/2 pt-2" data-header-faq-panel role="region" aria-label="{{ __('Knowledge base') }}">
+              <div class="w-[min(42rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5">
+                <div class="border-b border-slate-200 bg-slate-50 px-4 py-3">
+                  <p class="text-[10px] font-extrabold uppercase tracking-[0.14em] text-zinc-500">{{ __('Knowledge base') }}</p>
+                </div>
+                <div class="grid grid-cols-1 gap-px bg-slate-200 p-px sm:grid-cols-2">
+                  @foreach ($faqNavItems as $faqNav)
+                    <a href="{{ $faqUrl }}#{{ $faqNav['hash'] }}" class="group flex items-start gap-3 bg-white px-4 py-3.5 transition hover:bg-slate-50">
+                      <span class="material-symbols-outlined shrink-0 text-[26px] text-[#ffb129]" aria-hidden="true">{{ $faqNav['icon'] }}</span>
+                      <span class="min-w-0 flex-1">
+                        <span class="block text-[12px] font-bold uppercase tracking-[0.06em] text-zinc-900 transition-colors group-hover:text-[#1280DF]">{{ $faqNav['title'] }}</span>
+                        <span class="mt-1 block text-[11px] font-medium text-zinc-600">{{ __('Jump to this section') }}</span>
+                      </span>
+                      <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF] transition group-hover:translate-x-0.5 group-hover:text-[#0a5cb3]">chevron_right</span>
+                    </a>
+                  @endforeach
+                </div>
+                <div class="border-t border-slate-200 bg-slate-50/90 px-4 py-3">
+                  <a href="{{ $faqUrl }}" class="inline-flex items-center gap-1 text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#1280DF] transition-colors hover:text-[#0a5cb3]">{{ __('Open FAQ page') }}<span class="material-symbols-outlined text-base">arrow_forward</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        @else
+          <a href="{{ $faqUrl }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ request()->routeIs('faq') ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">{{ __('FAQ') }}</a>
+        @endif
         <a href="{{ route('contact') }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ request()->routeIs('contact') ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">{{ __('Contact') }}</a>
       </nav>
 
@@ -225,52 +259,52 @@
 </header>
 
 <div class="fixed inset-0 z-[55] hidden bg-black/55 xl:hidden" data-mobile-menu-overlay aria-hidden="true"></div>
-<div class="fixed right-0 top-0 z-[60] flex h-full w-[min(22rem,calc(100vw-2rem))] translate-x-full flex-col bg-[#232628] shadow-2xl transition-transform duration-200 ease-out xl:hidden" data-mobile-menu-panel id="site-mobile-nav">
-  <div class="flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-4">
-    <span class="font-headline text-lg font-black italic text-white">{{ strtolower($brandName) }}</span>
-    <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md text-white/80 hover:bg-white/10 hover:text-white" data-mobile-menu-close aria-label="{{ __('Close') }}">
+<div class="fixed right-0 top-0 z-[60] flex h-full min-h-0 w-[min(22rem,calc(100vw-2rem))] translate-x-full flex-col bg-white shadow-2xl ring-1 ring-black/5 transition-transform duration-200 ease-out xl:hidden" data-mobile-menu-panel id="site-mobile-nav">
+  <div class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4">
+    <span class="font-headline text-lg font-black italic text-zinc-900">{{ strtolower($brandName) }}</span>
+    <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md text-zinc-600 hover:bg-slate-100 hover:text-zinc-900" data-mobile-menu-close aria-label="{{ __('Close') }}">
       <span class="material-symbols-outlined text-2xl">close</span>
     </button>
   </div>
-  <nav class="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-4" aria-label="{{ __('Mobile') }}">
-    <div class="border-b border-white/10 pb-4">
-      <a href="{{ route('compare') }}" class="flex items-center justify-between rounded-md border border-white/15 bg-white/5 px-3 py-3 text-sm font-black uppercase tracking-[0.06em] text-white transition hover:bg-white/10">
+  <nav class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden px-4 py-4 text-zinc-800" aria-label="{{ __('Mobile') }}">
+    <div class="shrink-0 border-b border-slate-200 pb-4">
+      <a href="{{ route('compare') }}" class="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-black uppercase tracking-[0.06em] text-zinc-900 transition hover:border-slate-300 hover:bg-slate-100">
         <span class="inline-flex items-center gap-2">
           <span class="material-symbols-outlined text-[22px] text-[#1280DF]">speed</span>
           {{ __('Compare') }}
         </span>
-        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1280DF] px-2 text-xs font-extrabold">{{ $compareCount }}</span>
+        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1280DF] px-2 text-xs font-extrabold text-white">{{ $compareCount }}</span>
       </a>
     </div>
 
-    <a href="{{ route('home') }}" class="rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('Home') }}</a>
-    <div class="overflow-hidden rounded-sm border border-white/10 bg-white/[0.03]">
-      <button type="button" class="flex w-full items-center justify-between px-3 py-3.5 text-left text-sm font-bold uppercase tracking-[0.06em] text-white transition hover:bg-white/10" data-mobile-inventory-toggle aria-expanded="false" aria-controls="mobile-inventory-subnav">
+    <a href="{{ route('home') }}" class="shrink-0 rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-zinc-800 transition hover:bg-slate-100 hover:text-[#1280DF]">{{ __('Home') }}</a>
+    <div class="shrink-0 rounded-sm border border-slate-200 bg-slate-50/80">
+      <button type="button" class="flex w-full items-center justify-between px-3 py-3.5 text-left text-sm font-bold uppercase tracking-[0.06em] text-zinc-900 transition hover:bg-slate-100" data-mobile-inventory-toggle aria-expanded="false" aria-controls="mobile-inventory-subnav">
         <span>{{ __('Inventory') }}</span>
-        <span class="material-symbols-outlined text-[22px] text-white/70 transition-transform duration-200" data-mobile-inventory-chevron aria-hidden="true">expand_more</span>
+        <span class="material-symbols-outlined text-[22px] text-zinc-500 transition-transform duration-200" data-mobile-inventory-chevron aria-hidden="true">expand_more</span>
       </button>
-      <div id="mobile-inventory-subnav" class="hidden border-t border-white/10" data-mobile-inventory-panel>
-        <a href="{{ $inventoryNigeriaUrl }}" class="flex items-center gap-2 border-b border-white/5 px-4 py-3 text-xs font-bold uppercase tracking-[0.06em] text-white/80 transition hover:bg-white/10 hover:text-white">
-          <img src="https://flagcdn.com/w40/ng.png" width="24" height="16" alt="" class="h-4 w-auto shrink-0 rounded-sm object-cover ring-1 ring-white/15" decoding="async" loading="lazy" />{{ __('Nigerian Used') }}
+      <div id="mobile-inventory-subnav" class="hidden max-h-[min(78dvh,36rem)] overflow-y-auto overscroll-y-contain border-t border-slate-200 bg-white" data-mobile-inventory-panel>
+        <a href="{{ $inventoryNigeriaUrl }}" class="flex items-center gap-2 border-b border-slate-100 px-4 py-3 text-xs font-bold uppercase tracking-[0.06em] text-zinc-800 transition hover:bg-slate-50 hover:text-[#1280DF]">
+          <img src="https://flagcdn.com/w40/ng.png" width="24" height="16" alt="" class="h-4 w-auto shrink-0 rounded-sm object-cover ring-1 ring-slate-200" decoding="async" loading="lazy" />{{ __('Nigerian Used') }}
         </a>
-        <a href="{{ $inventoryForeignUrl }}" class="flex items-center gap-2 border-b border-white/5 px-4 py-3 text-xs font-bold uppercase tracking-[0.06em] text-white/80 transition hover:bg-white/10 hover:text-white">
-          <img src="https://flagcdn.com/w40/us.png" width="24" height="16" alt="" class="h-4 w-auto shrink-0 rounded-sm object-cover ring-1 ring-white/15" decoding="async" loading="lazy" />{{ __('Foreign Used') }}
+        <a href="{{ $inventoryForeignUrl }}" class="flex items-center gap-2 border-b border-slate-100 px-4 py-3 text-xs font-bold uppercase tracking-[0.06em] text-zinc-800 transition hover:bg-slate-50 hover:text-[#1280DF]">
+          <img src="https://flagcdn.com/w40/us.png" width="24" height="16" alt="" class="h-4 w-auto shrink-0 rounded-sm object-cover ring-1 ring-slate-200" decoding="async" loading="lazy" />{{ __('Foreign Used') }}
         </a>
-        <a href="{{ $inventoryUrl }}" class="block bg-white/[0.03] px-4 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#1280DF] transition hover:bg-white/10 hover:text-white">{{ __('View full inventory') }}</a>
+        <a href="{{ $inventoryUrl }}" class="block border-b border-slate-100 bg-slate-50/80 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#1280DF] transition hover:bg-slate-100 hover:text-[#0a5cb3]">{{ __('View full inventory') }}</a>
         @if ($navMakes->isNotEmpty())
-          <div class="border-t border-white/10 bg-[#1a1d20]">
-            <p class="px-4 pt-3 pb-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white/45">{{ __('Shop by make') }}</p>
+          <div class="border-t border-slate-200 bg-slate-50">
+            <p class="bg-slate-50 px-4 pb-1 pt-3 text-[10px] font-extrabold uppercase tracking-[0.14em] text-zinc-500">{{ __('Shop by make') }}</p>
             <div class="flex flex-col pb-2">
               @foreach ($navMakes as $makeOpt)
-                <a href="{{ route('inventory.index', ['make_listing_option_id' => $makeOpt->id]) }}" class="flex items-center gap-3 border-t border-white/5 px-4 py-2.5 transition hover:bg-white/10">
+                <a href="{{ route('inventory.index', ['make_listing_option_id' => $makeOpt->id]) }}" class="group flex items-center gap-3 border-t border-slate-100 px-4 py-2.5 transition hover:bg-white">
                   @if (! empty($makeOpt->logo_path))
-                    <span class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white/[0.06] ring-1 ring-white/10"><img src="{{ \App\Support\VehicleImageUrl::url($makeOpt->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" /></span>
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-slate-200"><img src="{{ \App\Support\VehicleImageUrl::url($makeOpt->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" /></span>
                   @elseif (! empty(trim((string) ($makeOpt->flag_emoji ?? ''))))
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center text-lg leading-none" style="font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif" aria-hidden="true">{{ trim((string) $makeOpt->flag_emoji) }}</span>
                   @else
-                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white/10 text-[10px] font-black text-white/60">{{ strtoupper(\Illuminate\Support\Str::substr($makeOpt->value, 0, 2)) }}</span>
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-200 text-[10px] font-black text-zinc-700">{{ strtoupper(\Illuminate\Support\Str::substr($makeOpt->value, 0, 2)) }}</span>
                   @endif
-                  <span class="text-left text-[11px] font-bold uppercase tracking-[0.05em] text-white/85">{{ $makeOpt->value }}</span>
+                  <span class="text-left text-[11px] font-bold uppercase tracking-[0.05em] text-zinc-800 transition group-hover:text-[#1280DF]">{{ $makeOpt->value }}</span>
                 </a>
               @endforeach
             </div>
@@ -278,19 +312,37 @@
         @endif
       </div>
     </div>
-    <a href="{{ route('about') }}" class="rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('About') }}</a>
-    <a href="{{ route('faq') }}" class="rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('FAQ') }}</a>
-    <a href="{{ route('contact') }}" class="rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('Contact') }}</a>
+    <a href="{{ route('about') }}" class="shrink-0 rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-zinc-800 transition hover:bg-slate-100 hover:text-[#1280DF]">{{ __('About') }}</a>
+    @if (! empty($faqNavItems))
+      <div class="shrink-0 rounded-sm border border-slate-200 bg-slate-50/80">
+        <button type="button" class="flex w-full items-center justify-between px-3 py-3.5 text-left text-sm font-bold uppercase tracking-[0.06em] text-zinc-900 transition hover:bg-slate-100" data-mobile-faq-toggle aria-expanded="false" aria-controls="mobile-faq-subnav">
+          <span>{{ __('FAQ') }}</span>
+          <span class="material-symbols-outlined text-[22px] text-zinc-500 transition-transform duration-200" data-mobile-faq-chevron aria-hidden="true">expand_more</span>
+        </button>
+        <div id="mobile-faq-subnav" class="hidden max-h-[min(60vh,28rem)] overflow-y-auto overscroll-contain border-t border-slate-200 bg-white" data-mobile-faq-panel>
+          @foreach ($faqNavItems as $faqNav)
+            <a href="{{ $faqUrl }}#{{ $faqNav['hash'] }}" class="flex items-center gap-3 border-b border-slate-100 px-4 py-3 text-xs font-bold uppercase tracking-[0.06em] text-zinc-800 transition hover:bg-slate-50 hover:text-[#1280DF]">
+              <span class="material-symbols-outlined shrink-0 text-[22px] text-[#ffb129]" aria-hidden="true">{{ $faqNav['icon'] }}</span>
+              <span class="text-left">{{ $faqNav['title'] }}</span>
+            </a>
+          @endforeach
+          <a href="{{ $faqUrl }}" class="block bg-slate-50/80 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#1280DF] transition hover:bg-slate-100 hover:text-[#0a5cb3]">{{ __('Full help center') }}</a>
+        </div>
+      </div>
+    @else
+      <a href="{{ $faqUrl }}" class="shrink-0 rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-zinc-800 transition hover:bg-slate-100 hover:text-[#1280DF]">{{ __('FAQ') }}</a>
+    @endif
+    <a href="{{ route('contact') }}" class="shrink-0 rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-zinc-800 transition hover:bg-slate-100 hover:text-[#1280DF]">{{ __('Contact') }}</a>
 
-    <div class="mt-5 border-t border-white/10 pt-4">
+    <div class="mt-auto shrink-0 border-t border-slate-200 pt-4">
       <div class="flex flex-col gap-2">
-        <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="flex h-11 items-center justify-center rounded border border-white/15 bg-white/[0.06] px-3 text-sm font-extrabold uppercase tracking-[0.07em] text-white/90 backdrop-blur-sm transition hover:bg-white/10">{{ __('My account') }}</a>
+        <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="flex h-11 items-center justify-center rounded border border-slate-200 bg-zinc-900 px-3 text-sm font-extrabold uppercase tracking-[0.07em] text-white transition hover:bg-zinc-800">{{ __('My account') }}</a>
         @auth
-          <div class="border-t border-white/10 pt-2">
+          <div class="border-t border-slate-200 pt-2">
             <form method="post" action="{{ route('logout') }}">
               @csrf
-              <button type="submit" class="w-full rounded-sm border border-white/10 px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
-                <span>{{ __('Logout') }}</span><span class="material-symbols-outlined text-xl">logout</span>
+              <button type="submit" class="flex w-full items-center justify-between rounded-sm border border-slate-200 px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-zinc-800 transition hover:bg-slate-100">
+                <span>{{ __('Logout') }}</span><span class="material-symbols-outlined text-xl text-zinc-600">logout</span>
               </button>
             </form>
           </div>
@@ -299,12 +351,12 @@
     </div>
 
     @if ($address !== '' || $phone !== '')
-      <div class="mt-5 border-t border-white/10 pt-4 text-xs text-white/70">
+      <div class="shrink-0 border-t border-slate-200 pt-4 text-xs text-zinc-600">
         @if ($address !== '')
           <p class="line-clamp-2">{{ $address }}</p>
         @endif
         @if ($phone !== '')
-          <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone) }}" class="mt-2 inline-flex text-sm font-semibold text-[#4ea3ff] hover:text-white">{{ $phone }}</a>
+          <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone) }}" class="mt-2 inline-flex text-sm font-semibold text-[#1280DF] hover:text-[#0a5cb3]">{{ $phone }}</a>
         @endif
       </div>
     @endif
