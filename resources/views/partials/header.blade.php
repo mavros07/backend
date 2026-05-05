@@ -20,6 +20,14 @@
   $socialYoutube = trim((string) ($site['social_youtube'] ?? ''));
   $compareCount = \App\Support\Compare::count();
   $isHome = request()->routeIs('home') || request()->routeIs('faq') || request()->routeIs('about');
+  $inventoryUrl = route('inventory.index');
+  $inventoryNigeriaUrl = route('inventory.index', ['q' => 'Nigeria']);
+  $inventoryForeignUrl = route('inventory.index', ['q' => 'United States']);
+  $inventoryActive = request()->routeIs('inventory.index');
+  $qRaw = strtolower((string) request('q', ''));
+  $inventoryMegaActive = $inventoryActive && $qRaw === '';
+  $nigeriaActive = $inventoryActive && str_contains($qRaw, 'nigeria');
+  $foreignActive = $inventoryActive && str_contains($qRaw, 'united states');
 @endphp
 
 {{-- Motors dealer-two inspired public header: https://motors.stylemixthemes.com/elementor-dealer-two/ --}}
@@ -36,7 +44,9 @@
       [data-site-header].is-home-header.is-scrolled [data-header-menu-icon] { color: #111827 !important; }
       [data-site-header].is-home-header.is-scrolled [data-header-nav-link] { color: rgba(17, 24, 39, 0.92) !important; }
       [data-site-header].is-home-header.is-scrolled [data-header-nav-link]:hover { color: #111827 !important; }
-      [data-site-header].is-home-header.is-scrolled [data-header-menu-button] { border-color: rgba(15, 23, 42, 0.2) !important; }
+      [data-site-header].is-home-header.is-scrolled [data-header-menu-button],
+      [data-site-header].is-home-header.is-scrolled [data-header-account-link] { border-color: rgba(15, 23, 42, 0.2) !important; }
+      [data-site-header].is-home-header.is-scrolled [data-header-account-link] { color: #111827 !important; background-color: rgba(255, 255, 255, 0.35) !important; }
     </style>
   @endif
   @if (request()->routeIs('about'))
@@ -47,7 +57,9 @@
       [data-site-header].is-home-header [data-header-menu-icon] { color: #111827 !important; }
       [data-site-header].is-home-header [data-header-nav-link] { color: rgba(17, 24, 39, 0.92) !important; }
       [data-site-header].is-home-header [data-header-nav-link]:hover { color: #111827 !important; }
-      [data-site-header].is-home-header [data-header-menu-button] { border-color: rgba(15, 23, 42, 0.2) !important; }
+      [data-site-header].is-home-header [data-header-menu-button],
+      [data-site-header].is-home-header [data-header-account-link] { border-color: rgba(15, 23, 42, 0.2) !important; }
+      [data-site-header].is-home-header [data-header-account-link] { color: #111827 !important; background-color: rgba(255, 255, 255, 0.28) !important; }
     </style>
   @endif
   <div class="h-10 border-b border-white/10 bg-[#232628]">
@@ -120,37 +132,54 @@
       </a>
 
       <nav class="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-4 xl:flex xl:px-2 w-max" aria-label="{{ __('Primary') }}">
-        @foreach ([
-          ['route' => 'home', 'label' => __('Home')],
-          ['route' => 'inventory.index', 'label' => __('Inventory')],
-          ['url' => route('inventory.index', ['q' => 'Nigeria']), 'label' => __('Nigerian Used')],
-          ['url' => route('inventory.index', ['q' => 'United States']), 'label' => __('Foreign Used')],
-          ['route' => 'about', 'label' => __('About')],
-          ['route' => 'faq', 'label' => __('FAQ')],
-          ['route' => 'contact', 'label' => __('Contact')],
-        ] as $item)
-          @php
-            $r = $item['route'] ?? null;
-            $url = $item['url'] ?? route($r);
-            if ($r) {
-                $active = match ($r) {
-                  'home' => request()->routeIs('home'),
-                  'inventory.index' => request()->routeIs('inventory.index'),
-                  default => request()->routeIs($r),
-                };
-            } else {
-                $active = str_contains(urldecode(request()->fullUrl()), urldecode($url));
-            }
-          @endphp
-          <a href="{{ $url }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ $active ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">
-            <span>{{ $item['label'] }}</span>
+        <a href="{{ route('home') }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ request()->routeIs('home') ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">{{ __('Home') }}</a>
+
+        {{-- Inventory mega dropdown (Nigerian / Foreign live under here) --}}
+        <div class="pointer-events-auto relative flex items-end" data-header-inventory-dropdown>
+          <a href="{{ $inventoryUrl }}" data-header-inventory-trigger data-header-nav-link class="inline-flex items-center gap-0.5 border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ $inventoryActive ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}" aria-expanded="false" aria-haspopup="true">
+            <span>{{ __('Inventory') }}</span>
+            <span class="material-symbols-outlined text-[18px] leading-none text-inherit" aria-hidden="true">expand_more</span>
           </a>
-        @endforeach
+          <div class="absolute left-1/2 top-full z-[60] hidden w-max -translate-x-1/2 pt-2" data-header-inventory-panel role="region" aria-label="{{ __('Inventory categories') }}">
+            <div class="w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-white/15 bg-[#191c1e]/95 shadow-2xl shadow-black/40 backdrop-blur-xl ring-1 ring-white/5">
+              <div class="grid gap-px bg-white/10 p-px">
+                <a href="{{ $inventoryUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $inventoryMegaActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
+                  <div>
+                    <span class="text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]">{{ __('All inventory') }}</span>
+                    <p class="mt-1 text-xs font-medium text-white/50">{{ __('Browse every available vehicle.') }}</p>
+                  </div>
+                  <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
+                </a>
+                <a href="{{ $inventoryNigeriaUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $nigeriaActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
+                  <div>
+                    <span class="text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]">{{ __('Nigerian Used') }}</span>
+                    <p class="mt-1 text-xs font-medium text-white/50">{{ __('Locally sourced Nigerian-used listings.') }}</p>
+                  </div>
+                  <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
+                </a>
+                <a href="{{ $inventoryForeignUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $foreignActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
+                  <div>
+                    <span class="text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]">{{ __('Foreign Used') }}</span>
+                    <p class="mt-1 text-xs font-medium text-white/50">{{ __('Foreign-used imports and international stock.') }}</p>
+                  </div>
+                  <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
+                </a>
+              </div>
+              <div class="border-t border-white/10 bg-white/[0.04] px-4 py-3">
+                <a href="{{ $inventoryUrl }}" class="inline-flex items-center gap-1 text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#1280DF] hover:text-white">{{ __('View full inventory') }}<span class="material-symbols-outlined text-base">arrow_forward</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <a href="{{ route('about') }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ request()->routeIs('about') ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">{{ __('About') }}</a>
+        <a href="{{ route('faq') }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ request()->routeIs('faq') ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">{{ __('FAQ') }}</a>
+        <a href="{{ route('contact') }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ request()->routeIs('contact') ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">{{ __('Contact') }}</a>
       </nav>
 
-      <div class="relative z-20 flex shrink-0 items-center gap-2 sm:gap-4">
-        {{-- Order: Compare (left), then My Account (guest → auth page, user → dashboard), then hamburger on small screens --}}
-        <a href="{{ route('compare') }}" class="group inline-flex items-center gap-2" title="{{ __('Compare vehicles') }}">
+      <div class="relative z-20 flex shrink-0 items-center justify-end gap-2 sm:gap-4">
+        {{-- Compare + My account: desktop xl+ only (mobile finds them inside the sidebar after nav links). --}}
+        <a href="{{ route('compare') }}" class="group hidden items-center gap-2 xl:inline-flex" title="{{ __('Compare vehicles') }}">
           <span data-header-action-text class="hidden text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF] xl:inline">{{ __('Compare') }}</span>
           <span class="relative ml-0 inline-flex">
             <span data-header-icon class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF] xl:text-[24px]">speed</span>
@@ -161,7 +190,7 @@
         @php
           $myAccountUrl = auth()->check() ? route('dashboard') : route('login');
         @endphp
-        <a href="{{ $myAccountUrl }}" class="inline-flex min-h-[40px] items-center justify-center rounded-md bg-gradient-to-r from-[#c98712] via-[#ffb129] to-[#ffd078] px-4 py-2 text-center text-[11px] font-black uppercase tracking-[0.07em] text-neutral-900 shadow-sm ring-1 ring-black/15 transition hover:brightness-105 active:brightness-95" title="{{ __('My account') }}">
+        <a href="{{ $myAccountUrl }}" data-header-account-link class="hidden h-9 items-center justify-center rounded border border-white/15 bg-white/[0.06] px-3.5 text-center text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] text-white/90 shadow-none backdrop-blur-sm transition hover:bg-white/10 xl:inline-flex" title="{{ __('My account') }}">
           {{ __('My account') }}
         </a>
 
@@ -182,40 +211,37 @@
     </button>
   </div>
   <nav class="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-4" aria-label="{{ __('Mobile') }}">
-    <div class="mb-3 flex flex-col gap-2">
-      <a href="{{ route('compare') }}" class="flex items-center justify-between rounded-md border border-white/15 bg-white/5 px-3 py-3 text-sm font-black uppercase tracking-[0.06em] text-white transition hover:bg-white/10">
-        <span class="inline-flex items-center gap-2">
-          <span class="material-symbols-outlined text-[22px] text-[#1280DF]">speed</span>
-          {{ __('Compare') }}
-        </span>
-        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1280DF] px-2 text-xs font-extrabold">{{ $compareCount }}</span>
-      </a>
-      <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="flex min-h-[44px] items-center justify-center rounded-md bg-gradient-to-r from-[#c98712] via-[#ffb129] to-[#ffd078] px-3 py-3 text-sm font-black uppercase tracking-[0.06em] text-neutral-900 shadow ring-1 ring-black/15">{{ __('My account') }}</a>
+    <a href="{{ route('home') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('Home') }}</a>
+    <div class="rounded-sm border border-white/10 bg-white/[0.03] px-2 py-2">
+      <a href="{{ $inventoryUrl }}" class="block px-2 py-2 text-sm font-bold uppercase tracking-[0.06em] text-white transition hover:bg-white/10">{{ __('Inventory') }}</a>
+      <a href="{{ $inventoryNigeriaUrl }}" class="block px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white/75 transition hover:bg-white/10 hover:text-white">{{ __('Nigerian Used') }}</a>
+      <a href="{{ $inventoryForeignUrl }}" class="block px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white/75 transition hover:bg-white/10 hover:text-white">{{ __('Foreign Used') }}</a>
     </div>
-    @foreach ([
-      ['route' => 'home', 'label' => __('Home')],
-      ['route' => 'inventory.index', 'label' => __('Inventory')],
-      ['url' => route('inventory.index', ['q' => 'Nigeria']), 'label' => __('Nigerian Used')],
-      ['url' => route('inventory.index', ['q' => 'United States']), 'label' => __('Foreign Used')],
-      ['route' => 'about', 'label' => __('About')],
-      ['route' => 'faq', 'label' => __('FAQ')],
-      ['route' => 'contact', 'label' => __('Contact')],
-    ] as $item)
-      @php
-        $url = $item['url'] ?? route($item['route']);
-      @endphp
-      <a href="{{ $url }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ $item['label'] }}</a>
-    @endforeach
-    @auth
-      <div class="mt-4 border-t border-white/10 pt-4">
-        <form method="post" action="{{ route('logout') }}">
-          @csrf
-          <button type="submit" class="w-full rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
-            <span>{{ __('Logout') }}</span><span class="material-symbols-outlined text-xl">logout</span>
-          </button>
-        </form>
+    <a href="{{ route('about') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('About') }}</a>
+    <a href="{{ route('faq') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('FAQ') }}</a>
+    <a href="{{ route('contact') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('Contact') }}</a>
+
+    <div class="mt-5 border-t border-white/10 pt-4">
+      <div class="flex flex-col gap-2">
+        <a href="{{ route('compare') }}" class="flex items-center justify-between rounded-md border border-white/15 bg-white/5 px-3 py-3 text-sm font-black uppercase tracking-[0.06em] text-white transition hover:bg-white/10">
+          <span class="inline-flex items-center gap-2">
+            <span class="material-symbols-outlined text-[22px] text-[#1280DF]">speed</span>
+            {{ __('Compare') }}
+          </span>
+          <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1280DF] px-2 text-xs font-extrabold">{{ $compareCount }}</span>
+        </a>
+        <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="flex h-11 items-center justify-center rounded border border-white/15 bg-white/[0.06] px-3 text-sm font-extrabold uppercase tracking-[0.07em] text-white/90 backdrop-blur-sm transition hover:bg-white/10">{{ __('My account') }}</a>
+        @auth
+          <form method="post" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="w-full rounded-sm border border-white/10 px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
+              <span>{{ __('Logout') }}</span><span class="material-symbols-outlined text-xl">logout</span>
+            </button>
+          </form>
+        @endauth
       </div>
-    @endauth
+    </div>
+
     @if ($address !== '' || $phone !== '')
       <div class="mt-5 border-t border-white/10 pt-4 text-xs text-white/70">
         @if ($address !== '')

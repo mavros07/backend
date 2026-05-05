@@ -37,6 +37,43 @@
     window.addEventListener('scroll', sync, { passive: true });
   }
 
+  /** Desktop inventory mega panel: hover + Escape (sigsol-style flyout). */
+  function bindHeaderInventoryDropdown() {
+    var root = document.querySelector('[data-header-inventory-dropdown]');
+    var panel = document.querySelector('[data-header-inventory-panel]');
+    if (!root || !panel) return;
+
+    var closeTimer = null;
+    var trigger = root.querySelector('[data-header-inventory-trigger]');
+
+    function open() {
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+      panel.classList.remove('hidden');
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    }
+
+    function scheduleClose() {
+      if (closeTimer) clearTimeout(closeTimer);
+      closeTimer = setTimeout(function () {
+        panel.classList.add('hidden');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        closeTimer = null;
+      }, 140);
+    }
+
+    root.addEventListener('mouseenter', open);
+    root.addEventListener('mouseleave', scheduleClose);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        panel.classList.add('hidden');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
   function bindContactTabs() {
     var tabButtons = document.querySelectorAll('[data-contact-tab]');
     if (!tabButtons.length) return;
@@ -931,6 +968,7 @@
   bindAccordions();
   bindContactTabs();
   bindHeaderScrollState();
+  bindHeaderInventoryDropdown();
   bindHomeStatsCountUp();
   bindListingHoverGalleries();
   bindSimpleCarousels();
