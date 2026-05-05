@@ -6,11 +6,21 @@
   var menuOverlay = document.querySelector('[data-mobile-menu-overlay]');
   var menuClose = document.querySelector('[data-mobile-menu-close]');
 
+  function closeMobileInventoryAccordion() {
+    var panel = document.querySelector('[data-mobile-inventory-panel]');
+    var btn = document.querySelector('[data-mobile-inventory-toggle]');
+    var chev = document.querySelector('[data-mobile-inventory-chevron]');
+    if (panel) panel.classList.add('hidden');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (chev) chev.classList.remove('rotate-180');
+  }
+
   function setMenu(open) {
     if (!menuPanel || !menuOverlay) return;
     menuPanel.classList.toggle('is-open', open);
     menuOverlay.classList.toggle('hidden', !open);
     document.body.classList.toggle('mobile-menu-open', open);
+    if (!open) closeMobileInventoryAccordion();
   }
 
   if (menuToggle && menuPanel && menuOverlay) {
@@ -71,6 +81,21 @@
         panel.classList.add('hidden');
         if (trigger) trigger.setAttribute('aria-expanded', 'false');
       }
+    });
+  }
+
+  /** Mobile sidebar: collapsible Inventory (closed by default). */
+  function bindMobileInventoryAccordion() {
+    var btn = document.querySelector('[data-mobile-inventory-toggle]');
+    var panel = document.querySelector('[data-mobile-inventory-panel]');
+    var chev = document.querySelector('[data-mobile-inventory-chevron]');
+    if (!btn || !panel) return;
+
+    btn.addEventListener('click', function () {
+      panel.classList.toggle('hidden');
+      var expanded = !panel.classList.contains('hidden');
+      btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      if (chev) chev.classList.toggle('rotate-180', expanded);
     });
   }
 
@@ -969,6 +994,7 @@
   bindContactTabs();
   bindHeaderScrollState();
   bindHeaderInventoryDropdown();
+  bindMobileInventoryAccordion();
   bindHomeStatsCountUp();
   bindListingHoverGalleries();
   bindSimpleCarousels();

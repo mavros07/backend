@@ -25,7 +25,6 @@
   $inventoryForeignUrl = route('inventory.index', ['q' => 'United States']);
   $inventoryActive = request()->routeIs('inventory.index');
   $qRaw = strtolower((string) request('q', ''));
-  $inventoryMegaActive = $inventoryActive && $qRaw === '';
   $nigeriaActive = $inventoryActive && str_contains($qRaw, 'nigeria');
   $foreignActive = $inventoryActive && str_contains($qRaw, 'united states');
 @endphp
@@ -131,7 +130,7 @@
         @endif
       </a>
 
-      <nav class="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-4 xl:flex xl:px-2 w-max" aria-label="{{ __('Primary') }}">
+      <nav class="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-6 xl:flex xl:px-2 w-max" aria-label="{{ __('Primary') }}">
         <a href="{{ route('home') }}" data-header-nav-link class="pointer-events-auto inline-flex items-center border-b-2 pb-1.5 text-[13px] font-extrabold uppercase leading-none tracking-[0.07em] transition-colors whitespace-nowrap {{ request()->routeIs('home') ? 'border-[#1280DF] text-white' : 'border-transparent text-white/85 hover:text-[#1280DF]' }}">{{ __('Home') }}</a>
 
         {{-- Inventory mega dropdown (Nigerian / Foreign live under here) --}}
@@ -141,25 +140,18 @@
             <span class="material-symbols-outlined text-[18px] leading-none text-inherit" aria-hidden="true">expand_more</span>
           </a>
           <div class="absolute left-1/2 top-full z-[60] hidden w-max -translate-x-1/2 pt-2" data-header-inventory-panel role="region" aria-label="{{ __('Inventory categories') }}">
-            <div class="w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-white/15 bg-[#191c1e]/95 shadow-2xl shadow-black/40 backdrop-blur-xl ring-1 ring-white/5">
+            <div class="w-[min(30rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-white/15 bg-[#191c1e]/95 shadow-2xl shadow-black/40 backdrop-blur-xl ring-1 ring-white/5">
               <div class="grid gap-px bg-white/10 p-px">
-                <a href="{{ $inventoryUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $inventoryMegaActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
-                  <div>
-                    <span class="text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]">{{ __('All inventory') }}</span>
-                    <p class="mt-1 text-xs font-medium text-white/50">{{ __('Browse every available vehicle.') }}</p>
-                  </div>
-                  <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
-                </a>
                 <a href="{{ $inventoryNigeriaUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $nigeriaActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
                   <div>
-                    <span class="text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]">{{ __('Nigerian Used') }}</span>
+                    <span class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]"><span class="text-2xl leading-none" aria-hidden="true">🇳🇬</span>{{ __('Nigerian Used') }}</span>
                     <p class="mt-1 text-xs font-medium text-white/50">{{ __('Locally sourced Nigerian-used listings.') }}</p>
                   </div>
                   <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
                 </a>
                 <a href="{{ $inventoryForeignUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $foreignActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
                   <div>
-                    <span class="text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]">{{ __('Foreign Used') }}</span>
+                    <span class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]"><span class="text-2xl leading-none" aria-hidden="true">🇺🇸</span>{{ __('Foreign Used') }}</span>
                     <p class="mt-1 text-xs font-medium text-white/50">{{ __('Foreign-used imports and international stock.') }}</p>
                   </div>
                   <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
@@ -187,6 +179,8 @@
           </span>
         </a>
 
+        <span class="mx-0 hidden h-7 w-px shrink-0 bg-white/15 xl:block" aria-hidden="true"></span>
+
         @php
           $myAccountUrl = auth()->check() ? route('dashboard') : route('login');
         @endphp
@@ -210,34 +204,49 @@
       <span class="material-symbols-outlined text-2xl">close</span>
     </button>
   </div>
-  <nav class="flex flex-1 flex-col gap-1 overflow-y-auto px-4 py-4" aria-label="{{ __('Mobile') }}">
-    <a href="{{ route('home') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('Home') }}</a>
-    <div class="rounded-sm border border-white/10 bg-white/[0.03] px-2 py-2">
-      <a href="{{ $inventoryUrl }}" class="block px-2 py-2 text-sm font-bold uppercase tracking-[0.06em] text-white transition hover:bg-white/10">{{ __('Inventory') }}</a>
-      <a href="{{ $inventoryNigeriaUrl }}" class="block px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white/75 transition hover:bg-white/10 hover:text-white">{{ __('Nigerian Used') }}</a>
-      <a href="{{ $inventoryForeignUrl }}" class="block px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] text-white/75 transition hover:bg-white/10 hover:text-white">{{ __('Foreign Used') }}</a>
+  <nav class="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-4" aria-label="{{ __('Mobile') }}">
+    <div class="border-b border-white/10 pb-4">
+      <a href="{{ route('compare') }}" class="flex items-center justify-between rounded-md border border-white/15 bg-white/5 px-3 py-3 text-sm font-black uppercase tracking-[0.06em] text-white transition hover:bg-white/10">
+        <span class="inline-flex items-center gap-2">
+          <span class="material-symbols-outlined text-[22px] text-[#1280DF]">speed</span>
+          {{ __('Compare') }}
+        </span>
+        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1280DF] px-2 text-xs font-extrabold">{{ $compareCount }}</span>
+      </a>
     </div>
-    <a href="{{ route('about') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('About') }}</a>
-    <a href="{{ route('faq') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('FAQ') }}</a>
-    <a href="{{ route('contact') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('Contact') }}</a>
+
+    <a href="{{ route('home') }}" class="rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('Home') }}</a>
+    <div class="overflow-hidden rounded-sm border border-white/10 bg-white/[0.03]">
+      <button type="button" class="flex w-full items-center justify-between px-3 py-3.5 text-left text-sm font-bold uppercase tracking-[0.06em] text-white transition hover:bg-white/10" data-mobile-inventory-toggle aria-expanded="false" aria-controls="mobile-inventory-subnav">
+        <span>{{ __('Inventory') }}</span>
+        <span class="material-symbols-outlined text-[22px] text-white/70 transition-transform duration-200" data-mobile-inventory-chevron aria-hidden="true">expand_more</span>
+      </button>
+      <div id="mobile-inventory-subnav" class="hidden border-t border-white/10" data-mobile-inventory-panel>
+        <a href="{{ $inventoryNigeriaUrl }}" class="flex items-center gap-2 border-b border-white/5 px-4 py-3 text-xs font-bold uppercase tracking-[0.06em] text-white/80 transition hover:bg-white/10 hover:text-white">
+          <span class="text-xl leading-none" aria-hidden="true">🇳🇬</span>{{ __('Nigerian Used') }}
+        </a>
+        <a href="{{ $inventoryForeignUrl }}" class="flex items-center gap-2 border-b border-white/5 px-4 py-3 text-xs font-bold uppercase tracking-[0.06em] text-white/80 transition hover:bg-white/10 hover:text-white">
+          <span class="text-xl leading-none" aria-hidden="true">🇺🇸</span>{{ __('Foreign Used') }}
+        </a>
+        <a href="{{ $inventoryUrl }}" class="block bg-white/[0.03] px-4 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#1280DF] transition hover:bg-white/10 hover:text-white">{{ __('View full inventory') }}</a>
+      </div>
+    </div>
+    <a href="{{ route('about') }}" class="rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('About') }}</a>
+    <a href="{{ route('faq') }}" class="rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('FAQ') }}</a>
+    <a href="{{ route('contact') }}" class="rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('Contact') }}</a>
 
     <div class="mt-5 border-t border-white/10 pt-4">
       <div class="flex flex-col gap-2">
-        <a href="{{ route('compare') }}" class="flex items-center justify-between rounded-md border border-white/15 bg-white/5 px-3 py-3 text-sm font-black uppercase tracking-[0.06em] text-white transition hover:bg-white/10">
-          <span class="inline-flex items-center gap-2">
-            <span class="material-symbols-outlined text-[22px] text-[#1280DF]">speed</span>
-            {{ __('Compare') }}
-          </span>
-          <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[#1280DF] px-2 text-xs font-extrabold">{{ $compareCount }}</span>
-        </a>
         <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="flex h-11 items-center justify-center rounded border border-white/15 bg-white/[0.06] px-3 text-sm font-extrabold uppercase tracking-[0.07em] text-white/90 backdrop-blur-sm transition hover:bg-white/10">{{ __('My account') }}</a>
         @auth
-          <form method="post" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="w-full rounded-sm border border-white/10 px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
-              <span>{{ __('Logout') }}</span><span class="material-symbols-outlined text-xl">logout</span>
-            </button>
-          </form>
+          <div class="border-t border-white/10 pt-2">
+            <form method="post" action="{{ route('logout') }}">
+              @csrf
+              <button type="submit" class="w-full rounded-sm border border-white/10 px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
+                <span>{{ __('Logout') }}</span><span class="material-symbols-outlined text-xl">logout</span>
+              </button>
+            </form>
+          </div>
         @endauth
       </div>
     </div>
