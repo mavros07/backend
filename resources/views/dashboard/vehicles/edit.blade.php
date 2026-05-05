@@ -114,6 +114,21 @@
                 </div>
               </div>
 
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <x-input-label for="finance_min_down_payment" value="Minimum down payment" />
+                  <x-text-input id="finance_min_down_payment" name="finance_min_down_payment" type="number" class="mt-1 block w-full" value="{{ old('finance_min_down_payment', $vehicle->finance_min_down_payment) }}" />
+                </div>
+                <div>
+                  <x-input-label for="finance_term_min_months" value="Loan term min (months)" />
+                  <x-text-input id="finance_term_min_months" name="finance_term_min_months" type="number" class="mt-1 block w-full" value="{{ old('finance_term_min_months', $vehicle->finance_term_min_months) }}" />
+                </div>
+                <div>
+                  <x-input-label for="finance_term_max_months" value="Loan term max (months)" />
+                  <x-text-input id="finance_term_max_months" name="finance_term_max_months" type="number" class="mt-1 block w-full" value="{{ old('finance_term_max_months', $vehicle->finance_term_max_months) }}" />
+                </div>
+              </div>
+
               <div class="flex items-center gap-2 rounded-md border border-indigo-200 bg-indigo-50/70 px-3 py-2">
                 <input id="show_financing_calculator" name="show_financing_calculator" type="checkbox" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(old('show_financing_calculator', $vehicle->show_financing_calculator)) />
                 <x-input-label for="show_financing_calculator" value="{{ __('Show financing calculator on detail page') }}" class="!mb-0" />

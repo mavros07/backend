@@ -269,7 +269,17 @@
             <button type="button" id="homeWelcomeVideoClose" class="absolute -right-1 -top-1 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-zinc-900 shadow hover:bg-white sm:right-2 sm:top-2" aria-label="{{ __('Close') }}">&times;</button>
             <p id="homeWelcomeVideoTitle" class="sr-only">{{ __('Video') }}</p>
             <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
-              <iframe id="homeWelcomeVideoFrame" title="{{ __('Welcome video') }}" class="h-full w-full" width="560" height="315" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+              <button type="button" id="homeWelcomeVideoStart" class="absolute inset-0 z-[2] flex items-center justify-center" aria-label="{{ __('Play video') }}">
+                <img src="https://img.youtube.com/vi/{{ $welcomeYoutubeEmbedId }}/hqdefault.jpg" alt="" class="absolute inset-0 h-full w-full object-cover opacity-90" loading="lazy" />
+                <span class="absolute inset-0 bg-black/35"></span>
+                <span class="relative flex h-20 w-20 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm ring-1 ring-white/20 transition hover:bg-white/25">
+                  <span class="material-symbols-outlined ml-1 text-5xl text-white" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                </span>
+              </button>
+              <div id="homeWelcomeVideoLoading" class="absolute inset-0 z-[3] hidden items-center justify-center bg-black/60">
+                <div class="h-10 w-10 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
+              </div>
+              <iframe id="homeWelcomeVideoFrame" title="{{ __('Welcome video') }}" class="relative z-[1] h-full w-full" width="560" height="315" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
             </div>
           </div>
         </div>
@@ -303,21 +313,46 @@
         var modal = document.getElementById('homeWelcomeVideoModal');
         var closeBtn = document.getElementById('homeWelcomeVideoClose');
         var frame = document.getElementById('homeWelcomeVideoFrame');
-        if (!openBtn || !modal || !closeBtn || !frame) return;
+        var startBtn = document.getElementById('homeWelcomeVideoStart');
+        var loading = document.getElementById('homeWelcomeVideoLoading');
+        if (!openBtn || !modal || !closeBtn || !frame || !startBtn) return;
         var embedBase = 'https://www.youtube.com/embed/{{ $welcomeYoutubeEmbedId }}?autoplay=1&rel=0';
+        var playing = false;
         function openModal() {
-          frame.src = embedBase;
           modal.classList.remove('hidden');
           modal.classList.add('flex');
           document.body.style.overflow = 'hidden';
         }
+        function startPlayback() {
+          if (playing) return;
+          playing = true;
+          if (loading) {
+            loading.classList.remove('hidden');
+            loading.classList.add('flex');
+          }
+          startBtn.classList.add('hidden');
+          frame.src = embedBase;
+        }
         function closeModal() {
+          playing = false;
           frame.src = '';
+          startBtn.classList.remove('hidden');
+          if (loading) {
+            loading.classList.add('hidden');
+            loading.classList.remove('flex');
+          }
           modal.classList.add('hidden');
           modal.classList.remove('flex');
           document.body.style.overflow = '';
         }
+        frame.addEventListener('load', function () {
+          if (loading) {
+            loading.classList.add('hidden');
+            loading.classList.remove('flex');
+          }
+        });
         openBtn.addEventListener('click', openModal);
+        startBtn.addEventListener('click', startPlayback);
         closeBtn.addEventListener('click', closeModal);
         modal.addEventListener('click', function (e) {
           if (e.target === modal) closeModal();

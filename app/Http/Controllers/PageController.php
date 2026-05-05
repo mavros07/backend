@@ -614,7 +614,16 @@ class PageController extends Controller
     {
         $page = CmsPage::query()->where('slug', 'compare')->where('is_active', true)->first();
         $vehicles = Vehicle::query()
-            ->with(['images', 'fuelTypeOption', 'transmissionOption', 'makeOption', 'modelOption'])
+            ->with([
+                'images',
+                'fuelTypeOption',
+                'transmissionOption',
+                'makeOption',
+                'modelOption',
+                'bodyTypeOption',
+                'driveOption',
+                'countryOption',
+            ])
             ->whereIn('id', Compare::ids())
             ->get()
             ->sortBy(fn (Vehicle $v) => array_search($v->id, Compare::ids(), true))

@@ -159,6 +159,31 @@
           </span>
         </a>
 
+        {{-- Auth actions (desktop): keep in sync with mobile menu below --}}
+        @guest
+          <a href="{{ route('login') }}" class="group hidden items-center gap-2 xl:inline-flex" title="{{ __('Login') }}">
+            <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Login') }}</span>
+            <span class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]" data-header-icon>login</span>
+          </a>
+          <a href="{{ route('register') }}" class="group hidden items-center gap-2 xl:inline-flex" title="{{ __('Register') }}">
+            <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Register') }}</span>
+            <span class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]" data-header-icon>person_add</span>
+          </a>
+        @endguest
+        @auth
+          <a href="{{ route('dashboard') }}" class="group hidden items-center gap-2 xl:inline-flex" title="{{ __('Dashboard') }}">
+            <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Account') }}</span>
+            <span class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]" data-header-icon>account_circle</span>
+          </a>
+          <form method="post" action="{{ route('logout') }}" class="hidden xl:inline-flex">
+            @csrf
+            <button type="submit" class="group inline-flex items-center gap-2" title="{{ __('Logout') }}">
+              <span data-header-action-text class="text-[11px] font-extrabold uppercase tracking-[0.06em] text-white transition-colors group-hover:text-[#1280DF]">{{ __('Logout') }}</span>
+              <span class="material-symbols-outlined text-[24px] text-white transition-colors group-hover:text-[#1280DF]" data-header-icon>logout</span>
+            </button>
+          </form>
+        @endauth
+
         <span class="relative hidden xl:inline-flex border-l border-white/15 pl-5">
           <span data-header-icon class="material-symbols-outlined text-[27px] text-white">shopping_bag</span>
           <span data-header-bag-count class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[22%] text-[10px] font-bold text-white">0</span>
@@ -196,6 +221,28 @@
       @endphp
       <a href="{{ $url }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ $item['label'] }}</a>
     @endforeach
+    {{-- Auth actions (mobile): keep in sync with desktop header above --}}
+    <div class="mt-4 border-t border-white/10 pt-4">
+      @guest
+        <a href="{{ route('login') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
+          <span>{{ __('Login') }}</span><span class="material-symbols-outlined text-xl">login</span>
+        </a>
+        <a href="{{ route('register') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
+          <span>{{ __('Register') }}</span><span class="material-symbols-outlined text-xl">person_add</span>
+        </a>
+      @endguest
+      @auth
+        <a href="{{ route('dashboard') }}" class="rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
+          <span>{{ __('Account') }}</span><span class="material-symbols-outlined text-xl">account_circle</span>
+        </a>
+        <form method="post" action="{{ route('logout') }}" class="mt-1">
+          @csrf
+          <button type="submit" class="w-full rounded-sm px-3 py-3 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white flex items-center justify-between">
+            <span>{{ __('Logout') }}</span><span class="material-symbols-outlined text-xl">logout</span>
+          </button>
+        </form>
+      @endauth
+    </div>
     @if ($address !== '' || $phone !== '')
       <div class="mt-5 border-t border-white/10 pt-4 text-xs text-white/70">
         @if ($address !== '')

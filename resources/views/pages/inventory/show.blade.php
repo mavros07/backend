@@ -11,6 +11,47 @@
   $images = $vehicle->images ?? collect();
   $cover = $images->first();
   $galleryUrls = $images->map(fn ($img) => \App\Support\VehicleImageUrl::url($img->path))->values();
+  $youtubeId = null;
+  $videoUrl = trim((string) ($vehicle->video_url ?? ''));
+  if ($videoUrl !== '') {
+      $try = $videoUrl;
+      if (preg_match('/^[a-zA-Z0-9_-]{11}$/', $try) === 1) {
+          $youtubeId = $try;
+      } else {
+          $parts = parse_url($try) ?: [];
+          $host = strtolower((string) ($parts['host'] ?? ''));
+          $path = (string) ($parts['path'] ?? '');
+          parse_str((string) ($parts['query'] ?? ''), $qs);
+          if (str_contains($host, 'youtu.be')) {
+              $cand = trim($path, '/');
+              if (preg_match('/^[a-zA-Z0-9_-]{11}$/', $cand) === 1) $youtubeId = $cand;
+          } elseif (str_contains($host, 'youtube.com')) {
+              if (!empty($qs['v']) && preg_match('/^[a-zA-Z0-9_-]{11}$/', (string) $qs['v']) === 1) {
+                  $youtubeId = (string) $qs['v'];
+              } elseif (preg_match('#/embed/([a-zA-Z0-9_-]{11})#', $path, $m) === 1) {
+                  $youtubeId = (string) ($m[1] ?? '');
+              }
+          }
+      }
+  }
+  $galleryItems = $galleryUrls->map(fn ($u) => ['type' => 'image', 'src' => $u])->values()->all();
+  if ($youtubeId) {
+      $galleryItems[] = [
+          'type' => 'video',
+          'provider' => 'youtube',
+          'embedUrl' => 'https://www.youtube.com/embed/'.$youtubeId.'?autoplay=1&rel=0',
+          'thumbUrl' => 'https://img.youtube.com/vi/'.$youtubeId.'/hqdefault.jpg',
+          'externalUrl' => 'https://www.youtube.com/watch?v='.$youtubeId,
+      ];
+  } elseif ($videoUrl !== '') {
+      $galleryItems[] = [
+          'type' => 'video',
+          'provider' => 'external',
+          'embedUrl' => null,
+          'thumbUrl' => null,
+          'externalUrl' => $videoUrl,
+      ];
+  }
   $msrp = $vehicle->msrp;
   $price = $vehicle->price;
   $saving = (!is_null($price) && !is_null($msrp) && $msrp > $price) ? ($msrp - $price) : null;
@@ -31,14 +72,38 @@
     $vehicle->map_location ?? null,
     $vehicle->street_address ?? null,
   );
-  $financePrice = (int) ($vehicle->finance_price ?: $vehicle->price ?: 0);
-  $financeRate = (float) ($vehicle->finance_interest_rate ?: 3);
-  $financeTerm = (int) ($vehicle->finance_term_months ?: 24);
-  $financeDown = (int) ($vehicle->finance_down_payment ?: 350);
-  $showFinanceCalculator = (bool) ($vehicle->show_financing_calculator ?? false)
+  // Financing (constrained): vendor sets interest + minimum down payment + min/max term.
+  // Calculator derives from listing price only.
+  $financePrice = (float) ($vehicle->price ?? 0);
+  $financeRate = (float) ($vehicle->finance_interest_rate ?? 0);
+  $financeDownMin = (float) ($vehicle->finance_min_down_payment ?? $vehicle->finance_down_payment ?? 0);
+  $financeTermMonthsBase = (int) ($vehicle->finance_term_months ?? 0);
+  $hasTermMinCol = $vehicle->finance_term_min_months !== null;
+  $hasTermMaxCol = $vehicle->finance_term_max_months !== null;
+  $financeTermMin = $hasTermMinCol
+      ? (int) $vehicle->finance_term_min_months
+      : ($financeTermMonthsBase > 0 ? $financeTermMonthsBase : 0);
+  $financeTermMax = $hasTermMaxCol
+      ? (int) $vehicle->finance_term_max_months
+      : ($financeTermMonthsBase > 0 ? $financeTermMonthsBase : 0);
+  if ($financeTermMin <= 0 && $financeTermMax > 0) {
+      $financeTermMin = $financeTermMax;
+  }
+  if ($financeTermMax <= 0 && $financeTermMin > 0) {
+      $financeTermMax = $financeTermMin;
+  }
+  if ($financeTermMin > 0 && $financeTermMax > 0 && $financeTermMax < $financeTermMin) {
+      $financeTermMax = $financeTermMin;
+  }
+  if ($financePrice > 0 && $financeDownMin > $financePrice) {
+      $financeDownMin = $financePrice;
+  }
+  $financingEnabled = (bool) ($vehicle->show_financing_calculator ?? false);
+  $showFinanceCalculator = $financingEnabled
     && $financePrice > 0
-    && $financeRate > 0
-    && $financeTerm > 0;
+    && $financeRate >= 0
+    && $financeTermMin > 0
+    && $financeTermMax >= $financeTermMin;
 @endphp
 
 <div class="vehicle-detail-page bg-black text-white font-['Open_Sans']">
@@ -78,8 +143,12 @@
           </div>
           <div class="absolute top-4 right-4 flex gap-2 z-10">
             <button class="bg-black/50 p-2 rounded-sm" type="button" onclick="window.print()"><span class="material-symbols-outlined text-sm">print</span></button>
+            <form method="post" action="{{ route('compare.add', ['vehicle' => $vehicle->id]) }}">
+              @csrf
+              <button class="bg-black/50 p-2 rounded-sm" type="submit" title="{{ __('Add to compare') }}"><span class="material-symbols-outlined text-sm">compare_arrows</span></button>
+            </form>
             @auth
-              <form method="post" action="{{ route('favorites.toggle', ['vehicle' => $vehicle->id]) }}">
+              <form method="post" action="{{ route('favorites.toggle', ['vehicle' => $vehicle->id]) }}" data-favorite-toggle>
                 @csrf
                 <button class="bg-black/50 p-2 rounded-sm" type="submit"><span class="material-symbols-outlined text-sm">{{ $isFavorited ? 'favorite' : 'favorite_border' }}</span></button>
               </form>
@@ -89,7 +158,9 @@
             <div
               class="outline-none"
               data-vehicle-detail-gallery
+              data-gallery-version="v2"
               data-gallery-urls="{{ e($galleryUrls->values()->toJson(JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)) }}"
+              data-gallery-items="{{ e(collect($galleryItems)->toJson(JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)) }}"
               tabindex="0"
               aria-label="{{ __('Image gallery') }}"
             >
@@ -100,8 +171,21 @@
                   class="h-full w-full object-cover transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
                   style="opacity:1"
                   data-vehicle-detail-main
+                  data-vehicle-detail-main-img
                   draggable="false"
                 />
+                <div class="absolute inset-0 hidden" data-vehicle-detail-main-video>
+                  <button type="button" class="absolute inset-0 z-[2] flex items-center justify-center" data-vehicle-detail-video-start aria-label="{{ __('Play video') }}">
+                    <img src="{{ $youtubeId ? ('https://img.youtube.com/vi/'.$youtubeId.'/hqdefault.jpg') : '' }}" alt="" class="absolute inset-0 h-full w-full object-cover opacity-90" loading="lazy" />
+                    <span class="absolute inset-0 bg-black/35"></span>
+                    <span class="relative flex h-20 w-20 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm ring-1 ring-white/20 transition hover:bg-white/25">
+                      <span class="material-symbols-outlined ml-1 text-5xl text-white" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                    </span>
+                  </button>
+                  <div class="absolute inset-0 z-[3] hidden items-center justify-center bg-black/60" data-vehicle-detail-video-loading>
+                    <div class="h-10 w-10 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
+                  </div>
+                </div>
               </div>
               <div class="flex gap-2 overflow-x-auto pb-2 scroll-smooth" data-vehicle-detail-thumbs-scroll>
                 @foreach ($galleryUrls as $index => $url)
@@ -117,6 +201,28 @@
                     </span>
                   </button>
                 @endforeach
+                @if ($videoUrl !== '')
+                  @php $videoIndex = (int) $galleryUrls->count(); @endphp
+                  <button
+                    type="button"
+                    class="vehicle-detail-thumb-btn shrink-0 w-[calc((100%-2.5rem)/6))] min-w-[4.5rem] max-w-[6.25rem] border-2 border-transparent opacity-70 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffb129]"
+                    data-vehicle-detail-thumb
+                    data-index="{{ $videoIndex }}"
+                    data-full=""
+                    aria-label="{{ __('Video') }}"
+                  >
+                    <span class="block aspect-video w-full overflow-hidden rounded-sm bg-[#232628] relative">
+                      @if ($youtubeId)
+                        <img src="https://img.youtube.com/vi/{{ $youtubeId }}/hqdefault.jpg" alt="" class="h-full w-full object-cover" loading="lazy" draggable="false" />
+                      @else
+                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest text-white/80">{{ __('Video') }}</span>
+                      @endif
+                      <span class="absolute inset-0 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white/90">play_circle</span>
+                      </span>
+                    </span>
+                  </button>
+                @endif
               </div>
             </div>
           @endif
@@ -134,7 +240,10 @@
           <h4 class="text-lg font-black uppercase mb-6 font-['Montserrat']">Extra Features</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-y-3">
             @forelse (($vehicle->features ?? []) as $feature)
-              <div class="flex items-center gap-3 text-xs"><span class="material-symbols-outlined text-[#ffb129] text-[16px]">check_circle</span> {{ $feature }}</div>
+              <div class="flex min-w-0 items-start gap-3 text-xs">
+                <span class="material-symbols-outlined shrink-0 text-[#ffb129] text-[16px]">check_circle</span>
+                <span class="min-w-0 break-words [overflow-wrap:anywhere]">{{ $feature }}</span>
+              </div>
             @empty
               <div class="text-xs text-gray-400">No extra features provided.</div>
             @endforelse
@@ -152,9 +261,14 @@
               <div class="text-[10px] text-gray-500 uppercase font-bold">{{ $vehicle->isStaffListing() ? 'Dealer' : 'Private Seller' }}</div>
             </div>
           </div>
-          <div class="w-full bg-[#1e2124] py-3 px-4 text-sm font-bold flex items-center justify-between">
-            <span>{{ $sellerProfile['phone'] ?? '-' }}</span>
-            <span class="text-[10px] text-[#ffb129] uppercase font-bold">Show Number</span>
+          @php
+            $rawPhone = trim((string) ($sellerProfile['phone'] ?? ''));
+            $maskedPhone = $rawPhone !== '' ? (mb_substr($rawPhone, 0, 4) . str_repeat('•', max(0, mb_strlen($rawPhone) - 6)) . mb_substr($rawPhone, -2)) : '-';
+          @endphp
+          <div class="w-full bg-[#1e2124] py-3 px-4 text-sm font-bold flex items-center justify-between" data-phone-reveal data-phone-revealed-label="{{ e(__('Number shown')) }}">
+            <span data-phone-mask>{{ $maskedPhone }}</span>
+            <span data-phone-full class="hidden">{{ $rawPhone }}</span>
+            <button class="text-[10px] text-[#ffb129] uppercase font-bold" type="button" data-phone-reveal-btn>{{ __('Show Number') }}</button>
           </div>
         </div>
 
@@ -178,24 +292,44 @@
         </div>
 
         @if ($showFinanceCalculator)
-          <div class="bg-[#191c1e] p-8 border border-white/5" data-finance-calculator
-               data-price="{{ $financePrice }}"
-               data-rate="{{ $financeRate }}"
-               data-term="{{ $financeTerm }}"
-               data-down="{{ $financeDown }}">
+          <div class="bg-[#191c1e] p-8 border border-white/5" data-finance-calculator data-finance-version="constrained"
+               data-price="{{ (float) $financePrice }}"
+               data-rate="{{ (float) $financeRate }}"
+               data-term-min="{{ (int) $financeTermMin }}"
+               data-term-max="{{ (int) $financeTermMax }}"
+               data-down-min="{{ (float) $financeDownMin }}">
             <h3 class="text-sm font-black uppercase flex items-center gap-2 mb-8"><span class="material-symbols-outlined text-[#ffb129]">calculate</span> Financing calculator</h3>
             <div class="space-y-6">
-              <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Vehicle price ($)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="price"></div>
-              <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Interest rate (%)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" step="0.01" data-finance-input="rate"></div>
-              <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Loan term (month)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="term"></div>
-              <div class="space-y-2"><label class="text-[10px] font-bold uppercase text-gray-500">Down payment ($)</label><input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="down"></div>
-              <button class="w-full bg-[#3b5998] py-3 text-xs font-black uppercase tracking-tighter hover:bg-[#4b71be] transition-colors" type="button" data-finance-calc-btn>Calculate</button>
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase text-gray-500">Vehicle price ($)</label>
+                <input class="w-full bg-white/90 text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="price" readonly aria-readonly="true" />
+              </div>
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase text-gray-500">Interest rate (%)</label>
+                <input class="w-full bg-white/90 text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" step="0.01" data-finance-input="rate" readonly aria-readonly="true" />
+              </div>
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase text-gray-500">Loan term (months)</label>
+                <input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="term" />
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Allowed: {{ (int) $financeTermMin }}–{{ (int) $financeTermMax }}</p>
+              </div>
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase text-gray-500">Down payment ($)</label>
+                <input class="w-full bg-white text-[#191c1e] font-bold py-2.5 px-4 rounded-sm border-none" type="number" data-finance-input="down" />
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Minimum: {{ number_format((float) $financeDownMin, 0, '.', ',') }}</p>
+              </div>
+              <button class="w-full bg-[#3b5998] py-3 text-xs font-black uppercase tracking-tighter hover:bg-[#4b71be] transition-colors" type="button" data-finance-apply-btn>Apply</button>
               <div class="pt-6 border-t border-white/10 space-y-2">
                 <div class="flex justify-between text-xs"><span class="text-gray-500">Monthly Payment</span><span class="font-black text-[#ffb129]" data-finance-result>$0</span></div>
                 <div class="flex justify-between text-xs"><span class="text-gray-500">Total Interest Payment</span><span class="font-black text-[#ffb129]" data-finance-total-interest>$0</span></div>
                 <div class="flex justify-between text-xs"><span class="text-gray-500">Total Amount to Pay</span><span class="font-black text-[#ffb129]" data-finance-total-amount>$0</span></div>
               </div>
             </div>
+          </div>
+        @elseif ($financingEnabled)
+          <div class="bg-[#191c1e] p-8 border border-white/5">
+            <h3 class="text-sm font-black uppercase flex items-center gap-2 mb-3"><span class="material-symbols-outlined text-[#ffb129]">calculate</span> Financing calculator</h3>
+            <p class="text-sm text-gray-400">{{ __('Financing not available for this vehicle.') }}</p>
           </div>
         @endif
       </aside>
@@ -234,7 +368,7 @@
         <div class="w-full h-[400px] bg-[#232628] relative overflow-hidden">
           <iframe
             title="Dealer location map"
-            class="w-full h-full opacity-70 grayscale"
+            class="w-full h-full"
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
             src="https://maps.google.com/maps?q={{ urlencode($mapQuery) }}&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>

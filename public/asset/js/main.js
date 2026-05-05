@@ -350,29 +350,121 @@
     var roots = document.querySelectorAll('[data-vehicle-detail-gallery]');
     if (!roots.length) return;
     roots.forEach(function (root) {
-      var raw = root.getAttribute('data-gallery-urls') || '[]';
-      var urls = [];
-      try {
-        urls = JSON.parse(raw);
-      } catch (e) {
-        urls = [];
-      }
-      if (!Array.isArray(urls) || !urls.length) return;
-
       var main = root.querySelector('[data-vehicle-detail-main]');
       var viewport = root.querySelector('[data-vehicle-detail-viewport]') || root;
       var thumbs = root.querySelectorAll('[data-vehicle-detail-thumb]');
       var thumbScroll = root.querySelector('[data-vehicle-detail-thumbs-scroll]');
-      if (!main || !thumbs.length) return;
+      if (!main) return;
+
+      // Optional v2 elements for mixed media.
+      var mainImg = root.querySelector('[data-vehicle-detail-main-img]') || main;
+      var mainVideoWrap = root.querySelector('[data-vehicle-detail-main-video]');
+      var mainVideoStart = root.querySelector('[data-vehicle-detail-video-start]');
+      var mainVideoLoading = root.querySelector('[data-vehicle-detail-video-loading]');
+
+      function safeParseUrls(rawJson) {
+        var out = [];
+        try {
+          out = JSON.parse(rawJson || '[]');
+        } catch (_) {
+          out = [];
+        }
+        if (!Array.isArray(out)) out = [];
+        out = out
+          .map(function (u) { return String(u || '').trim(); })
+          .filter(function (u) { return u !== ''; });
+        return out;
+      }
+
+      function safeParseItems(rawJson) {
+        var out = [];
+        try {
+          out = JSON.parse(rawJson || '[]');
+        } catch (_) {
+          out = [];
+        }
+        if (!Array.isArray(out)) out = [];
+        return out
+          .map(function (it) {
+            it = it || {};
+            var type = String(it.type || 'image');
+            if (type !== 'video') type = 'image';
+            if (type === 'image') {
+              var src = String(it.src || '').trim();
+              if (!src) return null;
+              return { type: 'image', src: src };
+            }
+            // video
+            var provider = String(it.provider || 'youtube').trim() || 'youtube';
+            var embedUrl = String(it.embedUrl || '').trim();
+            var thumbUrl = String(it.thumbUrl || '').trim();
+            var externalUrl = String(it.externalUrl || '').trim();
+            if (!embedUrl && !externalUrl) return null;
+            return { type: 'video', provider: provider, embedUrl: embedUrl, thumbUrl: thumbUrl, externalUrl: externalUrl };
+          })
+          .filter(function (x) { return !!x; });
+      }
+
+      // Primary contract: data-gallery-urls (image URLs array).
+      var raw = root.getAttribute('data-gallery-urls') || '[]';
+      var urls = safeParseUrls(raw);
+
+      // v2 contract (optional): data-gallery-items (structured mixed media).
+      var version = String(root.getAttribute('data-gallery-version') || 'v1').toLowerCase();
+      var itemsRaw = root.getAttribute('data-gallery-items') || '[]';
+      var items = (version === 'v2') ? safeParseItems(itemsRaw) : [];
+
+      // Fallback: derive URLs from DOM thumbs if JSON missing/broken.
+      if (!urls.length && thumbs && thumbs.length) {
+        thumbs.forEach(function (t) {
+          var u = (t.getAttribute('data-full') || '').trim();
+          if (u) urls.push(u);
+        });
+      }
+
+      // Final fallback: whatever is currently rendered as main src.
+      if (!urls.length) {
+        var mainSrc = (main.getAttribute('src') || '').trim();
+        if (mainSrc) urls = [mainSrc];
+      }
+
+      // If v2 failed to parse but v1 has URLs, keep v1.
+      if (version === 'v2' && itemsRaw && !items.length) {
+        try { console.warn('[vehicle-detail-gallery] v2 items parse failed; falling back to v1 URLs', root); } catch (_) {}
+        version = 'v1';
+      }
+
+      if (version !== 'v2' && !urls.length) {
+        // Never silently die; leave static markup visible.
+        try { console.warn('[vehicle-detail-gallery] No usable media items for gallery root', root); } catch (_) {}
+        return;
+      }
+
+      if (!thumbs || !thumbs.length) {
+        // Single-image gallery: keep static image visible, do not error.
+        return;
+      }
 
       var idx = 0;
       var preloaded = {};
       var fadeMs = 280;
+      var activeVideo = { iframe: null };
+
+      function itemCount() {
+        return (version === 'v2' && items.length) ? items.length : urls.length;
+      }
+
+      function getItem(i) {
+        if (version === 'v2' && items.length) return items[i];
+        return { type: 'image', src: urls[i] };
+      }
 
       function preload(i) {
         if (preloaded[i]) return;
+        var it = getItem(i);
+        if (!it || it.type !== 'image') return;
         var im = new Image();
-        im.src = urls[i];
+        im.src = it.src;
         preloaded[i] = true;
       }
 
@@ -394,26 +486,121 @@
         }
       }
 
+      /** Remove iframe only (keep video pane visible — used before embedding a fresh player). */
+      function removeVideoIframeOnly() {
+        if (activeVideo.iframe && activeVideo.iframe.parentNode) {
+          try { activeVideo.iframe.setAttribute('src', ''); } catch (_) {}
+          try { activeVideo.iframe.remove(); } catch (_) {}
+        }
+        activeVideo.iframe = null;
+      }
+
+      /** Full teardown when leaving video mode (slide to image). */
+      function unloadVideo() {
+        removeVideoIframeOnly();
+        if (mainVideoWrap) mainVideoWrap.classList.add('hidden');
+        if (mainVideoStart) mainVideoStart.classList.remove('hidden');
+        if (mainVideoLoading) {
+          mainVideoLoading.classList.add('hidden');
+          mainVideoLoading.classList.remove('flex');
+        }
+      }
+
+      function showImage(src) {
+        unloadVideo();
+        if (mainImg) {
+          mainImg.classList.remove('hidden');
+          mainImg.setAttribute('src', src);
+        } else {
+          main.setAttribute('src', src);
+        }
+      }
+
+      function showVideo(it) {
+        // Requires v2 markup; if missing, fall back to external.
+        if (!mainVideoWrap) {
+          if (it && it.externalUrl) window.open(it.externalUrl, '_blank', 'noopener');
+          return;
+        }
+        removeVideoIframeOnly();
+        if (mainVideoLoading) {
+          mainVideoLoading.classList.add('hidden');
+          mainVideoLoading.classList.remove('flex');
+        }
+        if (mainImg) mainImg.classList.add('hidden');
+        mainVideoWrap.classList.remove('hidden');
+
+        // Show thumbnail overlay until user clicks play.
+        if (mainVideoStart) mainVideoStart.classList.remove('hidden');
+        if (mainVideoStart && it && it.thumbUrl) {
+          var img = mainVideoStart.querySelector('img');
+          if (img) img.setAttribute('src', it.thumbUrl);
+        }
+
+        function start() {
+          if (!it || !it.embedUrl) {
+            if (it && it.externalUrl) window.open(it.externalUrl, '_blank', 'noopener');
+            return;
+          }
+          // Single-active-player rule: detach previous iframe; keep wrap visible for the new embed.
+          removeVideoIframeOnly();
+          if (mainVideoWrap) mainVideoWrap.classList.remove('hidden');
+          if (mainVideoLoading) {
+            mainVideoLoading.classList.remove('hidden');
+            mainVideoLoading.classList.add('flex');
+          }
+          if (mainVideoStart) mainVideoStart.classList.add('hidden');
+          var frame = document.createElement('iframe');
+          frame.setAttribute('title', 'Vehicle video');
+          frame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+          frame.setAttribute('allowfullscreen', 'allowfullscreen');
+          frame.className = 'h-full w-full';
+          frame.addEventListener('load', function () {
+            if (mainVideoLoading) {
+              mainVideoLoading.classList.add('hidden');
+              mainVideoLoading.classList.remove('flex');
+            }
+          });
+          frame.src = it.embedUrl;
+          activeVideo.iframe = frame;
+          mainVideoWrap.appendChild(frame);
+        }
+
+        if (mainVideoStart) {
+          mainVideoStart.onclick = function (e) { e && e.preventDefault && e.preventDefault(); start(); };
+        }
+      }
+
       function setIndex(nextIdx, force) {
-        var n = ((nextIdx % urls.length) + urls.length) % urls.length;
+        var count = itemCount();
+        var n = ((nextIdx % count) + count) % count;
         if (n === idx && !force) return;
         main.style.opacity = '0';
         window.setTimeout(function () {
-          main.setAttribute('src', urls[n]);
           idx = n;
+          var it = getItem(idx);
+          if (it && it.type === 'video') {
+            showVideo(it);
+          } else {
+            showImage(it ? it.src : urls[idx]);
+          }
           syncThumbStyles();
-          preload((idx + 1) % urls.length);
-          preload((idx - 1 + urls.length) % urls.length);
+          preload((idx + 1) % count);
+          preload((idx - 1 + count) % count);
           var done = function () {
             main.style.opacity = '1';
           };
-          if (main.complete) {
+          if (it && it.type === 'image' && mainImg && mainImg.complete) {
             requestAnimationFrame(done);
           } else {
-            main.onload = function () {
-              main.onload = null;
+            if (it && it.type === 'image' && mainImg) {
+              mainImg.onload = function () {
+                mainImg.onload = null;
+                requestAnimationFrame(done);
+              };
+            } else {
               requestAnimationFrame(done);
-            };
+            }
           }
         }, Math.round(fadeMs * 0.45));
       }
@@ -473,8 +660,44 @@
         viewport.addEventListener('touchcancel', function () { active = false; }, { passive: true });
       })();
 
+      // Desktop swipe/drag (Pointer Events). Touch already handled above.
+      (function bindPointerDrag() {
+        if (!viewport || !viewport.addEventListener) return;
+        if (window.PointerEvent == null) return;
+        var startX = 0;
+        var startY = 0;
+        var active = false;
+        var moved = false;
+        function onDown(e) {
+          if (!e || e.pointerType === 'touch') return;
+          active = true;
+          moved = false;
+          startX = e.clientX;
+          startY = e.clientY;
+          try { viewport.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+        function onMove(e) {
+          if (!active) return;
+          var dx = e.clientX - startX;
+          var dy = e.clientY - startY;
+          if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.1) moved = true;
+        }
+        function onUp(e) {
+          if (!active) return;
+          active = false;
+          if (!moved) return;
+          var dx = e.clientX - startX;
+          if (Math.abs(dx) < 34) return;
+          setIndex(dx < 0 ? idx + 1 : idx - 1, true);
+        }
+        viewport.addEventListener('pointerdown', onDown);
+        viewport.addEventListener('pointermove', onMove);
+        viewport.addEventListener('pointerup', onUp);
+        viewport.addEventListener('pointercancel', function () { active = false; });
+      })();
+
       preload(0);
-      if (urls.length > 1) preload(1);
+      if (itemCount() > 1) preload(1);
     });
   }
 
@@ -490,20 +713,75 @@
       var totalInterestEl = root.querySelector('[data-finance-total-interest]');
       var totalAmountEl = root.querySelector('[data-finance-total-amount]');
       var calcBtn = root.querySelector('[data-finance-calc-btn]');
+      var applyBtn = root.querySelector('[data-finance-apply-btn]');
       if (!priceEl || !downEl || !rateEl || !termEl || !outEl) return;
 
       function toNum(v) { var n = parseFloat(String(v || '0')); return isNaN(n) ? 0 : n; }
-      function money(v) { return '$' + Math.max(0, v).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
+      function money(v) { return '$' + Math.max(0, v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
-      priceEl.value = root.getAttribute('data-price') || '0';
-      downEl.value = root.getAttribute('data-down') || '0';
-      rateEl.value = root.getAttribute('data-rate') || '4.9';
-      termEl.value = root.getAttribute('data-term') || '60';
+      var price = toNum(root.getAttribute('data-price') || '0');
+      var rate = toNum(root.getAttribute('data-rate') || '0');
+      var termMin = parseInt(root.getAttribute('data-term-min') || root.getAttribute('data-term') || '0', 10) || 0;
+      var termMax = parseInt(root.getAttribute('data-term-max') || root.getAttribute('data-term') || '0', 10) || 0;
+      var downMin = toNum(root.getAttribute('data-down-min') || root.getAttribute('data-down') || '0');
+
+      priceEl.value = String(price || 0);
+      rateEl.value = String(rate || 0);
+      priceEl.setAttribute('readonly', 'readonly');
+      rateEl.setAttribute('readonly', 'readonly');
+
+      // Constrained defaults
+      if (termMin > 0) termEl.value = String(termMin);
+      if (downMin > 0) downEl.value = String(downMin);
+
+      // Constrained bounds for user-editable fields
+      if (termMin > 0) termEl.setAttribute('min', String(termMin));
+      if (termMax > 0) termEl.setAttribute('max', String(termMax));
+      if (downMin > 0) downEl.setAttribute('min', String(downMin));
+      if (price > 0) downEl.setAttribute('max', String(price));
 
       function calc() {
-        var principal = Math.max(0, toNum(priceEl.value) - toNum(downEl.value));
+        var p = Math.max(0, toNum(priceEl.value));
+        var d = Math.max(0, toNum(downEl.value));
+        var monthsRaw = parseInt(termEl.value || '0', 10) || 0;
+        // Enforce vendor bounds in JS (inputs can be overridden in devtools).
+        if (p > 0 && d > p) {
+          d = p;
+          downEl.value = String(d);
+        }
+        if (downMin > 0 && d < downMin) {
+          d = downMin;
+          downEl.value = String(d);
+        }
+        var months = monthsRaw;
+        if (termMin > 0 && months < termMin) {
+          months = termMin;
+          termEl.value = String(months);
+        }
+        if (termMax > 0 && months > termMax) {
+          months = termMax;
+          termEl.value = String(months);
+        }
+        var principal = Math.max(0, p - d);
         var annualRate = Math.max(0, toNum(rateEl.value));
-        var months = Math.max(1, parseInt(termEl.value || '0', 10) || 1);
+
+        if (months <= 0) {
+          outEl.textContent = money(0);
+          if (totalInterestEl) totalInterestEl.textContent = money(0);
+          if (totalAmountEl) totalAmountEl.textContent = money(0);
+          if (applyBtn) applyBtn.setAttribute('disabled', 'disabled');
+          return;
+        }
+
+        if (principal <= 0) {
+          // Down payment == price → no financing needed.
+          outEl.textContent = money(0);
+          if (totalInterestEl) totalInterestEl.textContent = money(0);
+          if (totalAmountEl) totalAmountEl.textContent = money(0);
+          if (applyBtn) applyBtn.setAttribute('disabled', 'disabled');
+          return;
+        }
+
         var monthlyRate = annualRate / 100 / 12;
         var payment = 0;
         if (monthlyRate <= 0) payment = principal / months;
@@ -513,12 +791,37 @@
         outEl.textContent = money(payment);
         if (totalInterestEl) totalInterestEl.textContent = money(totalInterest);
         if (totalAmountEl) totalAmountEl.textContent = money(totalAmount);
+        if (applyBtn) applyBtn.removeAttribute('disabled');
       }
 
       [priceEl, downEl, rateEl, termEl].forEach(function (el) {
         el.addEventListener('input', calc);
       });
       if (calcBtn) calcBtn.addEventListener('click', calc);
+      if (applyBtn) applyBtn.addEventListener('click', function () {
+        if (applyBtn.getAttribute('disabled') === 'disabled') return;
+        calc(); // sync clamped down/term to DOM before composing the message
+        // Apply: scroll to message form and prefill message.
+        var msg = document.querySelector('textarea[name="message"]');
+        if (!msg) return;
+        var p = Math.max(0, toNum(priceEl.value));
+        var d = Math.max(0, toNum(downEl.value));
+        var principal = Math.max(0, p - d);
+        var annualRate = Math.max(0, toNum(rateEl.value));
+        var months = parseInt(termEl.value || '0', 10) || 0;
+        var monthly = (outEl && outEl.textContent) ? outEl.textContent : money(0);
+        var summary = 'Financing request:\n'
+          + '- Vehicle price: ' + money(p) + '\n'
+          + '- Down payment: ' + money(d) + '\n'
+          + '- Loan amount: ' + money(principal) + '\n'
+          + '- Interest rate: ' + annualRate.toFixed(2) + '%\n'
+          + '- Term: ' + months + ' months\n'
+          + '- Estimated monthly payment: ' + monthly;
+        msg.value = summary;
+        msg.dispatchEvent(new Event('input', { bubbles: true }));
+        msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        msg.focus();
+      });
       calc();
     });
   }
@@ -557,6 +860,74 @@
     });
   }
 
+  function bindPhoneReveal() {
+    var roots = document.querySelectorAll('[data-phone-reveal]');
+    if (!roots.length) return;
+    roots.forEach(function (root) {
+      var btn = root.querySelector('[data-phone-reveal-btn]');
+      var mask = root.querySelector('[data-phone-mask]');
+      var full = root.querySelector('[data-phone-full]');
+      if (!btn || !mask || !full) return;
+      btn.addEventListener('click', function () {
+        var fullText = (full.textContent || '').trim();
+        if (!fullText) return;
+        mask.textContent = fullText;
+        btn.setAttribute('disabled', 'disabled');
+        var revealed = (root.getAttribute('data-phone-revealed-label') || '').trim();
+        btn.textContent = revealed || 'Number shown';
+      });
+    });
+  }
+
+  function bindFavoriteToggles() {
+    var forms = document.querySelectorAll('form[data-favorite-toggle]');
+    if (!forms.length) return;
+    var token = document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    forms.forEach(function (form) {
+      if (!form || !form.addEventListener) return;
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var btn = form.querySelector('button[type="submit"]');
+        var icon = form.querySelector('.material-symbols-outlined');
+        var action = form.getAttribute('action') || '';
+        if (!action) return;
+        if (btn) btn.setAttribute('disabled', 'disabled');
+        var body = new FormData();
+        var hidden = form.querySelector('input[name="_token"]');
+        if (hidden && hidden.value) body.append('_token', hidden.value);
+        fetch(action, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'X-CSRF-TOKEN': token || '',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json, text/plain, */*'
+          },
+          body: body,
+        }).then(function (res) {
+          // If session/CSRF expired (419), reload to let Laravel reissue tokens via full page refresh.
+          if (res.status === 419 || res.status === 401) {
+            window.location.reload();
+            return null;
+          }
+          // Toggle is implemented as redirect-back; treat any 2xx/3xx as success and flip icon.
+          if (res && (res.ok || (res.status >= 300 && res.status < 400))) {
+            if (icon) {
+              var cur = (icon.textContent || '').trim();
+              icon.textContent = (cur === 'favorite') ? 'favorite_border' : 'favorite';
+            }
+          }
+          return null;
+        }).catch(function () {
+          // Fallback: submit normally if fetch fails.
+          form.submit();
+        }).finally(function () {
+          if (btn) btn.removeAttribute('disabled');
+        });
+      });
+    });
+  }
+
   bindAccordions();
   bindContactTabs();
   bindHeaderScrollState();
@@ -565,4 +936,6 @@
   bindSimpleCarousels();
   bindVehicleDetailGallery();
   bindFinanceCalculators();
+  bindPhoneReveal();
+  bindFavoriteToggles();
 })();
