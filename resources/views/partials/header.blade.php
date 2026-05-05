@@ -141,8 +141,8 @@
             <span class="material-symbols-outlined text-[18px] leading-none text-inherit" aria-hidden="true">expand_more</span>
           </a>
           <div class="absolute left-1/2 top-full z-[60] hidden w-max -translate-x-1/2 pt-2" data-header-inventory-panel role="region" aria-label="{{ __('Inventory categories') }}">
-            <div class="flex w-[min(48rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/15 bg-[#191c1e]/95 shadow-2xl shadow-black/40 backdrop-blur-xl ring-1 ring-white/5">
-              <div class="flex min-w-0 flex-1 flex-col">
+            <div class="flex w-[min(56rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/15 bg-[#191c1e]/95 shadow-2xl shadow-black/40 backdrop-blur-xl ring-1 ring-white/5">
+              <div class="flex min-w-0 w-1/2 flex-col border-r border-white/10">
                 <div class="grid flex-1 gap-px bg-white/10 p-px">
                   <a href="{{ $inventoryNigeriaUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $nigeriaActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
                     <div>
@@ -170,7 +170,7 @@
                 </div>
               </div>
               @if ($navMakes->isNotEmpty())
-                <div class="hidden w-[14rem] shrink-0 flex-col border-l border-white/10 bg-black/25 p-3 sm:flex sm:flex-col md:w-[15rem]" aria-label="{{ __('Shop by make') }}">
+                <div class="flex min-w-0 w-1/2 flex-col bg-black/25 p-3 sm:p-4" aria-label="{{ __('Shop by make') }}">
                   <p class="mb-3 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white/45">{{ __('Shop by make') }}</p>
                   <div class="grid grid-cols-3 gap-x-2 gap-y-3">
                     @foreach ($navMakes as $makeOpt)
@@ -257,6 +257,25 @@
           <img src="https://flagcdn.com/w40/us.png" width="24" height="16" alt="" class="h-4 w-auto shrink-0 rounded-sm object-cover ring-1 ring-white/15" decoding="async" loading="lazy" />{{ __('Foreign Used') }}
         </a>
         <a href="{{ $inventoryUrl }}" class="block bg-white/[0.03] px-4 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#1280DF] transition hover:bg-white/10 hover:text-white">{{ __('View full inventory') }}</a>
+        @if ($navMakes->isNotEmpty())
+          <div class="border-t border-white/10 bg-[#1a1d20]">
+            <p class="px-4 pt-3 pb-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white/45">{{ __('Shop by make') }}</p>
+            <div class="flex flex-col pb-2">
+              @foreach ($navMakes as $makeOpt)
+                <a href="{{ route('inventory.index', ['make_listing_option_id' => $makeOpt->id]) }}" class="flex items-center gap-3 border-t border-white/5 px-4 py-2.5 transition hover:bg-white/10">
+                  @if (! empty($makeOpt->logo_path))
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white/[0.06] ring-1 ring-white/10"><img src="{{ \App\Support\VehicleImageUrl::url($makeOpt->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" /></span>
+                  @elseif (! empty(trim((string) ($makeOpt->flag_emoji ?? ''))))
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center text-lg leading-none" style="font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif" aria-hidden="true">{{ trim((string) $makeOpt->flag_emoji) }}</span>
+                  @else
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white/10 text-[10px] font-black text-white/60">{{ strtoupper(\Illuminate\Support\Str::substr($makeOpt->value, 0, 2)) }}</span>
+                  @endif
+                  <span class="text-left text-[11px] font-bold uppercase tracking-[0.05em] text-white/85">{{ $makeOpt->value }}</span>
+                </a>
+              @endforeach
+            </div>
+          </div>
+        @endif
       </div>
     </div>
     <a href="{{ route('about') }}" class="rounded-sm px-3 py-3.5 text-sm font-bold uppercase tracking-[0.06em] text-white/90 transition hover:bg-white/10 hover:text-white">{{ __('About') }}</a>
@@ -324,7 +343,17 @@
           const data = await res.json().catch(() => ({}));
           if (!res.ok || !data.success) return;
           menu.classList.add('hidden');
-          window.location.reload();
+          if (data.currency_ui) {
+            window.siteCurrency = data.currency_ui;
+            try {
+              document.body.setAttribute('data-currency-ui', JSON.stringify(data.currency_ui));
+            } catch (_) { /* noop */ }
+          }
+          if (typeof window.applySiteCurrencyFormatting === 'function') {
+            window.applySiteCurrencyFormatting();
+          } else {
+            window.location.reload();
+          }
         } finally {
           toggle.removeAttribute('aria-busy');
           toggle.removeAttribute('disabled');

@@ -61,7 +61,7 @@
     @stack('head')
   </head>
 
-  <body class="bg-page_bg font-body text-on_surface selection:bg-brand_blue/20 {{ $bodyClass ?? '' }}" data-currency-ui="{{ e(json_encode($currencyUi ?? ['default' => 'USD', 'selected' => 'USD', 'symbols' => ['USD' => '$'], 'rates' => ['USD' => 1.0]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}">
+  <body class="bg-page_bg font-body text-on_surface selection:bg-brand_blue/20 {{ $bodyClass ?? '' }}" data-currency-label-prefix="{{ e(__('Currency')) }}" data-currency-ui="{{ e(json_encode($currencyUi ?? ['default' => 'USD', 'selected' => 'USD', 'symbols' => ['USD' => '$'], 'rates' => ['USD' => 1.0]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}">
     <!-- Global Loading Screen: logo centered; only outer ring animates (no box behind logo) -->
     <div id="global-loader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#1E2229] transition-opacity duration-700 ease-in-out">
       <div class="relative flex h-36 w-36 items-center justify-center">
@@ -132,22 +132,6 @@
         parsedCurrencyUi = {default: 'USD', selected: 'USD', symbols: {USD: '$'}, rates: {USD: 1}};
       }
       window.siteCurrency = parsedCurrencyUi;
-      (() => {
-        const cfg = window.siteCurrency || {};
-        const selected = String(cfg.selected || cfg.default || 'USD').toUpperCase();
-        const base = String(cfg.default || 'USD').toUpperCase();
-        const rates = cfg.rates || {};
-        const symbols = cfg.symbols || {};
-        const rate = Number(rates[selected] ?? rates[base] ?? 1);
-        const symbol = symbols[selected] ?? (selected + ' ');
-        document.querySelectorAll('[data-currency-amount]').forEach((el) => {
-          const raw = Number(el.getAttribute('data-currency-amount'));
-          if (!Number.isFinite(raw)) return;
-          const decimals = Number(el.getAttribute('data-currency-decimals') ?? '0');
-          const converted = raw * (Number.isFinite(rate) && rate > 0 ? rate : 1);
-          el.textContent = symbol + converted.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-        });
-      })();
 
       (() => {
         const cfg = window.siteCurrency || {};

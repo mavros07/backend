@@ -255,7 +255,14 @@
         <div class="bg-[#191c1e] border border-white/5 p-8 rounded-sm">
           <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-6">Dealer info</h3>
           <div class="flex items-center gap-4 mb-6">
-            <div class="w-12 h-12 rounded-full border-2 border-[#ffb129] bg-[#30353a]"></div>
+            @php $sellerPhoto = trim((string) ($sellerProfile['photo_url'] ?? '')); @endphp
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#ffb129] bg-[#30353a]">
+              @if ($sellerPhoto !== '')
+                <img src="{{ \Illuminate\Support\Str::startsWith($sellerPhoto, ['http://', 'https://']) ? $sellerPhoto : \App\Support\VehicleImageUrl::url($sellerPhoto) }}" alt="" class="h-full w-full object-cover" />
+              @else
+                <span class="material-symbols-outlined text-[28px] text-white/45" aria-hidden="true">person</span>
+              @endif
+            </div>
             <div>
               <div class="font-bold text-sm">{{ $sellerProfile['name'] ?? 'Dealer' }}</div>
               <div class="text-[10px] text-gray-500 uppercase font-bold">{{ $vehicle->isStaffListing() ? 'Dealer' : 'Private Seller' }}</div>
@@ -409,14 +416,14 @@
 
     @if ($similarVehicles->isNotEmpty())
       <section class="mt-24 pt-12 border-t border-white/10">
-        <div class="flex justify-between items-center mb-10">
-          <a class="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:text-[#ffb129]" href="{{ route('inventory.index') }}"><span class="material-symbols-outlined text-[14px]">arrow_back</span> Search results</a>
-          <div class="flex gap-2">
-            <button class="w-10 h-10 border border-white/20 flex items-center justify-center hover:border-[#ffb129]" type="button" data-carousel-prev><span class="material-symbols-outlined">chevron_left</span></button>
-            <button class="w-10 h-10 border border-white/20 flex items-center justify-center hover:border-[#ffb129]" type="button" data-carousel-next><span class="material-symbols-outlined">chevron_right</span></button>
-          </div>
-        </div>
         <div data-simple-carousel data-carousel-type="similar-cars">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-10">
+            <a class="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:text-[#ffb129]" href="{{ route('inventory.index') }}"><span class="material-symbols-outlined text-[14px]">arrow_back</span> Search results</a>
+            <div class="flex gap-2 shrink-0">
+              <button class="w-10 h-10 border border-white/20 flex items-center justify-center hover:border-[#ffb129]" type="button" data-carousel-prev aria-label="{{ __('Previous') }}"><span class="material-symbols-outlined">chevron_left</span></button>
+              <button class="w-10 h-10 border border-white/20 flex items-center justify-center hover:border-[#ffb129]" type="button" data-carousel-next aria-label="{{ __('Next') }}"><span class="material-symbols-outlined">chevron_right</span></button>
+            </div>
+          </div>
           <div class="overflow-hidden" data-carousel-viewport>
             <div class="flex gap-6 transition-transform duration-300" data-carousel-track>
               @foreach ($similarVehicles as $item)

@@ -1,6 +1,57 @@
 (function () {
   'use strict';
 
+  /**
+   * Format every [data-currency-amount] using window.siteCurrency (amounts stored in site's default/base currency).
+   */
+  window.applySiteCurrencyFormatting = function applySiteCurrencyFormatting() {
+    var cfg = typeof window.siteCurrency === 'object' && window.siteCurrency ? window.siteCurrency : {};
+    var selected = String(cfg.selected || cfg.default || 'USD').toUpperCase();
+    var base = String(cfg.default || 'USD').toUpperCase();
+    var rates = cfg.rates || {};
+    var symbols = cfg.symbols || {};
+    var r = rates[selected];
+    var rate = Number(r);
+    if (!isFinite(rate) || rate <= 0) {
+      rate = selected === base ? 1 : 1;
+    }
+    var symbol = symbols[selected] || (selected + ' ');
+    document.querySelectorAll('[data-currency-amount]').forEach(function (el) {
+      var raw = parseFloat(String(el.getAttribute('data-currency-amount') || '').replace(/,/g, ''));
+      if (!isFinite(raw)) return;
+      var dec = parseInt(String(el.getAttribute('data-currency-decimals') ?? '0'), 10);
+      if (!isFinite(dec) || dec < 0) dec = 0;
+      var converted = raw * rate;
+      el.textContent = symbol + converted.toLocaleString(undefined, {
+        minimumFractionDigits: dec,
+        maximumFractionDigits: dec,
+      });
+    });
+
+    var label = document.querySelector('[data-currency-label]');
+    if (label) {
+      var prefix = (document.body && document.body.getAttribute('data-currency-label-prefix')) || 'Currency';
+      label.textContent = prefix + ' (' + selected + ')';
+    }
+
+    if (document.body && typeof window.siteCurrency === 'object' && window.siteCurrency) {
+      try {
+        document.body.setAttribute('data-currency-ui', JSON.stringify(window.siteCurrency));
+      } catch (_) {
+        /* noop */
+      }
+    }
+
+    document.dispatchEvent(new CustomEvent('mt:site-currency-updated'));
+
+    document.querySelectorAll('[data-finance-calculator]').forEach(function (root) {
+      ['price', 'down', 'rate', 'term'].forEach(function (field) {
+        var inp = root.querySelector('[data-finance-input="' + field + '"]');
+        if (inp) inp.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    });
+  };
+
   var menuToggle = document.querySelector('[data-mobile-menu-toggle]');
   var menuPanel = document.querySelector('[data-mobile-menu-panel]');
   var menuOverlay = document.querySelector('[data-mobile-menu-overlay]');
@@ -779,7 +830,18 @@
       if (!priceEl || !downEl || !rateEl || !termEl || !outEl) return;
 
       function toNum(v) { var n = parseFloat(String(v || '0')); return isNaN(n) ? 0 : n; }
-      function money(v) { return '$' + Math.max(0, v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+      function financeMoney(v) {
+        var cfg = window.siteCurrency || {};
+        var sel = String(cfg.selected || cfg.default || 'USD').toUpperCase();
+        var base = String(cfg.default || 'USD').toUpperCase();
+        var rates = cfg.rates || {};
+        var symbols = cfg.symbols || {};
+        var rate = Number(rates[sel]);
+        if (!isFinite(rate) || rate <= 0) rate = sel === base ? 1 : 1;
+        var sym = symbols[sel] || '$';
+        var amt = Math.max(0, v) * rate;
+        return sym + amt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
 
       var price = toNum(root.getAttribute('data-price') || '0');
       var rate = toNum(root.getAttribute('data-rate') || '0');
@@ -828,18 +890,18 @@
         var annualRate = Math.max(0, toNum(rateEl.value));
 
         if (months <= 0) {
-          outEl.textContent = money(0);
-          if (totalInterestEl) totalInterestEl.textContent = money(0);
-          if (totalAmountEl) totalAmountEl.textContent = money(0);
+          outEl.textContent = financeMoney(0);
+          if (totalInterestEl) totalInterestEl.textContent = financeMoney(0);
+          if (totalAmountEl) totalAmountEl.textContent = financeMoney(0);
           if (applyBtn) applyBtn.setAttribute('disabled', 'disabled');
           return;
         }
 
         if (principal <= 0) {
           // Down payment == price → no financing needed.
-          outEl.textContent = money(0);
-          if (totalInterestEl) totalInterestEl.textContent = money(0);
-          if (totalAmountEl) totalAmountEl.textContent = money(0);
+          outEl.textContent = financeMoney(0);
+          if (totalInterestEl) totalInterestEl.textContent = financeMoney(0);
+          if (totalAmountEl) totalAmountEl.textContent = financeMoney(0);
           if (applyBtn) applyBtn.setAttribute('disabled', 'disabled');
           return;
         }
@@ -850,9 +912,9 @@
         else payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
         var totalAmount = payment * months;
         var totalInterest = totalAmount - principal;
-        outEl.textContent = money(payment);
-        if (totalInterestEl) totalInterestEl.textContent = money(totalInterest);
-        if (totalAmountEl) totalAmountEl.textContent = money(totalAmount);
+        outEl.textContent = financeMoney(payment);
+        if (totalInterestEl) totalInterestEl.textContent = financeMoney(totalInterest);
+        if (totalAmountEl) totalAmountEl.textContent = financeMoney(totalAmount);
         if (applyBtn) applyBtn.removeAttribute('disabled');
       }
 
@@ -871,11 +933,11 @@
         var principal = Math.max(0, p - d);
         var annualRate = Math.max(0, toNum(rateEl.value));
         var months = parseInt(termEl.value || '0', 10) || 0;
-        var monthly = (outEl && outEl.textContent) ? outEl.textContent : money(0);
+        var monthly = (outEl && outEl.textContent) ? outEl.textContent : financeMoney(0);
         var summary = 'Financing request:\n'
-          + '- Vehicle price: ' + money(p) + '\n'
-          + '- Down payment: ' + money(d) + '\n'
-          + '- Loan amount: ' + money(principal) + '\n'
+          + '- Vehicle price: ' + financeMoney(p) + '\n'
+          + '- Down payment: ' + financeMoney(d) + '\n'
+          + '- Loan amount: ' + financeMoney(principal) + '\n'
           + '- Interest rate: ' + annualRate.toFixed(2) + '%\n'
           + '- Term: ' + months + ' months\n'
           + '- Estimated monthly payment: ' + monthly;
@@ -929,14 +991,34 @@
       var btn = root.querySelector('[data-phone-reveal-btn]');
       var mask = root.querySelector('[data-phone-mask]');
       var full = root.querySelector('[data-phone-full]');
+      var iconShow = btn && btn.querySelector('[data-phone-icon-show]');
+      var iconHide = btn && btn.querySelector('[data-phone-icon-hide]');
       if (!btn || !mask || !full) return;
+      var maskedText = mask.textContent || '';
+      if (!root.getAttribute('data-phone-mask-original')) {
+        root.setAttribute('data-phone-mask-original', maskedText);
+      }
+      function syncIcons(revealed) {
+        if (iconShow) iconShow.classList.toggle('hidden', revealed);
+        if (iconHide) iconHide.classList.toggle('hidden', !revealed);
+        btn.setAttribute('aria-pressed', revealed ? 'true' : 'false');
+      }
+      syncIcons(false);
+
       btn.addEventListener('click', function () {
         var fullText = (full.textContent || '').trim();
         if (!fullText) return;
-        mask.textContent = fullText;
-        btn.setAttribute('disabled', 'disabled');
-        var revealed = (root.getAttribute('data-phone-revealed-label') || '').trim();
-        btn.textContent = revealed || 'Number shown';
+        var orig = root.getAttribute('data-phone-mask-original') || '';
+        var showing = root.getAttribute('data-phone-reveal-state') === '1';
+        if (!showing) {
+          mask.textContent = fullText;
+          root.setAttribute('data-phone-reveal-state', '1');
+          syncIcons(true);
+        } else {
+          mask.textContent = orig;
+          root.setAttribute('data-phone-reveal-state', '0');
+          syncIcons(false);
+        }
       });
     });
   }
@@ -1002,4 +1084,15 @@
   bindFinanceCalculators();
   bindPhoneReveal();
   bindFavoriteToggles();
+
+  function runSiteCurrencyFormatting() {
+    if (typeof window.applySiteCurrencyFormatting === 'function') {
+      window.applySiteCurrencyFormatting();
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runSiteCurrencyFormatting);
+  } else {
+    runSiteCurrencyFormatting();
+  }
 })();

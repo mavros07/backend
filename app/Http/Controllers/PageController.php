@@ -510,15 +510,19 @@ class PageController extends Controller
         $siteMerged = SiteSettingDefaults::mergeWithDatabase(SiteSetting::allKeyed());
 
         if ($vehicle->isStaffListing()) {
+            $logoPath = trim((string) ($siteMerged['logo_path'] ?? ''));
+            $logoUrl = trim((string) ($siteMerged['logo_url'] ?? ''));
             $sellerProfile = [
                 'name' => trim((string) ($siteMerged['site_display_name'] ?? '')) ?: (string) config('app.name'),
                 'email' => trim((string) ($siteMerged['dealer_public_email'] ?? '')) ?: (string) config('mail.from.address'),
                 'phone' => trim((string) ($siteMerged['dealer_phone'] ?? '')) ?: trim((string) ($siteMerged['dealer_sales_phone'] ?? '')),
                 'address' => (string) ($siteMerged['dealer_address'] ?? ''),
                 'map_location' => trim((string) ($vehicle->map_location ?? '')),
+                'photo_url' => $logoPath !== '' ? $logoPath : ($logoUrl !== '' ? $logoUrl : null),
             ];
         } else {
             $vp = $vehicle->user?->vendorProfile;
+            $userAvatar = trim((string) ($vehicle->user?->avatar ?? ''));
             if ($vp && $vp->show_on_listings) {
                 $sellerProfile = [
                     'name' => trim((string) ($vp->business_name ?? '')) ?: ($vehicle->user?->name ?: 'Dealer'),
@@ -526,6 +530,7 @@ class PageController extends Controller
                     'phone' => trim((string) ($vp->public_phone ?? '')) ?: ($vehicle->contact_phone ?: trim((string) ($siteMerged['dealer_phone'] ?? ''))),
                     'address' => trim((string) ($vp->public_address ?? '')) ?: trim((string) ($vehicle->street_address ?? '')),
                     'map_location' => trim((string) ($vp->map_location ?? '')) ?: trim((string) ($vehicle->map_location ?? '')),
+                    'photo_url' => $userAvatar !== '' ? $userAvatar : null,
                 ];
             } else {
                 $sellerProfile = [
@@ -534,6 +539,7 @@ class PageController extends Controller
                     'phone' => $vehicle->contact_phone ?: SiteSetting::getValue('dealer_phone', ''),
                     'address' => trim((string) ($vehicle->street_address ?? '')),
                     'map_location' => trim((string) ($vehicle->map_location ?? '')),
+                    'photo_url' => $userAvatar !== '' ? $userAvatar : null,
                 ];
             }
         }
