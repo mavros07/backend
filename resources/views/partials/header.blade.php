@@ -27,6 +27,7 @@
   $qRaw = strtolower((string) request('q', ''));
   $nigeriaActive = $inventoryActive && str_contains($qRaw, 'nigeria');
   $foreignActive = $inventoryActive && str_contains($qRaw, 'united states');
+  $navMakes = \App\Support\VehicleListingCatalog::activeMakeNavTiles();
 @endphp
 
 {{-- Motors dealer-two inspired public header: https://motors.stylemixthemes.com/elementor-dealer-two/ --}}
@@ -140,26 +141,53 @@
             <span class="material-symbols-outlined text-[18px] leading-none text-inherit" aria-hidden="true">expand_more</span>
           </a>
           <div class="absolute left-1/2 top-full z-[60] hidden w-max -translate-x-1/2 pt-2" data-header-inventory-panel role="region" aria-label="{{ __('Inventory categories') }}">
-            <div class="w-[min(30rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-white/15 bg-[#191c1e]/95 shadow-2xl shadow-black/40 backdrop-blur-xl ring-1 ring-white/5">
-              <div class="grid gap-px bg-white/10 p-px">
-                <a href="{{ $inventoryNigeriaUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $nigeriaActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
-                  <div>
-                    <span class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]"><span class="text-2xl leading-none" aria-hidden="true">🇳🇬</span>{{ __('Nigerian Used') }}</span>
-                    <p class="mt-1 text-xs font-medium text-white/50">{{ __('Locally sourced Nigerian-used listings.') }}</p>
-                  </div>
-                  <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
-                </a>
-                <a href="{{ $inventoryForeignUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $foreignActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
-                  <div>
-                    <span class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]"><span class="text-2xl leading-none" aria-hidden="true">🇺🇸</span>{{ __('Foreign Used') }}</span>
-                    <p class="mt-1 text-xs font-medium text-white/50">{{ __('Foreign-used imports and international stock.') }}</p>
-                  </div>
-                  <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
-                </a>
+            <div class="flex w-[min(48rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-white/15 bg-[#191c1e]/95 shadow-2xl shadow-black/40 backdrop-blur-xl ring-1 ring-white/5">
+              <div class="flex min-w-0 flex-1 flex-col">
+                <div class="grid flex-1 gap-px bg-white/10 p-px">
+                  <a href="{{ $inventoryNigeriaUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $nigeriaActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
+                    <div>
+                      <span class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]">
+                        <img src="https://flagcdn.com/w40/ng.png" srcset="https://flagcdn.com/w80/ng.png 2x" width="28" height="19" alt="" class="h-6 w-auto shrink-0 rounded-sm object-cover shadow-sm ring-1 ring-white/20" decoding="async" loading="lazy" />
+                        {{ __('Nigerian Used') }}
+                      </span>
+                      <p class="mt-1 text-xs font-medium text-white/50">{{ __('Locally sourced Nigerian-used listings.') }}</p>
+                    </div>
+                    <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
+                  </a>
+                  <a href="{{ $inventoryForeignUrl }}" class="group flex items-start justify-between gap-3 bg-[#232628] px-4 py-3 transition hover:bg-white/[0.06] {{ $foreignActive ? 'ring-1 ring-inset ring-[#1280DF]/50' : '' }}">
+                    <div>
+                      <span class="flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-white group-hover:text-[#1280DF]">
+                        <img src="https://flagcdn.com/w40/us.png" srcset="https://flagcdn.com/w80/us.png 2x" width="28" height="19" alt="" class="h-6 w-auto shrink-0 rounded-sm object-cover shadow-sm ring-1 ring-white/20" decoding="async" loading="lazy" />
+                        {{ __('Foreign Used') }}
+                      </span>
+                      <p class="mt-1 text-xs font-medium text-white/50">{{ __('Foreign-used imports and international stock.') }}</p>
+                    </div>
+                    <span class="material-symbols-outlined shrink-0 text-lg text-[#1280DF]/60 transition group-hover:translate-x-0.5 group-hover:text-[#1280DF]">chevron_right</span>
+                  </a>
+                </div>
+                <div class="border-t border-white/10 bg-white/[0.04] px-4 py-3">
+                  <a href="{{ $inventoryUrl }}" class="inline-flex items-center gap-1 text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#1280DF] hover:text-white">{{ __('View full inventory') }}<span class="material-symbols-outlined text-base">arrow_forward</span></a>
+                </div>
               </div>
-              <div class="border-t border-white/10 bg-white/[0.04] px-4 py-3">
-                <a href="{{ $inventoryUrl }}" class="inline-flex items-center gap-1 text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#1280DF] hover:text-white">{{ __('View full inventory') }}<span class="material-symbols-outlined text-base">arrow_forward</span></a>
-              </div>
+              @if ($navMakes->isNotEmpty())
+                <div class="hidden w-[14rem] shrink-0 flex-col border-l border-white/10 bg-black/25 p-3 sm:flex sm:flex-col md:w-[15rem]" aria-label="{{ __('Shop by make') }}">
+                  <p class="mb-3 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white/45">{{ __('Shop by make') }}</p>
+                  <div class="grid grid-cols-3 gap-x-2 gap-y-3">
+                    @foreach ($navMakes as $makeOpt)
+                      <a href="{{ route('inventory.index', ['make_listing_option_id' => $makeOpt->id]) }}" class="group flex flex-col items-center gap-1 rounded-lg p-1.5 text-center transition hover:bg-white/10">
+                        @if (! empty($makeOpt->logo_path))
+                          <span class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-md bg-white/[0.06] ring-1 ring-white/10"><img src="{{ \App\Support\VehicleImageUrl::url($makeOpt->logo_path) }}" alt="" class="h-full w-full object-contain p-0.5" /></span>
+                        @elseif (! empty(trim((string) ($makeOpt->flag_emoji ?? ''))))
+                          <span class="flex h-9 w-9 items-center justify-center text-xl leading-none" style="font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif" aria-hidden="true">{{ trim((string) $makeOpt->flag_emoji) }}</span>
+                        @else
+                          <span class="flex h-9 w-9 items-center justify-center rounded-md bg-white/10 text-[10px] font-black text-white/60">{{ strtoupper(\Illuminate\Support\Str::substr($makeOpt->value, 0, 2)) }}</span>
+                        @endif
+                        <span class="line-clamp-2 w-full text-[8px] font-bold uppercase leading-tight text-white/70 transition group-hover:text-white">{{ $makeOpt->value }}</span>
+                      </a>
+                    @endforeach
+                  </div>
+                </div>
+              @endif
             </div>
           </div>
         </div>
@@ -223,10 +251,10 @@
       </button>
       <div id="mobile-inventory-subnav" class="hidden border-t border-white/10" data-mobile-inventory-panel>
         <a href="{{ $inventoryNigeriaUrl }}" class="flex items-center gap-2 border-b border-white/5 px-4 py-3 text-xs font-bold uppercase tracking-[0.06em] text-white/80 transition hover:bg-white/10 hover:text-white">
-          <span class="text-xl leading-none" aria-hidden="true">🇳🇬</span>{{ __('Nigerian Used') }}
+          <img src="https://flagcdn.com/w40/ng.png" width="24" height="16" alt="" class="h-4 w-auto shrink-0 rounded-sm object-cover ring-1 ring-white/15" decoding="async" loading="lazy" />{{ __('Nigerian Used') }}
         </a>
         <a href="{{ $inventoryForeignUrl }}" class="flex items-center gap-2 border-b border-white/5 px-4 py-3 text-xs font-bold uppercase tracking-[0.06em] text-white/80 transition hover:bg-white/10 hover:text-white">
-          <span class="text-xl leading-none" aria-hidden="true">🇺🇸</span>{{ __('Foreign Used') }}
+          <img src="https://flagcdn.com/w40/us.png" width="24" height="16" alt="" class="h-4 w-auto shrink-0 rounded-sm object-cover ring-1 ring-white/15" decoding="async" loading="lazy" />{{ __('Foreign Used') }}
         </a>
         <a href="{{ $inventoryUrl }}" class="block bg-white/[0.03] px-4 py-3 text-xs font-extrabold uppercase tracking-[0.08em] text-[#1280DF] transition hover:bg-white/10 hover:text-white">{{ __('View full inventory') }}</a>
       </div>

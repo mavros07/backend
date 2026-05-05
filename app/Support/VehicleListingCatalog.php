@@ -66,6 +66,35 @@ final class VehicleListingCatalog
     }
 
     /**
+     * Active makes with logo/flag for public header mega menu (desktop).
+     *
+     * @return Collection<int, ListingOption>
+     */
+    public static function activeMakeNavTiles(): Collection
+    {
+        try {
+            if (! Schema::hasTable('listing_options') || ! Schema::hasTable('listing_option_categories')) {
+                return collect();
+            }
+        } catch (\Throwable) {
+            return collect();
+        }
+
+        $catId = ListingOptionCategory::query()->where('slug', 'make')->value('id');
+        if (! $catId) {
+            return collect();
+        }
+
+        return ListingOption::query()
+            ->where('category_id', $catId)
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('value')
+            ->get(['id', 'value', 'logo_path', 'flag_emoji']);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public static function filterOptions(): array

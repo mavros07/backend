@@ -1,6 +1,17 @@
 {{-- Single-path media picker for admin pages (e.g. listing-options). Excluded on admin.pages.edit which binds its own modal logic. --}}
 <script>
 (function () {
+  function mtSyncMakeLogoPickVisibility() {
+    document.querySelectorAll('.js-mt-media-pick[data-mt-media-target]').forEach(function (btn) {
+      var tid = btn.getAttribute('data-mt-media-target');
+      if (!tid || (tid.indexOf('make_logo_path_') !== 0 && tid !== 'modal_make_logo_path')) return;
+      var input = document.getElementById(tid);
+      if (!input) return;
+      var hasPath = String(input.value || '').trim() !== '';
+      btn.classList.toggle('hidden', hasPath);
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     const mediaModal = document.getElementById('media-modal');
     const mediaGrid = document.getElementById('media-grid');
@@ -135,6 +146,7 @@
           const clean = String(path || '').replace(/^\/+/, '');
           previewImg.src = '/' + clean;
         }
+        mtSyncMakeLogoPickVisibility();
         closePickerModal();
       }, true);
     }
@@ -194,6 +206,15 @@
         }
       });
     }
+
+    mtSyncMakeLogoPickVisibility();
+    document.addEventListener('input', function (e) {
+      var t = e.target;
+      if (!t || !t.id) return;
+      if (t.id === 'modal_make_logo_path' || t.id.indexOf('make_logo_path_') === 0) {
+        mtSyncMakeLogoPickVisibility();
+      }
+    }, true);
   });
 })();
 </script>
