@@ -82,7 +82,7 @@
         </a>
         <a href="{{ route('admin.users.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-violet-300/80 hover:shadow-lg">
           <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-500">{{ __('Accounts') }}</span>
-          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Users & vendors') }}</span>
+          <span class="mt-2 block text-lg font-bold text-zinc-900">{{ __('Users & dealers') }}</span>
           <span class="mt-4 inline-flex items-center text-sm font-semibold text-violet-600 group-hover:text-violet-700">{{ __('Open →') }}</span>
         </a>
         <a href="{{ route('admin.pages.index') }}" class="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ring-1 ring-black/[0.03] transition hover:border-sky-300/80 hover:shadow-lg">

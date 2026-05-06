@@ -30,7 +30,7 @@
               @if($u?->hasRole('admin'))
                 {{ __('Staff (admin role)') }}
               @else
-                {{ __('Vendor') }}
+                {{ __('Dealer') }}
               @endif
             </div>
           </div>

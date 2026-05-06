@@ -21,7 +21,7 @@
                     </x-nav-link>
 
                     <x-nav-link :href="route('dashboard.vendor-settings.edit')" :active="request()->routeIs('dashboard.vendor-settings.*')">
-                        {{ __('Seller profile') }}
+                        {{ __('Dealer profile') }}
                     </x-nav-link>
 
                     <x-nav-link :href="route('inventory.index')" :active="request()->routeIs('inventory.*')">
@@ -88,7 +88,7 @@
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('dashboard.vendor-settings.edit')" :active="request()->routeIs('dashboard.vendor-settings.*')">
-                {{ __('Seller profile') }}
+                {{ __('Dealer profile') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('inventory.index')" :active="request()->routeIs('inventory.*')">
@@ -105,7 +105,7 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('dashboard.vendor-settings.edit')">
-                    {{ __('Seller profile') }}
+                    {{ __('Dealer profile') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link :href="route('profile.edit')">

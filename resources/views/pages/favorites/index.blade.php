@@ -1,17 +1,18 @@
-@extends('layouts.site')
-
-@section('content')
-  <div class="container">
-    <div style="margin: 24px 0 16px;">
-      <h1 class="heading-font" style="margin: 0;">Saved listings</h1>
-      <p class="text-muted" style="margin: 8px 0 0;">Vehicles you bookmarked from inventory.</p>
+<x-app-layout>
+  <x-slot name="header">
+    <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+      <h2 class="text-xl font-semibold text-slate-800">{{ __('Saved listings') }}</h2>
     </div>
+  </x-slot>
 
+  <div class="w-full">
     @if (session('status'))
-      <div style="padding:12px 16px;margin-bottom:16px;background:var(--site-success-bg,#dbf2a2);border-radius:8px;">
+      <div class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
         {{ session('status') }}
       </div>
     @endif
+
+    <p class="mb-6 text-sm text-slate-600">{{ __('Vehicles you bookmarked from inventory.') }}</p>
 
     <div class="inv-results" id="listings-result">
       @forelse($vehicles as $vehicle)
@@ -114,4 +115,4 @@
       </div>
     @endif
   </div>
-@endsection
+</x-app-layout>

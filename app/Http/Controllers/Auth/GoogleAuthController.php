@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Auth\EmailOtpService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -25,16 +26,22 @@ class GoogleAuthController extends Controller
             && is_string($redirect) && trim($redirect) !== '';
     }
 
-    public function redirect(): RedirectResponse
+    public function redirect(Request $request): RedirectResponse
     {
         if (! $this->googleOAuthConfigured()) {
             return redirect()->route('login')->withErrors(['email' => __('Google sign-in is not configured.')]);
         }
 
+        $intent = $request->query('intent', 'login');
+        if (! in_array($intent, ['login', 'register'], true)) {
+            $intent = 'login';
+        }
+        $request->session()->put('google_oauth_intent', $intent);
+
         return Socialite::driver('google')->redirect();
     }
 
-    public function callback(EmailOtpService $otp): RedirectResponse
+    public function callback(Request $request, EmailOtpService $otp): RedirectResponse
     {
         if (! $this->googleOAuthConfigured()) {
             return redirect()->route('login')->withErrors(['email' => __('Google sign-in is not configured.')]);
@@ -57,39 +64,67 @@ class GoogleAuthController extends Controller
         $name = (string) ($googleUser->getName() ?: Str::before($email, '@'));
         $avatar = $googleUser->getAvatar();
 
-        $user = User::query()->where('google_id', $googleId)->first();
-
-        if (! $user) {
-            $existing = User::query()->where('email', $email)->first();
-            if ($existing) {
-                if ($existing->google_id !== null && $existing->google_id !== $googleId) {
-                    return redirect()->route('login')->withErrors(['email' => __('This email is already linked to another sign-in method.')]);
-                }
-                $existing->forceFill([
-                    'google_id' => $googleId,
-                    'email_verified_at' => $existing->email_verified_at ?? now(),
-                ]);
-                if (is_string($avatar) && $avatar !== '') {
-                    $existing->avatar = $avatar;
-                }
-                $existing->save();
-                $user = $existing;
-            } else {
-                $user = User::create([
-                    'name' => $name,
-                    'email' => $email,
-                    'password' => Str::password(32),
-                    'google_id' => $googleId,
-                    'avatar' => is_string($avatar) ? $avatar : null,
-                    'email_verified_at' => now(),
-                ]);
-                Role::findOrCreate('user');
-                $user->assignRole('user');
-            }
-        } elseif (is_string($avatar) && $avatar !== '' && $user->avatar !== $avatar) {
-            $user->forceFill(['avatar' => $avatar])->save();
+        $intent = (string) $request->session()->pull('google_oauth_intent', 'login');
+        if (! in_array($intent, ['login', 'register'], true)) {
+            $intent = 'login';
         }
 
+        $userByGoogle = User::query()->where('google_id', $googleId)->first();
+        if ($userByGoogle) {
+            $user = $userByGoogle;
+            if (is_string($avatar) && $avatar !== '' && $user->avatar !== $avatar) {
+                $user->forceFill(['avatar' => $avatar])->save();
+            }
+
+            return $this->finalizeGoogleLogin($otp, $user);
+        }
+
+        $existingByEmail = User::query()->where('email', $email)->first();
+
+        if ($intent === 'register') {
+            if ($existingByEmail) {
+                return redirect()->route('login', ['tab' => 'login'])
+                    ->withErrors(['email' => __('An account with this email already exists. Sign in with Google from the Sign in tab instead.')]);
+            }
+
+            $user = User::create([
+                'name' => $name,
+                'email' => $email,
+                'password' => Str::password(32),
+                'google_id' => $googleId,
+                'avatar' => is_string($avatar) ? $avatar : null,
+                'email_verified_at' => now(),
+            ]);
+            Role::findOrCreate('user');
+            $user->assignRole('user');
+
+            return $this->finalizeGoogleLogin($otp, $user);
+        }
+
+        // intent === login
+        if (! $existingByEmail) {
+            return redirect()->route('login', ['tab' => 'register'])
+                ->withErrors(['email' => __('No account exists for this Google email yet. Create an account on the Create account tab, then you can use Google.')]);
+        }
+
+        if ($existingByEmail->google_id !== null && $existingByEmail->google_id !== $googleId) {
+            return redirect()->route('login')->withErrors(['email' => __('This email is already linked to another sign-in method.')]);
+        }
+
+        $existingByEmail->forceFill([
+            'google_id' => $googleId,
+            'email_verified_at' => $existingByEmail->email_verified_at ?? now(),
+        ]);
+        if (is_string($avatar) && $avatar !== '') {
+            $existingByEmail->avatar = $avatar;
+        }
+        $existingByEmail->save();
+
+        return $this->finalizeGoogleLogin($otp, $existingByEmail);
+    }
+
+    protected function finalizeGoogleLogin(EmailOtpService $otp, User $user): RedirectResponse
+    {
         if ($user->email_login_otp_enabled) {
             request()->session()->put('login_otp_user_id', $user->id);
             request()->session()->put('login_otp_remember', true);

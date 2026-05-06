@@ -13,7 +13,7 @@ class AppLayout extends Component
      */
     public function render(): View
     {
-        if (Auth::check() && Auth::user()->hasRole('admin')) {
+        if (Auth::check()) {
             return view('layouts.admin');
         }
 

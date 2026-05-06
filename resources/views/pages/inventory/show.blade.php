@@ -388,7 +388,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
           <div class="space-y-8">
             <h3 class="text-2xl font-black uppercase font-['Montserrat']">Contact Information</h3>
-            <p class="text-gray-400 text-sm">This vehicle listing is powered by live seller data and synced from the listing editor.</p>
+            <p class="text-gray-400 text-sm">{{ __('This vehicle listing reflects live listing data and is synced from the listing editor.') }}</p>
             <div class="space-y-4">
               <div class="flex items-center gap-4"><div class="bg-[#ffb129] p-2 rounded-full"><span class="material-symbols-outlined text-[#191c1e] text-lg">location_on</span></div><span class="text-sm font-bold">{{ $sellerProfile['address'] ?? $vehicle->street_address ?: 'N/A' }}</span></div>
               <div class="flex items-center gap-4"><div class="bg-[#ffb129] p-2 rounded-full"><span class="material-symbols-outlined text-[#191c1e] text-lg">phone</span></div><span class="text-sm font-bold">{{ $sellerProfile['phone'] ?? 'N/A' }}</span></div>
@@ -397,7 +397,7 @@
           </div>
           @if ($vehicle->status === 'approved')
             <div class="space-y-6">
-              <h3 class="text-xl font-black uppercase flex items-center gap-2 font-['Montserrat']"><span class="material-symbols-outlined text-[#ffb129]">send</span> Message to vendor</h3>
+              <h3 class="text-xl font-black uppercase flex items-center gap-2 font-['Montserrat']"><span class="material-symbols-outlined text-[#ffb129]">send</span> {{ __('Message to dealer') }}</h3>
               <form method="post" action="{{ route('inventory.inquiry', ['slug' => $vehicle->slug]) }}" class="space-y-4">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

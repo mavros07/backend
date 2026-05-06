@@ -143,7 +143,7 @@
                           @if($isStaffListing)
                             <span class="inline-flex rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">{{ __('Staff listing') }}</span>
                           @else
-                            <span class="inline-flex rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">{{ __('Vendor listing') }}</span>
+                            <span class="inline-flex rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">{{ __('Dealer listing') }}</span>
                           @endif
                         </div>
                       </td>
@@ -200,7 +200,7 @@
                             <form x-show="rejectExpandedId === {{ $vehicle->id }}" method="post" action="{{ route('admin.vehicles.reject', $vehicle) }}" class="space-y-2 border-t border-slate-100 bg-slate-50/90 px-3 py-3" x-cloak>
                               @csrf
                               <label class="block text-xs font-medium text-slate-600">{{ __('Reason (optional)') }}</label>
-                              <textarea name="rejection_reason" rows="3" class="w-full rounded-md border border-slate-300 text-sm shadow-sm focus:border-rose-400 focus:ring-rose-400" placeholder="{{ __('Explain to the vendor…') }}">{{ $rejectReasonDefault }}</textarea>
+                              <textarea name="rejection_reason" rows="3" class="w-full rounded-md border border-slate-300 text-sm shadow-sm focus:border-rose-400 focus:ring-rose-400" placeholder="{{ __('Explain to the dealer…') }}">{{ $rejectReasonDefault }}</textarea>
                               <button type="submit" class="w-full rounded-md bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-500">{{ __('Reject listing') }}</button>
                             </form>
                           </div>

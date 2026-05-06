@@ -1,7 +1,7 @@
 <x-app-layout>
   <x-slot name="header">
     <div class="flex flex-wrap items-start justify-between gap-4">
-      <h2 class="text-xl font-semibold tracking-tight text-zinc-900">{{ __('Users & vendors') }}</h2>
+      <h2 class="text-xl font-semibold tracking-tight text-zinc-900">{{ __('Users & dealers') }}</h2>
       <button
         type="button"
         class="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-zinc-800"
@@ -21,7 +21,7 @@
     <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
       <div class="border-b border-zinc-100 px-6 py-4">
         <h3 class="text-base font-bold text-zinc-900">{{ __('All accounts') }}</h3>
-        <p class="mt-1 text-sm text-zinc-600">{{ __('Admins manage the site; vendors own their listings.') }}</p>
+        <p class="mt-1 text-sm text-zinc-600">{{ __('Admins manage the site; dealers own their listings.') }}</p>
       </div>
       <div class="overflow-x-auto p-4 sm:p-6">
         <table class="min-w-full divide-y divide-zinc-200 text-sm">
@@ -44,7 +44,7 @@
                       @if($role->name === 'admin')
                         <span class="inline-flex rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-800">{{ __('Admin') }}</span>
                       @elseif($role->name === 'user')
-                        <span class="inline-flex rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold text-sky-800">{{ __('Vendor') }}</span>
+                        <span class="inline-flex rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold text-sky-800">{{ __('Dealer') }}</span>
                       @else
                         <span class="inline-flex rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-700">{{ $role->name }}</span>
                       @endif
@@ -92,7 +92,7 @@
         <div class="sticky top-0 flex items-start justify-between gap-4 border-b border-zinc-100 bg-white px-6 py-4">
           <div>
             <h3 class="text-base font-bold text-zinc-900">{{ __('Invite or create an account') }}</h3>
-            <p class="mt-1 text-sm text-zinc-600">{{ __('Choose Admin for full console access, or Vendor for users who only list vehicles.') }}</p>
+            <p class="mt-1 text-sm text-zinc-600">{{ __('Choose Admin for full console access, or Dealer for users who only list vehicles.') }}</p>
           </div>
           <button type="button" class="rounded-lg p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800" @click="inviteOpen = false" aria-label="{{ __('Close') }}">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -123,7 +123,7 @@
             <div class="sm:col-span-2">
               <x-input-label for="role" value="{{ __('Role') }}" />
               <select id="role" name="role" class="mt-1 block w-full rounded-lg border-zinc-300 text-sm shadow-sm focus:border-amber-500 focus:ring-amber-500">
-                <option value="user" @selected(old('role') === 'user')>{{ __('Vendor (list vehicles)') }}</option>
+                <option value="user" @selected(old('role') === 'user')>{{ __('Dealer (list vehicles)') }}</option>
                 <option value="admin" @selected(old('role') === 'admin')>{{ __('Admin (full access)') }}</option>
               </select>
               <x-input-error :messages="$errors->get('role')" class="mt-2" />

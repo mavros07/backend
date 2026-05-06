@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
@@ -49,7 +50,12 @@ class AdminUserController extends Controller
         // Prevent deleting yourself accidentally in this simple UI.
         abort_if(Auth::id() === $user->id, 400);
 
-        $user->delete();
+        DB::transaction(function () use ($user): void {
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+            DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+            $user->syncRoles([]);
+            $user->delete();
+        });
 
         return back();
     }

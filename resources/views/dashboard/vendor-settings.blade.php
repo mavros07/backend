@@ -5,7 +5,7 @@
   <x-slot name="header">
     <div>
       <div class="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-500">{{ __('Account') }}</div>
-      <div class="text-xl font-bold tracking-tight text-zinc-900">{{ __('Seller profile') }}</div>
+      <div class="text-xl font-bold tracking-tight text-zinc-900">{{ __('Dealer profile') }}</div>
     </div>
   </x-slot>
 
@@ -30,7 +30,7 @@
         <div class="mt-4 space-y-4">
           <label class="flex items-center gap-2">
             <input type="checkbox" name="show_on_listings" value="1" @checked(old('show_on_listings', $profile->show_on_listings)) class="rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500" />
-            <span class="text-sm text-zinc-800">{{ __('Use seller profile on listings') }}</span>
+            <span class="text-sm text-zinc-800">{{ __('Use dealer profile on listings') }}</span>
           </label>
           <div>
             <label for="business_name" class="block text-sm font-medium text-zinc-700">{{ __('Business / display name') }}</label>

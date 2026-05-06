@@ -7,18 +7,41 @@
   $initials = strtoupper(substr($n, 0, 1).(str_contains($n, ' ') ? substr($n, (int) strrpos($n, ' ') + 1, 1) : ''));
   $initials = strlen($initials) > 2 ? substr($initials, 0, 2) : $initials;
 
-  /** Outline icons (stroke 1.5 in markup) — Heroicons 24 outline style */
-  $navItems = [
-      ['route' => 'admin.dashboard', 'match' => 'admin.dashboard', 'label' => __('Overview'), 'icon' => 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z'],
-      ['route' => 'dashboard.vehicles.index', 'match' => 'dashboard.vehicles.*', 'label' => __('All listings'), 'icon' => 'M6 6.878V6a2.25 2.25 0 012.25-2.25h9.75A2.25 2.25 0 0120.25 6v.878m-15.75 1.5h15m-15 0a2.25 2.25 0 00-2.25 2.25v9.75A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25v-9.75a2.25 2.25 0 00-2.25-2.25h-15z'],
-      ['route' => 'admin.users.index', 'match' => 'admin.users.*', 'label' => __('All users'), 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
-      ['route' => 'admin.analytics.index', 'match' => 'admin.analytics.*', 'label' => __('Analytics'), 'icon' => 'M3 3v18h18M7 15l3-3 3 2 4-5'],
-      ['route' => 'admin.pages.index', 'match' => 'admin.pages.*', 'label' => __('Pages'), 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-      ['route' => 'admin.listing-options.index', 'match' => 'admin.listing-options.*', 'label' => __('Listing options'), 'icon' => 'M4 6h16M4 10h16M4 14h10'],
-      ['route' => 'admin.media.index', 'match' => 'admin.media.*', 'label' => __('Media'), 'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
-      ['route' => 'admin.settings.edit', 'match' => 'admin.settings.*', 'label' => __('Site settings'), 'icon' => 'M3 3v18h18M7 15l3-3 3 2 4-5'],
-      ['route' => 'admin.audit.index', 'match' => 'admin.audit.*', 'label' => __('Audit trail'), 'icon' => 'M9 12h6m-6 4h6M7.5 3.75h9A2.25 2.25 0 0118.75 6v12A2.25 2.25 0 0116.5 20.25h-9A2.25 2.25 0 015.25 18V6A2.25 2.25 0 017.5 3.75z'],
-  ];
+  $icOverview = 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z';
+  $icListings = 'M6 6.878V6a2.25 2.25 0 012.25-2.25h9.75A2.25 2.25 0 0120.25 6v.878m-15.75 1.5h15m-15 0a2.25 2.25 0 00-2.25 2.25v9.75A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25v-9.75a2.25 2.25 0 00-2.25-2.25h-15z';
+  $icUsers = 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z';
+  $icPlus = 'M12 4.5v15m7.5-7.5h-15';
+  $icHeart = 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z';
+  $icStore = 'M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c-1.026 0-1.945.52-2.48 1.312A3.001 3.001 0 003.75 9.35m0 0v11.65';
+
+  $isAdminRole = $user && $user->hasRole('admin');
+  $dashboardHomeRoute = $isAdminRole ? 'admin.dashboard' : 'dashboard';
+  $shellSubtitle = $isAdminRole ? __('Console') : __('Dealer');
+  $navAriaLabel = $isAdminRole ? __('Admin') : __('Account');
+
+  /** Outline icons (stroke 1.5) — Heroicons 24 outline style */
+  $navItems = $isAdminRole
+      ? [
+          ['route' => 'admin.dashboard', 'match' => 'admin.dashboard', 'label' => __('Overview'), 'icon' => $icOverview],
+          ['route' => 'dashboard.vehicles.index', 'match' => 'dashboard.vehicles.*', 'label' => __('All listings'), 'icon' => $icListings],
+          ['route' => 'admin.users.index', 'match' => 'admin.users.*', 'label' => __('All users'), 'icon' => $icUsers],
+          ['route' => 'admin.analytics.index', 'match' => 'admin.analytics.*', 'label' => __('Analytics'), 'icon' => 'M3 3v18h18M7 15l3-3 3 2 4-5'],
+          ['route' => 'admin.pages.index', 'match' => 'admin.pages.*', 'label' => __('Pages'), 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+          ['route' => 'admin.listing-options.index', 'match' => 'admin.listing-options.*', 'label' => __('Listing options'), 'icon' => 'M4 6h16M4 10h16M4 14h10'],
+          ['route' => 'admin.media.index', 'match' => 'admin.media.*', 'label' => __('Media'), 'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
+          ['route' => 'admin.settings.edit', 'match' => 'admin.settings.*', 'label' => __('Site settings'), 'icon' => 'M3 3v18h18M7 15l3-3 3 2 4-5'],
+          ['route' => 'admin.audit.index', 'match' => 'admin.audit.*', 'label' => __('Audit trail'), 'icon' => 'M9 12h6m-6 4h6M7.5 3.75h9A2.25 2.25 0 0118.75 6v12A2.25 2.25 0 0116.5 20.25h-9A2.25 2.25 0 015.25 18V6A2.25 2.25 0 017.5 3.75z'],
+      ]
+      : [
+          ['route' => 'dashboard', 'match' => 'dashboard', 'label' => __('Overview'), 'icon' => $icOverview],
+          ['route' => 'dashboard.vehicles.index', 'match' => 'dealer.vehicles.list', 'label' => __('My listings'), 'icon' => $icListings],
+          ['route' => 'dashboard.vehicles.create', 'match' => 'dashboard.vehicles.create', 'label' => __('New listing'), 'icon' => $icPlus],
+          ['route' => 'dashboard.vendor-settings.edit', 'match' => 'dashboard.vendor-settings.*', 'label' => __('Dealer profile'), 'icon' => $icStore],
+          ['route' => 'dashboard.favorites.index', 'match' => 'dashboard.favorites.*', 'label' => __('Saved vehicles'), 'icon' => $icHeart],
+      ];
+
+  $mediaUploadUrl = $isAdminRole ? route('admin.media.upload') : route('dashboard.api.media.upload');
+  $mediaListUrl = $isAdminRole ? route('admin.media.list') : route('dashboard.api.media');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
@@ -112,7 +135,7 @@
         ]"
       >
         <div class="flex h-16 shrink-0 items-center gap-2 border-b border-white/10 px-4">
-          <a href="{{ route('admin.dashboard') }}" class="flex min-w-0 flex-1 items-center gap-3" @click="closeDrawer()">
+          <a href="{{ route($dashboardHomeRoute) }}" class="flex min-w-0 flex-1 items-center gap-3" @click="closeDrawer()">
             @if (!empty($logoPath))
               <img x-show="!railMode" x-cloak src="{{ \App\Support\VehicleImageUrl::url($logoPath) }}" alt="" class="h-9 w-9 shrink-0 rounded-lg object-contain ring-1 ring-white/10" />
             @else
@@ -120,7 +143,7 @@
             @endif
             <div class="min-w-0" x-show="!railMode" x-cloak>
               <div class="truncate text-sm font-semibold tracking-tight text-white">{{ $brandName }}</div>
-              <div class="truncate text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">{{ __('Console') }}</div>
+              <div class="truncate text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-500">{{ $shellSubtitle }}</div>
             </div>
           </a>
           <button
@@ -136,9 +159,16 @@
           </button>
         </div>
 
-        <nav class="hide-scrollbar flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overflow-x-hidden px-3 py-4" aria-label="{{ __('Admin') }}">
+        <nav class="hide-scrollbar flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overflow-x-hidden px-3 py-4" aria-label="{{ $navAriaLabel }}">
           @foreach ($navItems as $item)
-            @php $active = request()->routeIs($item['match']); @endphp
+            @php
+              $match = $item['match'];
+              if ($match === 'dealer.vehicles.list') {
+                  $active = request()->routeIs('dashboard.vehicles.*') && ! request()->routeIs('dashboard.vehicles.create');
+              } else {
+                  $active = request()->routeIs($match);
+              }
+            @endphp
             <a
               href="{{ route($item['route']) }}"
               @click="closeDrawer()"
@@ -241,8 +271,8 @@
           </div>
         </main>
       </div>
-    @include('partials.media-modal', ['mediaUploadUrl' => route('admin.media.upload')])
-    <input type="hidden" id="media-list-url" value="{{ route('admin.media.list') }}" />
+    @include('partials.media-modal', ['mediaUploadUrl' => $mediaUploadUrl])
+    <input type="hidden" id="media-list-url" value="{{ $mediaListUrl }}" />
     @unless (request()->routeIs('admin.pages.edit'))
       @include('partials.media-modal-pickers')
     @endunless
