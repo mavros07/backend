@@ -10,7 +10,7 @@
     $useAuthPanelFallback = $panelPath === '' && is_file($authPanelFallback);
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full max-w-[100vw] overflow-x-hidden">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,10 +24,11 @@
 
         @include('partials.vite-assets')
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="flex min-h-screen flex-col bg-zinc-100 md:h-screen md:flex-row md:overflow-hidden">
+    <body class="h-full max-w-[100vw] overflow-x-hidden font-sans text-gray-900 antialiased">
+        {{-- min-w-0 on flex children prevents content from forcing horizontal scroll past 50/50 columns --}}
+        <div class="flex min-h-screen max-w-full min-w-0 flex-col bg-zinc-100 md:h-screen md:min-h-0 md:flex-row md:overflow-hidden">
             {{-- Left (desktop) / top (mobile): full-height background image --}}
-            <div class="relative min-h-[36vh] w-full shrink-0 overflow-hidden sm:min-h-[40vh] md:min-h-0 md:h-full md:w-[44%] lg:w-[45%]">
+            <div class="relative min-h-[36vh] w-full min-w-0 shrink-0 overflow-hidden sm:min-h-[40vh] md:h-full md:w-1/2">
                 @if ($panelPath !== '')
                     <img
                         src="{{ \App\Support\VehicleImageUrl::url($panelPath) }}"
@@ -48,9 +49,9 @@
                 @endif
             </div>
 
-            {{-- Right (desktop) / bottom (mobile): sign-in / register --}}
-            <div class="flex min-h-0 w-full flex-1 flex-col justify-center px-6 py-10 sm:px-10 md:w-[56%] md:flex-none md:overflow-y-auto md:py-14 lg:w-[55%]">
-                <div class="mx-auto w-full max-w-md">
+            {{-- Right (desktop) / bottom (mobile): sign-in / register (uses full half width on md+) --}}
+            <div class="flex min-h-0 w-full min-w-0 flex-1 flex-col justify-center px-6 py-10 sm:px-10 md:h-full md:w-1/2 md:flex-none md:overflow-y-auto md:overflow-x-hidden md:py-14 lg:px-12">
+                <div class="mx-auto w-full min-w-0">
                     <a href="{{ url('/') }}" class="inline-flex max-w-full items-center {{ $hasLogo ? '' : 'justify-center md:justify-start' }}">
                         @if ($hasLogo)
                             <img

@@ -18,7 +18,7 @@
       </div>
     @endif
 
-    <div class="flex border-b border-gray-200 mb-6 -mx-6 px-6">
+    <div class="mb-6 flex border-b border-gray-200">
       <button type="button" @click="tab = 'login'" :class="tab === 'login' ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-gray-500 hover:text-gray-700'" class="flex-1 border-b-2 py-3 text-sm font-semibold transition">
         {{ __('Sign in') }}
       </button>

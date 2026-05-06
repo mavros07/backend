@@ -7,7 +7,7 @@
   </x-slot>
 
   <div class="mx-auto max-w-5xl space-y-8">
-    <p class="text-sm text-zinc-600">{{ __('Branding, footer, top bar, and contact/newsletter routing. Upload logos/favicons directly here, or paste media library paths if needed.') }}</p>
+    <p class="text-sm text-zinc-600">{{ __('Branding, login page background, footer, top bar, and contact/newsletter routing. Upload logos/favicons directly here, or paste media library paths if needed.') }}</p>
 
     @if (session('status'))
       <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">{{ session('status') }}</div>
@@ -69,11 +69,26 @@
               @endif
             </div>
           </div>
-          <div class="border-t border-zinc-100 pt-4">
-            <label for="auth_panel_image_file" class="block text-sm font-medium text-zinc-700">{{ __('Sign-in / register panel image (desktop)') }}</label>
-            <p class="mt-1 text-xs text-zinc-500">{{ __('Shown on the right side of the account layout on large screens. Square or portrait photos work best.') }}</p>
+        </div>
+      </section>
+
+      <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div class="border-b border-zinc-100 bg-zinc-50 px-6 py-4">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-zinc-700">{{ __('Login & registration page') }}</h2>
+          <p class="mt-1 text-xs text-zinc-500">{{ __('Background image for the sign-in, register, and password-reset screens (split layout on desktop).') }}</p>
+        </div>
+        <div class="space-y-4 px-6 py-5">
+          <div>
+            <label for="auth_panel_image_file" class="block text-sm font-medium text-zinc-700">{{ __('Panel background image') }}</label>
+            <p class="mt-1 text-xs text-zinc-500">{{ __('On desktop this fills the left half of the screen beside the form; on phones it appears above the form. Use a wide or tall photo (e.g. 1600×1200 or portrait).') }}</p>
             <input type="file" name="auth_panel_image_file" id="auth_panel_image_file" accept=".jpg,.jpeg,.png,.webp" class="mt-2 block w-full rounded-md border border-zinc-300 bg-white text-sm shadow-sm file:mr-3 file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200"/>
             <input type="text" name="auth_panel_image_path" id="auth_panel_image_path" value="{{ old('auth_panel_image_path', $settings['auth_panel_image_path'] ?? '') }}" placeholder="{{ __('Optional manual path (storage/...)') }}" class="mt-2 block w-full rounded-md border-zinc-300 font-mono text-xs shadow-sm focus:border-indigo-500 focus:ring-indigo-500"/>
+            @php $authPanelPreview = trim((string) old('auth_panel_image_path', $settings['auth_panel_image_path'] ?? '')); @endphp
+            @if ($authPanelPreview !== '')
+              <img id="auth-panel-preview-live" src="{{ \App\Support\VehicleImageUrl::url($authPanelPreview) }}" alt="" class="mt-3 max-h-56 w-full max-w-xl rounded-lg border border-zinc-200 object-cover shadow-sm"/>
+            @else
+              <img id="auth-panel-preview-live" src="" alt="" class="mt-3 hidden max-h-56 w-full max-w-xl rounded-lg border border-zinc-200 object-cover shadow-sm"/>
+            @endif
           </div>
         </div>
       </section>
@@ -229,6 +244,7 @@
       wirePreview('logo_file', 'logo-preview-live');
       wirePreview('logo_light_file', 'logo-light-preview-live');
       wirePreview('favicon_file', 'favicon-preview-live');
+      wirePreview('auth_panel_image_file', 'auth-panel-preview-live');
     })();
   </script>
 </x-app-layout>
