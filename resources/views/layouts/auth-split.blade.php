@@ -57,8 +57,22 @@
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
+                align-items: center;
                 min-width: 0;
                 padding: 2.5rem 1.5rem;
+            }
+            .auth-split__form-inner {
+                width: 100%;
+                max-width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .auth-split__brand {
+                display: flex;
+                width: 100%;
+                justify-content: center;
+                align-items: center;
             }
             @media (min-width: 768px) {
                 .auth-split {
@@ -68,16 +82,16 @@
                     overflow: hidden;
                 }
                 .auth-split__panel {
-                    flex: 0 0 60%;
-                    width: 60%;
-                    max-width: 60%;
+                    flex: 0 0 50%;
+                    width: 50%;
+                    max-width: 50%;
                     min-height: 0;
                     height: 100%;
                 }
                 .auth-split__form {
-                    flex: 0 0 40%;
-                    width: 40%;
-                    max-width: 40%;
+                    flex: 0 0 50%;
+                    width: 50%;
+                    max-width: 50%;
                     height: 100%;
                     overflow-x: hidden;
                     overflow-y: auto;
@@ -117,25 +131,21 @@
                     <div class="absolute inset-0 z-0 bg-gradient-to-br from-zinc-600 via-zinc-800 to-zinc-950" aria-hidden="true"></div>
                 @endif
 
-                <div class="pointer-events-none absolute inset-0 z-[1] bg-black/60" aria-hidden="true"></div>
+                {{-- Stack: photo (z-0) → dark veil (z-1) → pattern on top (z-2). Slightly lighter veil when a pattern file exists so PNG alpha doesn’t read as invisible. --}}
+                <div class="pointer-events-none absolute inset-0 z-[1] {{ ! empty($authPatternUrl) ? 'bg-black/40' : 'bg-black/55' }}" aria-hidden="true"></div>
 
                 @if (! empty($authPatternUrl))
                     <div
-                        class="pointer-events-none absolute inset-0 z-[2] bg-repeat opacity-[0.28] mix-blend-soft-light"
-                        style="background-image: url('{{ $authPatternUrl }}'); background-size: 420px 420px;"
+                        class="pointer-events-none absolute inset-0 z-[2] bg-repeat brightness-125 contrast-125 opacity-[0.95]"
+                        style="background-image: url('{{ $authPatternUrl }}'); background-size: 220px 220px; background-position: 0 0;"
                         aria-hidden="true"
                     ></div>
                 @endif
-
-                <div
-                    class="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-t from-black/55 via-black/10 to-black/25 md:bg-gradient-to-r md:from-black/45 md:via-black/5 md:to-transparent"
-                    aria-hidden="true"
-                ></div>
             </div>
 
             <div class="auth-split__form">
-                <div class="mx-auto w-full min-w-0">
-                    <a href="{{ url('/') }}" class="inline-flex max-w-full items-center {{ $hasLogo ? '' : 'justify-center md:justify-start' }}">
+                <div class="auth-split__form-inner">
+                    <a href="{{ url('/') }}" class="auth-split__brand">
                         @if ($hasLogo)
                             <img
                                 src="{{ \App\Support\VehicleImageUrl::url($logoPath) }}"
@@ -143,11 +153,11 @@
                                 class="h-12 w-auto max-h-14 max-w-[min(100%,16rem)] object-contain sm:h-14 sm:max-h-16"
                             />
                         @else
-                            <span class="text-center text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl md:text-left">{{ $brandName }}</span>
+                            <span class="text-center text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">{{ $brandName }}</span>
                         @endif
                     </a>
 
-                    <div class="mt-8 overflow-hidden rounded-lg bg-white p-6 shadow-md sm:p-8">
+                    <div class="mt-8 w-full overflow-hidden rounded-lg bg-white p-6 shadow-md sm:p-8">
                         {{ $slot }}
                     </div>
                 </div>
