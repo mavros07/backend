@@ -23,7 +23,7 @@
     $authPatternUrl = $authPatternRel !== null ? asset($authPatternRel) : null;
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full max-w-[100vw] overflow-x-hidden">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full overflow-x-hidden">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -31,23 +31,75 @@
 
         <title>{{ $brandName }} — {{ __('Account') }}</title>
         <style>[x-cloak]{display:none!important}</style>
+        {{-- Split layout in plain CSS so it never depends on Tailwind purge/build for two columns. --}}
+        <style>
+            .auth-split {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                width: 100%;
+                max-width: 100vw;
+                overflow-x: hidden;
+                background: #f4f4f5;
+            }
+            .auth-split__panel {
+                position: relative;
+                isolation: isolate;
+                flex-shrink: 0;
+                width: 100%;
+                min-height: 40vh;
+                overflow: hidden;
+            }
+            .auth-split__form {
+                position: relative;
+                z-index: 2;
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                min-width: 0;
+                padding: 2.5rem 1.5rem;
+            }
+            @media (min-width: 768px) {
+                .auth-split {
+                    flex-direction: row;
+                    height: 100vh;
+                    min-height: 100vh;
+                    overflow: hidden;
+                }
+                .auth-split__panel {
+                    flex: 0 0 60%;
+                    width: 60%;
+                    max-width: 60%;
+                    min-height: 0;
+                    height: 100%;
+                }
+                .auth-split__form {
+                    flex: 0 0 40%;
+                    width: 40%;
+                    max-width: 40%;
+                    height: 100%;
+                    overflow-x: hidden;
+                    overflow-y: auto;
+                    padding: 3.5rem 2rem;
+                }
+            }
+            @media (min-width: 1024px) {
+                .auth-split__form {
+                    padding-left: 2.5rem;
+                    padding-right: 2.5rem;
+                }
+            }
+        </style>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         @include('partials.vite-assets')
     </head>
-    <body class="h-full max-w-[100vw] overflow-x-hidden font-sans text-gray-900 antialiased">
-        {{--
-          Mobile: flex column so the hero panel keeps height (absolute imgs don’t create grid row size).
-          Desktop (md+): 60/40 via grid-cols-5 + col-span-3 / col-span-2 — uses only core Tailwind utilities
-          so production CSS always includes the split (no fragile arbitrary md:grid-cols-[…] tokens).
-        --}}
-        <div
-            class="flex min-h-screen max-w-full min-w-0 flex-col bg-zinc-100 md:grid md:h-screen md:min-h-0 md:grid-cols-5 md:grid-rows-1 md:overflow-hidden"
-        >
-            {{-- Left (desktop) / top (mobile): photo + dark veil + pattern --}}
-            <div class="relative min-h-[40vh] w-full shrink-0 overflow-hidden md:col-span-3 md:h-full md:min-h-0">
+    <body class="font-sans text-gray-900 antialiased">
+        <div class="auth-split">
+            <div class="auth-split__panel">
                 @if ($panelPath !== '')
                     <img
                         src="{{ \App\Support\VehicleImageUrl::url($panelPath) }}"
@@ -81,8 +133,7 @@
                 ></div>
             </div>
 
-            {{-- Right (desktop) / bottom (mobile): sign-in / register --}}
-            <div class="relative z-[2] flex min-h-0 min-w-0 flex-1 flex-col justify-center px-6 py-10 sm:px-10 md:col-span-2 md:h-full md:min-h-0 md:overflow-y-auto md:overflow-x-hidden md:py-14 lg:px-12">
+            <div class="auth-split__form">
                 <div class="mx-auto w-full min-w-0">
                     <a href="{{ url('/') }}" class="inline-flex max-w-full items-center {{ $hasLogo ? '' : 'justify-center md:justify-start' }}">
                         @if ($hasLogo)
