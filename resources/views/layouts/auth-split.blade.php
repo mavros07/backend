@@ -25,32 +25,38 @@
         @include('partials.vite-assets')
     </head>
     <body class="h-full max-w-[100vw] overflow-x-hidden font-sans text-gray-900 antialiased">
-        {{-- min-w-0 on flex children prevents content from forcing horizontal scroll past 50/50 columns --}}
-        <div class="flex min-h-screen max-w-full min-w-0 flex-col bg-zinc-100 md:h-screen md:min-h-0 md:flex-row md:overflow-hidden">
+        {{--
+          Use CSS Grid (not flex) for the split: the panel <img> is position:absolute so it does not
+          contribute to flex basis. In a row flex container that let the first column behave like 100%
+          width and collapsed the form column to 0px. Grid assigns explicit column tracks (50/50 on md).
+        --}}
+        <div
+            class="grid min-h-screen max-w-full min-w-0 grid-cols-1 grid-rows-[minmax(36vh,auto)_1fr] bg-zinc-100 sm:grid-rows-[minmax(40vh,auto)_1fr] md:h-screen md:min-h-0 md:grid-cols-2 md:grid-rows-1 md:overflow-hidden"
+        >
             {{-- Left (desktop) / top (mobile): full-height background image --}}
-            <div class="relative min-h-[36vh] w-full min-w-0 shrink-0 overflow-hidden sm:min-h-[40vh] md:h-full md:w-1/2">
+            <div class="relative min-h-[36vh] min-w-0 overflow-hidden sm:min-h-[40vh] md:h-full md:min-h-0">
                 @if ($panelPath !== '')
                     <img
                         src="{{ \App\Support\VehicleImageUrl::url($panelPath) }}"
                         alt=""
-                        class="absolute inset-0 h-full w-full object-cover"
+                        class="absolute inset-0 z-0 h-full w-full object-cover"
                         decoding="async"
                     />
-                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/15 to-transparent md:bg-gradient-to-r md:from-black/35 md:via-black/10 md:to-transparent" aria-hidden="true"></div>
+                    <div class="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/45 via-black/15 to-transparent md:bg-gradient-to-r md:from-black/35 md:via-black/10 md:to-transparent" aria-hidden="true"></div>
                 @elseif ($useAuthPanelFallback)
                     <img
                         src="{{ asset('asset/images/media/placeholder-lorem.svg') }}"
                         alt=""
-                        class="absolute inset-0 h-full w-full object-cover opacity-95"
+                        class="absolute inset-0 z-0 h-full w-full object-cover opacity-95"
                     />
-                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-zinc-900/70 md:bg-gradient-to-r md:from-zinc-900/50 md:via-transparent md:to-transparent" aria-hidden="true"></div>
+                    <div class="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/35 via-transparent to-zinc-900/70 md:bg-gradient-to-r md:from-zinc-900/50 md:via-transparent md:to-transparent" aria-hidden="true"></div>
                 @else
-                    <div class="absolute inset-0 bg-gradient-to-br from-zinc-600 via-zinc-800 to-zinc-950" aria-hidden="true"></div>
+                    <div class="absolute inset-0 z-0 bg-gradient-to-br from-zinc-600 via-zinc-800 to-zinc-950" aria-hidden="true"></div>
                 @endif
             </div>
 
-            {{-- Right (desktop) / bottom (mobile): sign-in / register (uses full half width on md+) --}}
-            <div class="flex min-h-0 w-full min-w-0 flex-1 flex-col justify-center px-6 py-10 sm:px-10 md:h-full md:w-1/2 md:flex-none md:overflow-y-auto md:overflow-x-hidden md:py-14 lg:px-12">
+            {{-- Right (desktop) / bottom (mobile): sign-in / register --}}
+            <div class="relative z-[2] flex min-h-0 min-w-0 flex-col justify-center px-6 py-10 sm:px-10 md:h-full md:min-h-0 md:overflow-y-auto md:overflow-x-hidden md:py-14 lg:px-12">
                 <div class="mx-auto w-full min-w-0">
                     <a href="{{ url('/') }}" class="inline-flex max-w-full items-center {{ $hasLogo ? '' : 'justify-center md:justify-start' }}">
                         @if ($hasLogo)
