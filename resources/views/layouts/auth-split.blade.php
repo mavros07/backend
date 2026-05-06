@@ -8,6 +8,19 @@
     $panelPath = trim((string) ($site['auth_panel_image_path'] ?? ''));
     $authPanelFallback = public_path('asset/images/media/placeholder-lorem.svg');
     $useAuthPanelFallback = $panelPath === '' && is_file($authPanelFallback);
+
+    $authPatternRel = null;
+    foreach ([
+        'section-pattern.svg', 'section-pattern.png', 'section-pattern.webp', 'section-pattern.jpg',
+        'section-patern.svg', 'section-patern.png', 'section-patern.webp', 'section-patern.jpg',
+        'asset/section-pattern.svg', 'asset/section-pattern.png', 'asset/section-pattern.webp', 'asset/section-pattern.jpg',
+    ] as $candidate) {
+        if (is_file(public_path($candidate))) {
+            $authPatternRel = $candidate;
+            break;
+        }
+    }
+    $authPatternUrl = $authPatternRel !== null ? asset($authPatternRel) : null;
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full max-w-[100vw] overflow-x-hidden">
@@ -26,14 +39,12 @@
     </head>
     <body class="h-full max-w-[100vw] overflow-x-hidden font-sans text-gray-900 antialiased">
         {{--
-          Use CSS Grid (not flex) for the split: the panel <img> is position:absolute so it does not
-          contribute to flex basis. In a row flex container that let the first column behave like 100%
-          width and collapsed the form column to 0px. Grid assigns explicit column tracks (50/50 on md).
+          CSS Grid: absolute panel image does not affect column sizing. Desktop split 60% panel / 40% form (3fr / 2fr).
         --}}
         <div
-            class="grid min-h-screen max-w-full min-w-0 grid-cols-1 grid-rows-[minmax(36vh,auto)_1fr] bg-zinc-100 sm:grid-rows-[minmax(40vh,auto)_1fr] md:h-screen md:min-h-0 md:grid-cols-2 md:grid-rows-1 md:overflow-hidden"
+            class="grid min-h-screen max-w-full min-w-0 grid-cols-1 grid-rows-[minmax(36vh,auto)_1fr] bg-zinc-100 sm:grid-rows-[minmax(40vh,auto)_1fr] md:h-screen md:min-h-0 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:grid-rows-1 md:overflow-hidden"
         >
-            {{-- Left (desktop) / top (mobile): full-height background image --}}
+            {{-- Left (desktop) / top (mobile): photo + dark veil + pattern --}}
             <div class="relative min-h-[36vh] min-w-0 overflow-hidden sm:min-h-[40vh] md:h-full md:min-h-0">
                 @if ($panelPath !== '')
                     <img
@@ -42,17 +53,30 @@
                         class="absolute inset-0 z-0 h-full w-full object-cover"
                         decoding="async"
                     />
-                    <div class="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/45 via-black/15 to-transparent md:bg-gradient-to-r md:from-black/35 md:via-black/10 md:to-transparent" aria-hidden="true"></div>
                 @elseif ($useAuthPanelFallback)
                     <img
                         src="{{ asset('asset/images/media/placeholder-lorem.svg') }}"
                         alt=""
                         class="absolute inset-0 z-0 h-full w-full object-cover opacity-95"
                     />
-                    <div class="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/35 via-transparent to-zinc-900/70 md:bg-gradient-to-r md:from-zinc-900/50 md:via-transparent md:to-transparent" aria-hidden="true"></div>
                 @else
                     <div class="absolute inset-0 z-0 bg-gradient-to-br from-zinc-600 via-zinc-800 to-zinc-950" aria-hidden="true"></div>
                 @endif
+
+                <div class="pointer-events-none absolute inset-0 z-[1] bg-black/60" aria-hidden="true"></div>
+
+                @if (! empty($authPatternUrl))
+                    <div
+                        class="pointer-events-none absolute inset-0 z-[2] bg-repeat opacity-[0.28] mix-blend-soft-light"
+                        style="background-image: url('{{ $authPatternUrl }}'); background-size: 420px 420px;"
+                        aria-hidden="true"
+                    ></div>
+                @endif
+
+                <div
+                    class="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-t from-black/55 via-black/10 to-black/25 md:bg-gradient-to-r md:from-black/45 md:via-black/5 md:to-transparent"
+                    aria-hidden="true"
+                ></div>
             </div>
 
             {{-- Right (desktop) / bottom (mobile): sign-in / register --}}
