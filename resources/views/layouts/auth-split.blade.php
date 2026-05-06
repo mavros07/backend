@@ -39,13 +39,15 @@
     </head>
     <body class="h-full max-w-[100vw] overflow-x-hidden font-sans text-gray-900 antialiased">
         {{--
-          CSS Grid: absolute panel image does not affect column sizing. Desktop split 60% panel / 40% form (3fr / 2fr).
+          Mobile: flex column so the hero panel keeps height (absolute imgs don’t create grid row size).
+          Desktop (md+): 60/40 via grid-cols-5 + col-span-3 / col-span-2 — uses only core Tailwind utilities
+          so production CSS always includes the split (no fragile arbitrary md:grid-cols-[…] tokens).
         --}}
         <div
-            class="grid min-h-screen max-w-full min-w-0 grid-cols-1 grid-rows-[minmax(36vh,auto)_1fr] bg-zinc-100 sm:grid-rows-[minmax(40vh,auto)_1fr] md:h-screen md:min-h-0 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:grid-rows-1 md:overflow-hidden"
+            class="flex min-h-screen max-w-full min-w-0 flex-col bg-zinc-100 md:grid md:h-screen md:min-h-0 md:grid-cols-5 md:grid-rows-1 md:overflow-hidden"
         >
             {{-- Left (desktop) / top (mobile): photo + dark veil + pattern --}}
-            <div class="relative min-h-[36vh] min-w-0 overflow-hidden sm:min-h-[40vh] md:h-full md:min-h-0">
+            <div class="relative min-h-[40vh] w-full shrink-0 overflow-hidden md:col-span-3 md:h-full md:min-h-0">
                 @if ($panelPath !== '')
                     <img
                         src="{{ \App\Support\VehicleImageUrl::url($panelPath) }}"
@@ -80,7 +82,7 @@
             </div>
 
             {{-- Right (desktop) / bottom (mobile): sign-in / register --}}
-            <div class="relative z-[2] flex min-h-0 min-w-0 flex-col justify-center px-6 py-10 sm:px-10 md:h-full md:min-h-0 md:overflow-y-auto md:overflow-x-hidden md:py-14 lg:px-12">
+            <div class="relative z-[2] flex min-h-0 min-w-0 flex-1 flex-col justify-center px-6 py-10 sm:px-10 md:col-span-2 md:h-full md:min-h-0 md:overflow-y-auto md:overflow-x-hidden md:py-14 lg:px-12">
                 <div class="mx-auto w-full min-w-0">
                     <a href="{{ url('/') }}" class="inline-flex max-w-full items-center {{ $hasLogo ? '' : 'justify-center md:justify-start' }}">
                         @if ($hasLogo)
